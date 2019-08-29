@@ -12,7 +12,7 @@ public class ServerlessSaaSWorkshop {
 	public static void main(String[] args) {
 		SpringApplicationBuilder app = new SpringApplicationBuilder(ServerlessSaaSWorkshop.class)
 				.web(WebApplicationType.SERVLET);
-		app.build().addListeners(new ApplicationPidFileWriter("./monolith.pid"));
+		app.build().addListeners(new ApplicationPidFileWriter("monolith.pid"));
 		app.run();
 //		SpringApplication.run(ServerlessSaaSWorkshop.class, args);
 	}
