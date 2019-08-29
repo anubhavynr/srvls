@@ -1,3 +1,4 @@
 #!/bin/bash
 
-kill (cat monolith.pid)
+kill (cat /home/ec2-user/monolith.pid)
+rm /home/ec2-user/monolith.pid
