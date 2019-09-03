@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>
-    Home
+    <INSERT TITLE HERE>
   </title>
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/all.min.css" rel="stylesheet">
@@ -77,14 +77,14 @@
 
       <div class="collapse navbar-collapse" id="navbarBootcamp">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
+          <li class="nav-item">
             <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Dashboard</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Products</span></a>
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Products <span class="sr-only">(current)</span></span></a>
           </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
@@ -96,8 +96,40 @@
     <div class="row">
       <div class="col-md-12">
         <div class="jumbotron">
-          <p></p>
+          <h2>Products</h2>
           <hr>
+          <div class="container">
+            <div class="row col-md-6 col-md-offset-2 custyle">
+            <table class="table table-striped custab">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+                    <tr>
+                        <td>1</td>
+                        <td>Widget</td>
+                        <td>Category</td>
+                        <td class="text-center"><a class='btn btn-secondary btn-xs' href="#"><span class="glyphicon glyphicon-edit"></span> Edit</a> <a href="#" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Del</a></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Widgoo</td>
+                        <td>Category</td>
+                        <td class="text-center"><a class='btn btn-secondary btn-xs' href="#"><span class="glyphicon glyphicon-edit"></span> Edit</a> <a href="#" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Del</a></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Widgee</td>
+                        <td>Category</td>
+                        <td class="text-center"><a class='btn btn-secondary btn-xs' href="#"><span class="glyphicon glyphicon-edit"></span> Edit</a> <a href="#" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Del</a></td>
+                    </tr>
+            </table>
+            </div>
+        </div>
         </div>
       </div>
     </div>
