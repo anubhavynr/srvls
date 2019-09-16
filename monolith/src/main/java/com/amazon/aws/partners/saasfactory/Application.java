@@ -8,10 +8,10 @@ import org.springframework.boot.context.ApplicationPidFileWriter;
 import java.io.File;
 
 @SpringBootApplication
-public class ServerlessSaaSWorkshop {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplicationBuilder app = new SpringApplicationBuilder(ServerlessSaaSWorkshop.class)
+		SpringApplicationBuilder app = new SpringApplicationBuilder(Application.class)
 				.web(WebApplicationType.SERVLET);
 		app.build().addListeners(new ApplicationPidFileWriter(new File("/home/ec2-user/monolith.pid")));
 		app.run();
