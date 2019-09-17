@@ -17,7 +17,7 @@ public class ProductsController {
 
 	@GetMapping("/products")
 	public String products(Model model) throws Exception {
-		List<Product> products = productService.getProductsByUser(null);
+		List<Product> products = productService.getProducts();
 		model.addAttribute("products", products);
 		return "products";
 	}
