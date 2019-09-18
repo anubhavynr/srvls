@@ -1,5 +1,6 @@
 package com.amazon.aws.partners.saasfactory.repository;
 
+import com.amazon.aws.partners.saasfactory.domain.Category;
 import com.amazon.aws.partners.saasfactory.domain.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,12 +22,14 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Product getProduct(Long productId) throws Exception {
-        return jdbc.queryForObject("SELECT product_id, sku, product, price FROM product WHERE product_id = ?", new Object[]{productId}, new ProductRowMapper());
+//        String sql = "SELECT p.product_id, p.sku, p.product, p.price FROM product p WHERE p.product_id = ?";
+        String sql = "SELECT p.product_id, p.sku, p.product, p.price, c.category_id, c.category FROM product p JOIN (SELECT x.product_id, MAX(x.category_id) AS category_id FROM product_categories x JOIN product y ON x.product_id = y.product_id GROUP BY x.product_id) AS pc ON p.product_id = pc.product_id JOIN category AS c ON pc.category_id = c.category_id WHERE p.product_id = ?";
+        return jdbc.queryForObject(sql, new Object[]{productId}, new ProductRowMapper());
     }
 
     @Override
     public List<Product> getProducts() throws Exception {
-        return jdbc.query("SELECT product_id, sku, product, price FROM product", new ProductRowMapper());
+        return jdbc.query("SELECT p.product_id, p.sku, p.product, p.price, c.category_id, c.category FROM product p JOIN (SELECT x.product_id, MAX(x.category_id) AS category_id FROM product_categories x JOIN product y ON x.product_id = y.product_id GROUP BY x.product_id) AS pc ON p.product_id = pc.product_id JOIN category AS c ON pc.category_id = c.category_id", new ProductRowMapper());
     }
 
     @Override
@@ -64,7 +67,10 @@ public class ProductDaoImpl implements ProductDao {
     class ProductRowMapper  implements RowMapper<Product> {
         @Override
         public Product mapRow(ResultSet result, int rowNumber) throws SQLException {
-            return new Product(result.getLong("product_id"), result.getString("sku"), result.getString("product"), result.getBigDecimal("price"));
+            Product product = new Product(result.getLong("product_id"), result.getString("sku"), result.getString("product"), result.getBigDecimal("price"));
+            Category category = new Category(result.getLong("category_id"), result.getString("category"));
+            product.setCategory(category);
+            return product;
         }
     }
 }

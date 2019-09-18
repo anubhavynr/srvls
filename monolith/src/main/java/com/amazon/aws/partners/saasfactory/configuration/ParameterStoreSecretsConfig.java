@@ -16,19 +16,13 @@
  */
 package com.amazon.aws.partners.saasfactory.configuration;
 
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClient;
-import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
-import com.amazonaws.services.simplesystemsmanagement.model.GetParameterResult;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ssm.SsmClient;
+import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
 
 import java.util.Properties;
 
@@ -40,8 +34,6 @@ import java.util.Properties;
  */
 public class ParameterStoreSecretsConfig implements EnvironmentPostProcessor {
 
-    private static final Logger logger = LoggerFactory.getLogger(ParameterStoreSecretsConfig.class);
-
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         String awsRegion = environment.getProperty("AWS_REGION");
@@ -52,13 +44,12 @@ public class ParameterStoreSecretsConfig implements EnvironmentPostProcessor {
 
         // Fetch the secret value for the application user database
         // password from parameter store.
-        AWSSimpleSystemsManagement ssm = new AWSSimpleSystemsManagementClient();
-        ssm.setRegion(Region.getRegion(Regions.fromName(awsRegion)));
-        GetParameterRequest appPwRequest = new GetParameterRequest()
-                .withName(appPwParam)
-                .withWithDecryption(Boolean.TRUE);
-        GetParameterResult appPwResult = ssm.getParameter(appPwRequest);
-        String decryptedAppPassword = appPwResult.getParameter().getValue();
+        SsmClient ssm = SsmClient.builder().region(Region.of(awsRegion)).build();
+        GetParameterResponse response = ssm.getParameter(builder -> builder
+                .name(appPwParam)
+                .withDecryption(Boolean.TRUE)
+        );
+        String decryptedAppPassword = response.parameter().value();
 
         // Create properties with the same names as we launched Spring with
         Properties decryptedProps = new Properties();

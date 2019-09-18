@@ -1,4 +1,7 @@
 #!/bin/bash
 
-pkill -F /home/ec2-user/monolith.pid
-rm /home/ec2-user/monolith.pid
+PID_FILE=/home/ec2-user/monolith.pid
+if [ -f "$PID_FILE" ]; then
+    pkill -F $PID_FILE
+    rm -f $PID_FILE
+fi
