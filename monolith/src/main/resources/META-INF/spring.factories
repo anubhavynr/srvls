@@ -15,4 +15,4 @@
 
 # Application listener to replace the spring.datasource.password environment
 # variable with the decrypted parameter store value
-org.springframework.boot.env.EnvironmentPostProcessor=com.amazon.aws.partners.saasfactory.pgrls.configuration.ParameterStoreSecretsConfig
+org.springframework.boot.env.EnvironmentPostProcessor=com.amazon.aws.partners.saasfactory.configuration.ParameterStoreSecretsConfig
