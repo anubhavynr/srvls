@@ -2,6 +2,8 @@ package com.amazon.aws.partners.saasfactory.repository;
 
 import com.amazon.aws.partners.saasfactory.domain.Category;
 import com.amazon.aws.partners.saasfactory.domain.Product;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -12,16 +14,19 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
 public class ProductDaoImpl implements ProductDao {
 
+    private final static Logger logger = LoggerFactory.getLogger(ProductDaoImpl.class);
+
     @Autowired
     private JdbcTemplate jdbc;
 
     @Override
-    public Product getProduct(Long productId) throws Exception {
+    public Product getProduct(Integer productId) throws Exception {
 //        String sql = "SELECT p.product_id, p.sku, p.product, p.price FROM product p WHERE p.product_id = ?";
         String sql = "SELECT p.product_id, p.sku, p.product, p.price, c.category_id, c.category FROM product p JOIN (SELECT x.product_id, MAX(x.category_id) AS category_id FROM product_categories x JOIN product y ON x.product_id = y.product_id GROUP BY x.product_id) AS pc ON p.product_id = pc.product_id JOIN category AS c ON pc.category_id = c.category_id WHERE p.product_id = ?";
         return jdbc.queryForObject(sql, new Object[]{productId}, new ProductRowMapper());
@@ -42,15 +47,20 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     private Product insertProduct(Product product) throws Exception {
+        logger.info("ProductDao::insertProduct " + product);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO product (sku, product, price) VALUES (?, ?, ?)" );
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO product (sku, product, price) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, product.getSku());
             ps.setString(2, product.getName());
             ps.setBigDecimal(3, product.getPrice());
             return ps;
         }, keyHolder);
-        product.setId(keyHolder.getKey().longValue());
+        if (!keyHolder.getKeys().isEmpty()) {
+            product.setId((Integer) keyHolder.getKeys().get("product_id"));
+        } else {
+            product.setId(keyHolder.getKey().intValue());
+        }
         return product;
     }
 
@@ -67,8 +77,8 @@ public class ProductDaoImpl implements ProductDao {
     class ProductRowMapper  implements RowMapper<Product> {
         @Override
         public Product mapRow(ResultSet result, int rowNumber) throws SQLException {
-            Product product = new Product(result.getLong("product_id"), result.getString("sku"), result.getString("product"), result.getBigDecimal("price"));
-            Category category = new Category(result.getLong("category_id"), result.getString("category"));
+            Product product = new Product(result.getInt("product_id"), result.getString("sku"), result.getString("product"), result.getBigDecimal("price"));
+            Category category = new Category(result.getInt("category_id"), result.getString("category"));
             product.setCategory(category);
             return product;
         }

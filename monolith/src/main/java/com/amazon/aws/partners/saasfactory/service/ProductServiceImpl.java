@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProduct(Long productId) throws Exception {
+    public Product getProduct(Integer productId) throws Exception {
         logger.info("ProductService::getProduct " + productId);
         StopWatch timer = new StopWatch();
         timer.start();
@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product saveProduct(Product product) throws Exception {
-        Long productId = null;
+        Integer productId = null;
         if (product != null) {
             productId = product.getId();
         }
@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Product product) throws Exception {
-        Long productId = null;
+        Integer productId = null;
         if (product != null) {
             productId = product.getId();
         }

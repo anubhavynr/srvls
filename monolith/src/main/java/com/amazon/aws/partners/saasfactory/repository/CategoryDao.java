@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CategoryDao {
 
-    public Category getCategory(Long categoryId) throws Exception;
+    public Category getCategory(Integer categoryId) throws Exception;
 
     public List<Category> getCategories() throws Exception;
 

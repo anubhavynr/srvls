@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
@@ -20,7 +21,7 @@ public class CategoryDaoImpl implements CategoryDao {
     private JdbcTemplate jdbc;
 
     @Override
-    public Category getCategory(Long categoryId) throws Exception {
+    public Category getCategory(Integer categoryId) throws Exception {
         return jdbc.queryForObject("SELECT category_id, category FROM category WHERE category_id = ?", new Object[]{categoryId}, new CategoryRowMapper());
     }
 
@@ -41,11 +42,15 @@ public class CategoryDaoImpl implements CategoryDao {
     private Category insertCategory(Category category) throws Exception {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO category (category) VALUES (?)" );
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO category (category) VALUES (?)", Statement.RETURN_GENERATED_KEYS );
             ps.setString(1, category.getName());
             return ps;
         }, keyHolder);
-        category.setId(keyHolder.getKey().longValue());
+        if (!keyHolder.getKeys().isEmpty()) {
+            category.setId((Integer) keyHolder.getKeys().get("product_id"));
+        } else {
+            category.setId(keyHolder.getKey().intValue());
+        }
         return category;
     }
 
@@ -62,7 +67,7 @@ public class CategoryDaoImpl implements CategoryDao {
     class CategoryRowMapper implements RowMapper<Category> {
         @Override
         public Category mapRow(ResultSet result, int rowMapper) throws SQLException {
-            return new Category(result.getLong("category_id"), result.getString("category"));
+            return new Category(result.getInt("category_id"), result.getString("category"));
         }
     }
 }

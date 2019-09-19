@@ -8,7 +8,7 @@ public interface ProductService {
 
     public List<Product> getProducts() throws Exception;
 
-    public Product getProduct(Long productId) throws Exception;
+    public Product getProduct(Integer productId) throws Exception;
 
     public Product saveProduct(Product product) throws Exception;
 

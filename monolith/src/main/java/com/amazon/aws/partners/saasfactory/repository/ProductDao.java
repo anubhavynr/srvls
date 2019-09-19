@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ProductDao {
 
-    public Product getProduct(Long productId) throws Exception;
+    public Product getProduct(Integer productId) throws Exception;
 
     public List<Product> getProducts() throws Exception;
 

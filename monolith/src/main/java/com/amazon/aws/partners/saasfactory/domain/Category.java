@@ -5,14 +5,14 @@ import java.io.Serializable;
 public class Category implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    private Integer id;
     private String name;
 
     public Category() {
         this(null, null);
     }
 
-    public Category(Long id, String name) {
+    public Category(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -24,11 +24,11 @@ public class Category implements Serializable {
         }
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
