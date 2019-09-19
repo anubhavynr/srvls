@@ -112,7 +112,7 @@
             </thead>
                     <tr th:each="product : ${products}">
                         <td th:text="${product.sku}">ABC</td>
-                        <td th:text="${product.category}">Shoes</td>
+                        <td th:text="${product.category.name}">Shoes</td>
                         <td th:text="${product.name}">Air Jordan</td>
                         <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
                         <td class="text-center"><a class='btn btn-secondary btn-xs' href="#"><span class="glyphicon glyphicon-edit"></span> Edit</a> <a href="#" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Del</a></td>

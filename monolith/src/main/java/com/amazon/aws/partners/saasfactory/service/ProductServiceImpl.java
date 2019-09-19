@@ -20,11 +20,52 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> getProducts() throws Exception {
+        logger.info("ProductService::getProducts");
         StopWatch timer = new StopWatch();
         timer.start();
         List<Product> products = productDao.getProducts();
         timer.stop();
-        logger.info("getProducts execution " + timer.getTotalTimeMillis());
+        logger.info("ProductService::getProducts exec " + timer.getTotalTimeMillis());
         return products;
+    }
+
+    @Override
+    public Product getProduct(Long productId) throws Exception {
+        logger.info("ProductService::getProduct " + productId);
+        StopWatch timer = new StopWatch();
+        timer.start();
+        Product product = productDao.getProduct(productId);
+        timer.stop();
+        logger.info("ProductService::getProduct exec " + timer.getTotalTimeMillis());
+        return product;
+    }
+
+    @Override
+    public Product saveProduct(Product product) throws Exception {
+        Long productId = null;
+        if (product != null) {
+            productId = product.getId();
+        }
+        logger.info("ProductService::saveProduct " + productId);
+        StopWatch timer = new StopWatch();
+        timer.start();
+        product = productDao.saveProduct(product);
+        timer.stop();
+        logger.info("ProductService::saveProduct exec " + timer.getTotalTimeMillis());
+        return product;
+    }
+
+    @Override
+    public void deleteProduct(Product product) throws Exception {
+        Long productId = null;
+        if (product != null) {
+            productId = product.getId();
+        }
+        logger.info("ProductService::deleteProduct " + productId);
+        StopWatch timer = new StopWatch();
+        timer.start();
+        productDao.deleteProduct(product);
+        timer.stop();
+        logger.info("ProductService::deleteProduct exec " + timer.getTotalTimeMillis());
     }
 }

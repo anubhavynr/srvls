@@ -7,4 +7,10 @@ import java.util.List;
 public interface ProductService {
 
     public List<Product> getProducts() throws Exception;
+
+    public Product getProduct(Long productId) throws Exception;
+
+    public Product saveProduct(Product product) throws Exception;
+
+    public void deleteProduct(Product product) throws Exception;
 }
