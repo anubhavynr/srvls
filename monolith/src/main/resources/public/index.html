@@ -48,7 +48,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form>
+        <form id="signInForm" th:method="post" th:action="@{/login}">
           <div class="form-group">
             <label for="signInEmail1">Email address</label>
             <input type="email" class="form-control" id="signInEmail1" aria-describedby="emailHelp" placeholder="Enter email">
@@ -61,7 +61,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-success">Sign In</button>
+        <button type="button" class="btn btn-success" form="signInForm">Sign In</button>
       </div>
     </div>
   </div>
