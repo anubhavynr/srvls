@@ -27,7 +27,7 @@ public class WebMvcConfiguration {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/greeting-javaconfig");
+                registry.addMapping("/api");
             }
         };
     }
