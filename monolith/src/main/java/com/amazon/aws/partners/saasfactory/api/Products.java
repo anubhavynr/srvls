@@ -21,16 +21,19 @@ public class Products {
     @Autowired
     private ProductService productService;
 
+    @CrossOrigin
     @GetMapping(path = "/products/{id}")
     public Product getProduct(@PathVariable Integer id) throws Exception {
         return productService.getProduct(id);
     }
 
+    @CrossOrigin
     @GetMapping(path = "/products")
     public List<Product> getProducts() throws Exception {
         return productService.getProducts();
     }
 
+    @CrossOrigin
     @PutMapping(path = "/products/{id}")
     public Product saveProduct(@PathVariable Integer id, @RequestBody Product product) throws Exception {
         logger.info("Products::saveProduct [id = " + id + ", product = " + product + ", product.id = " + (product != null ? product.getId() : "null") + "]");
@@ -40,6 +43,7 @@ public class Products {
         return productService.saveProduct(product);
     }
 
+    @CrossOrigin
     @PostMapping(path = "/products")
     public Product saveProduct(@RequestBody Product product) throws Exception {
         if (product == null) {
@@ -48,6 +52,7 @@ public class Products {
         return productService.saveProduct(product);
     }
 
+    @CrossOrigin
     @DeleteMapping(path = "/products/{id}")
     public ResponseEntity deleteProduct(@PathVariable Integer id, @RequestBody Product product) throws Exception {
         if (id == null || product == null || !id.equals(product.getId())) {

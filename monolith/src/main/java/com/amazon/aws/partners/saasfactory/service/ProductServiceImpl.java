@@ -36,16 +36,13 @@ public class ProductServiceImpl implements ProductService {
         timer.start();
         Product product = productDao.getProduct(productId);
         timer.stop();
-        logger.info("ProductService::getProduct exec " + timer.getTotalTimeMillis());
+        logger.info("ProductService::getProduct " + productId + " exec " + timer.getTotalTimeMillis());
         return product;
     }
 
     @Override
     public Product saveProduct(Product product) throws Exception {
-        Integer productId = null;
-        if (product != null) {
-            productId = product.getId();
-        }
+        Integer productId = product != null ? product.getId() : null;
         logger.info("ProductService::saveProduct " + productId);
         StopWatch timer = new StopWatch();
         timer.start();
@@ -57,10 +54,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Product product) throws Exception {
-        Integer productId = null;
-        if (product != null) {
-            productId = product.getId();
-        }
+        Integer productId = product != null ? product.getId() : null;
         logger.info("ProductService::deleteProduct " + productId);
         StopWatch timer = new StopWatch();
         timer.start();

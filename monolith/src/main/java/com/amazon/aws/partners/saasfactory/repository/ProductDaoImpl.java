@@ -21,20 +21,30 @@ import java.util.List;
 public class ProductDaoImpl implements ProductDao {
 
     private final static Logger logger = LoggerFactory.getLogger(ProductDaoImpl.class);
+    private final static String SELECT_PRODUCT_SQL = "SELECT p.product_id, p.sku, p.product, p.price, c.category_id, c.category " +
+            "FROM product p JOIN ( " +
+            "SELECT x.product_id, MAX(x.category_id) AS category_id " +
+            "FROM product_categories x JOIN product y ON x.product_id = y.product_id " +
+            "GROUP BY x.product_id) AS pc " +
+            "ON p.product_id = pc.product_id " +
+            "JOIN category AS c ON pc.category_id = c.category_id";
+    private final static String INSERT_PRODUCT_SQL = "INSERT INTO product (sku, product, price) VALUES (?, ?, ?)";
+    private final static String UPDATE_PRODUCT_SQL = "UPDATE product SET sku = ?, product = ?, price = ? WHERE product_id = ?";
+    private final static String DELETE_PRODUCT_SQL = "DELETE FROM product WHERE product_id = ?";
 
     @Autowired
     private JdbcTemplate jdbc;
 
     @Override
     public Product getProduct(Integer productId) throws Exception {
-//        String sql = "SELECT p.product_id, p.sku, p.product, p.price FROM product p WHERE p.product_id = ?";
-        String sql = "SELECT p.product_id, p.sku, p.product, p.price, c.category_id, c.category FROM product p JOIN (SELECT x.product_id, MAX(x.category_id) AS category_id FROM product_categories x JOIN product y ON x.product_id = y.product_id GROUP BY x.product_id) AS pc ON p.product_id = pc.product_id JOIN category AS c ON pc.category_id = c.category_id WHERE p.product_id = ?";
+        //String sql = "SELECT p.product_id, p.sku, p.product, p.price FROM product p WHERE p.product_id = ?";
+        String sql = SELECT_PRODUCT_SQL.concat(" WHERE p.product_id = ?");
         return jdbc.queryForObject(sql, new Object[]{productId}, new ProductRowMapper());
     }
 
     @Override
     public List<Product> getProducts() throws Exception {
-        return jdbc.query("SELECT p.product_id, p.sku, p.product, p.price, c.category_id, c.category FROM product p JOIN (SELECT x.product_id, MAX(x.category_id) AS category_id FROM product_categories x JOIN product y ON x.product_id = y.product_id GROUP BY x.product_id) AS pc ON p.product_id = pc.product_id JOIN category AS c ON pc.category_id = c.category_id", new ProductRowMapper());
+        return jdbc.query(SELECT_PRODUCT_SQL, new ProductRowMapper());
     }
 
     @Override
@@ -50,7 +60,7 @@ public class ProductDaoImpl implements ProductDao {
         logger.info("ProductDao::insertProduct " + product);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO product (sku, product, price) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(INSERT_PRODUCT_SQL, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, product.getSku());
             ps.setString(2, product.getName());
             ps.setBigDecimal(3, product.getPrice());
@@ -65,13 +75,13 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     private Product updateProduct(Product product) throws Exception {
-        jdbc.update("UPDATE product SET sku = ?, product = ?, price = ? WHERE product_id = ?", new Object[]{product.getSku(), product.getName(), product.getPrice(), product.getId()});
+        jdbc.update(UPDATE_PRODUCT_SQL, new Object[]{product.getSku(), product.getName(), product.getPrice(), product.getId()});
         return product;
     }
 
     @Override
     public void deleteProduct(Product product) throws Exception {
-        jdbc.update("DELETE FROM product WHERE product_id = ?", new Object[]{product.getId()});
+        jdbc.update(DELETE_PRODUCT_SQL, new Object[]{product.getId()});
     }
 
     class ProductRowMapper  implements RowMapper<Product> {
