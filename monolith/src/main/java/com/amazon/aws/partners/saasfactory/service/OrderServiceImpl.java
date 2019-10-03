@@ -5,10 +5,12 @@ import com.amazon.aws.partners.saasfactory.repository.OrderDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
 import java.util.List;
 
+@Service
 public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
