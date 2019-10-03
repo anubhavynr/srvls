@@ -34,6 +34,8 @@ public class ProductDaoImpl implements ProductDao {
 
     @Autowired
     private JdbcTemplate jdbc;
+    @Autowired
+    private CategoryDao categoryDao;
 
     @Override
     public Product getProduct(Integer productId) throws Exception {
@@ -58,6 +60,10 @@ public class ProductDaoImpl implements ProductDao {
 
     private Product insertProduct(Product product) throws Exception {
         logger.info("ProductDao::insertProduct " + product);
+        if (product.getCategory() != null) {
+            Category category = categoryDao.saveCategory(product.getCategory());
+            product.setCategory(category);
+        }
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(INSERT_PRODUCT_SQL, Statement.RETURN_GENERATED_KEYS);
@@ -75,6 +81,10 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     private Product updateProduct(Product product) throws Exception {
+        if (product.getCategory() != null) {
+            Category category = categoryDao.saveCategory(product.getCategory());
+            product.setCategory(category);
+        }
         jdbc.update(UPDATE_PRODUCT_SQL, new Object[]{product.getSku(), product.getName(), product.getPrice(), product.getId()});
         return product;
     }

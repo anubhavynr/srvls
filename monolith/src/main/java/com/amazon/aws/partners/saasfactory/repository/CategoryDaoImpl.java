@@ -47,7 +47,7 @@ public class CategoryDaoImpl implements CategoryDao {
             return ps;
         }, keyHolder);
         if (!keyHolder.getKeys().isEmpty()) {
-            category.setId((Integer) keyHolder.getKeys().get("product_id"));
+            category.setId((Integer) keyHolder.getKeys().get("category_id"));
         } else {
             category.setId(keyHolder.getKey().intValue());
         }
