@@ -20,21 +20,21 @@ import java.util.Map;
 public class OrderDaoImpl implements OrderDao {
 
     private final static Logger logger = LoggerFactory.getLogger(OrderDaoImpl.class);
-    private final static String SELECT_ORDER_SQL = "SELECT o.order_id, o.order_date, o.ship_date, " +
+    private final static String SELECT_ORDER_SQL = "SELECT o.order_fulfillment_id, o.order_date, o.ship_date, " +
             "p.purchaser_id, p.first_name, p.last_name " +
             "o.ship_to_line1, o.ship_to_line2, o.ship_to_city, o.ship_to_state, o.ship_to_postal_code " +
             "o.bill_to_line1, o.bill_to_line2, o.bill_to_city, o.bill_to_state, o.bill_to_postal_code " +
-            "FROM order o " +
+            "FROM order_fulfillment o " +
             "INNER JOIN purchaser p ON o.purchaser_id = p.purchaser_id";
-    private final static String INSERT_ORDER_SQL = "INSERT INTO order (order_date, ship_date, " +
+    private final static String INSERT_ORDER_SQL = "INSERT INTO order_fulfillment (order_date, ship_date, " +
             "purchaser_id, ship_to_line1, ship_to_line2, ship_to_city, ship_to_state, ship_to_postal_code, " +
             "bill_to_line1, bill_to_line2, bill_to_city, bill_to_state, bill_to_postal_code) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private final static String UPDATE_ORDER_SQL = "UPDATE order SET order_date = ?, ship_date = ?, purchaser_id = ?, " +
+    private final static String UPDATE_ORDER_SQL = "UPDATE order_fulfillment SET order_date = ?, ship_date = ?, purchaser_id = ?, " +
             "ship_to_line1 = ?, ship_to_line2 = ?, ship_to_city = ?, ship_to_state = ?, ship_to_postal_code = ?, " +
             "bill_to_line1 = ?, bill_to_line2 = ?, bill_to_city = ?, bill_to_state = ?, bill_to_postal_code = ? " +
-            "WHERE order_id = ?";
-    private final static String DELETE_ORDER_SQL = "DELETE FROM order WHERE order_id = ?";
+            "WHERE order_fulfillment_id = ?";
+    private final static String DELETE_ORDER_SQL = "DELETE FROM order_fulfillment WHERE order_fulfillment_id = ?";
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -43,7 +43,7 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public Order getOrder(Integer orderId) throws Exception {
-        String sql = SELECT_ORDER_SQL.concat(" WHERE order_id = ?");
+        String sql = SELECT_ORDER_SQL.concat(" WHERE order_fulfillment_id = ?");
         return jdbc.queryForObject(sql, new Object[]{orderId}, new OrderRowMapper());
     }
 
@@ -97,7 +97,7 @@ public class OrderDaoImpl implements OrderDao {
             return ps;
         }, keyHolder);
         if (!keyHolder.getKeys().isEmpty()) {
-            order.setId((Integer) keyHolder.getKeys().get("order_id"));
+            order.setId((Integer) keyHolder.getKeys().get("order_fulfillment_id"));
         } else {
             order.setId(keyHolder.getKey().intValue());
         }
@@ -144,8 +144,8 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     private List<OrderLineItem> getOrderLineItems(Integer orderId) throws Exception {
-        String sql = "SELECT order_line_item_id, order_id, product_id, quantity, unit_purchase_price " +
-                "FROM order_line_item WHERE order_id = ?";
+        String sql = "SELECT order_line_item_id, order_fulfillment_id, product_id, quantity, unit_purchase_price " +
+                "FROM order_line_item WHERE order_fulfillment_id = ?";
         List<OrderLineItem> lineItems = jdbc.query(sql, new Object[]{orderId}, new OrderLineItemRowMapper());
         return lineItems;
     }
@@ -161,7 +161,7 @@ public class OrderDaoImpl implements OrderDao {
 
     private OrderLineItem saveOrderLineItem(OrderLineItem lineItem) throws Exception {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        final String sql = "INSERT INTO order_line_item (order_id, product_id, quantity, unit_purchase_price) " +
+        final String sql = "INSERT INTO order_line_item (order_fulfillment_id, product_id, quantity, unit_purchase_price) " +
                 "VALUES (?, ?, ?, ?)";
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -172,7 +172,7 @@ public class OrderDaoImpl implements OrderDao {
             return ps;
         }, keyHolder);
         if (!keyHolder.getKeys().isEmpty()) {
-            lineItem.setId((Integer) keyHolder.getKeys().get("order_id"));
+            lineItem.setId((Integer) keyHolder.getKeys().get("order_line_item_id"));
         } else {
             lineItem.setId(keyHolder.getKey().intValue());
         }
@@ -183,7 +183,7 @@ public class OrderDaoImpl implements OrderDao {
         @Override
         public Order mapRow(ResultSet result, int rowNumber) throws SQLException {
             Order order = new Order();
-            order.setId(result.getInt("order_id"));
+            order.setId(result.getInt("order_fulfillment_id"));
             order.setOrderDate(result.getDate("order_date"));
             order.setShipDate(result.getDate("ship_date"));
             order.setPurchaser(new Purchaser(
@@ -234,7 +234,7 @@ public class OrderDaoImpl implements OrderDao {
             }
             OrderLineItem lineItem = new OrderLineItem(
                     result.getInt("order_line_item_id"),
-                    result.getInt("order_id"),
+                    result.getInt("order_fulfillment_id"),
                     product,
                     result.getInt("quantity"),
                     result.getBigDecimal("unit_purchase_price")
