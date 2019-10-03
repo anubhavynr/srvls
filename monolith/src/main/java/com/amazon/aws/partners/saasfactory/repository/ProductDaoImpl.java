@@ -22,12 +22,12 @@ public class ProductDaoImpl implements ProductDao {
 
     private final static Logger logger = LoggerFactory.getLogger(ProductDaoImpl.class);
     private final static String SELECT_PRODUCT_SQL = "SELECT p.product_id, p.sku, p.product, p.price, c.category_id, c.category " +
-            "FROM product p JOIN ( " +
+            "FROM product p LEFT OUTER JOIN ( " +
             "SELECT x.product_id, MAX(x.category_id) AS category_id " +
-            "FROM product_categories x JOIN product y ON x.product_id = y.product_id " +
+            "FROM product_categories x INNER JOIN product y ON x.product_id = y.product_id " +
             "GROUP BY x.product_id) AS pc " +
             "ON p.product_id = pc.product_id " +
-            "JOIN category AS c ON pc.category_id = c.category_id";
+            "LEFT OUTER JOIN category AS c ON pc.category_id = c.category_id";
     private final static String INSERT_PRODUCT_SQL = "INSERT INTO product (sku, product, price) VALUES (?, ?, ?)";
     private final static String UPDATE_PRODUCT_SQL = "UPDATE product SET sku = ?, product = ?, price = ? WHERE product_id = ?";
     private final static String DELETE_PRODUCT_SQL = "DELETE FROM product WHERE product_id = ?";
