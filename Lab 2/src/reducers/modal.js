@@ -2,6 +2,7 @@ import { SET_CURRENT_MODAL, CLOSE_MODAL } from '../actions';
 
 const initialState = {
     currentModal: null,
+    params: null,
 }
 
 export const modal = (state = initialState, action) => {
@@ -10,6 +11,7 @@ export const modal = (state = initialState, action) => {
             return {
                 ...state,
                 currentModal: action.currentModal,
+                params: action.params,
             }
         case CLOSE_MODAL: 
             return {

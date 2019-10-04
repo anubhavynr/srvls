@@ -1,6 +1,6 @@
 const config = {
     api: {
-        base_url: 'http://svls-LoadB-ZG4LSQ4TZ88F-220566415.us-west-2.elb.amazonaws.com/api',
+        base_url: process.env.REACT_APP_BASE_URL,
     },
 }
 

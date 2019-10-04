@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { addProductModal, fetchProducts } from '../actions';
+import { addProductModal, deleteProductModal, fetchProducts } from '../actions';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -12,6 +12,7 @@ import { faEdit, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons'
 function Products(props) {
     const { products,
         addProductModal,
+        deleteProductModal,
         fetchProducts,
     } = props;
 
@@ -38,13 +39,19 @@ function Products(props) {
                             {
                                 products ? 
                                 products.map((product) => {
+                                    const { id,
+                                        sku,
+                                        name,
+                                        price,
+                                        category,
+                                    } = product;
                                     return (
-                                        <tr key={product.id}>
-                                            <td>{product.sku}</td>
-                                            <td>{product.name}</td>
-                                            <td>${product.price}</td>
-                                            <td>{product.category.name}</td>
-                                            <td className="text-center"><Button variant='secondary' href="/products"> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button href="/products" variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
+                                        <tr key={id}>
+                                            <td>{sku}</td>
+                                            <td>{name}</td>
+                                            <td>${price}</td>
+                                            <td>{category.name}</td>
+                                            <td className="text-center"><Button variant='secondary' href="/products"> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button onClick={() => deleteProductModal(id, name)} variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
                                         </tr>
                                     );
                                 }
@@ -71,4 +78,4 @@ const mapStateToProps = state => {
     };
 };
 
-export default connect(mapStateToProps, { addProductModal, fetchProducts })(Products);
+export default connect(mapStateToProps, { addProductModal, deleteProductModal, fetchProducts })(Products);
