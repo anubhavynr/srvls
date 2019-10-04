@@ -85,11 +85,13 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     private Product updateProduct(Product product) throws Exception {
+        logger.info("ProductDao::updateProduct updating product " + product.getId());
         if (product.getCategory() != null) {
             Category category = categoryDao.saveCategory(product.getCategory());
             product.setCategory(category);
-            Boolean insertProductCategory = jdbc.queryForObject("SELECT EXISTS (SELECT * FROM product_categories WHERE product_id = ? AND category_id = ?)", new Object[]{product.getId(), category.getId()}, Boolean.class);
+            Boolean insertProductCategory = jdbc.queryForObject("SELECT NOT EXISTS (SELECT * FROM product_categories WHERE product_id = ? AND category_id = ?)", new Object[]{product.getId(), category.getId()}, Boolean.class);
             if (insertProductCategory) {
+                logger.info("ProductDao::updateProduct inserting product category mapping " + product.getId() + ", " + category.getId());
                 jdbc.update("INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)", new Object[]{product.getId(), category.getId()});
             }
         }

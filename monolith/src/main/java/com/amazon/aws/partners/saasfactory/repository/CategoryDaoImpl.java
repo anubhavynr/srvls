@@ -1,6 +1,8 @@
 package com.amazon.aws.partners.saasfactory.repository;
 
 import com.amazon.aws.partners.saasfactory.domain.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,6 +19,8 @@ import java.util.List;
 @Repository
 public class CategoryDaoImpl implements CategoryDao {
 
+    private final static Logger logger = LoggerFactory.getLogger(CategoryDaoImpl.class);
+
     @Autowired
     private JdbcTemplate jdbc;
 
@@ -32,6 +36,8 @@ public class CategoryDaoImpl implements CategoryDao {
 
     @Override
     public Category saveCategory(Category category) throws Exception {
+        Integer categoryId = category != null ? category.getId() : null;
+        logger.info("CategoryDao::saveCategory category " + categoryId);
         if (category.getId() != null && category.getId() > 0) {
             return updateCategory(category);
         } else {
@@ -40,6 +46,7 @@ public class CategoryDaoImpl implements CategoryDao {
     }
 
     private Category insertCategory(Category category) throws Exception {
+        logger.info("CategoryDao::insertCategory category");
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO category (category) VALUES (?)", Statement.RETURN_GENERATED_KEYS );
@@ -55,12 +62,14 @@ public class CategoryDaoImpl implements CategoryDao {
     }
 
     private Category updateCategory(Category category) throws Exception {
+        logger.info("CategoryDao::updateCategory category " + category.getId());
         jdbc.update("UPDATE category SET category = ? WHERE category_id = ?", new Object[]{category.getName(), category.getId()});
         return category;
     }
 
     @Override
     public void deleteCategory(Category category) throws Exception {
+        logger.info("CategoryDao::deleteCategory category " + category.getId());
         jdbc.update("DELETE FROM category WHERE category_id = ?", new Object[]{category.getId()});
     }
 
