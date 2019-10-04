@@ -1,10 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { SIGN_IN_MODAL, SIGN_UP_MODAL, ADD_PRODUCT_MODAL, DELETE_PRODUCT_MODAL } from '../actions';
+import {
+    SIGN_IN_MODAL,
+    SIGN_UP_MODAL,
+    ADD_PRODUCT_MODAL,
+    DELETE_PRODUCT_MODAL,
+    EDIT_PRODUCT_MODAL
+} from '../actions';
 import SignInModal from './signInModal';
 import SignUpModal from './signUpModal';
 import AddProductModal from './addProductModal';
 import DeleteProductModal from './deleteProductModal';
+import EditProductModal from './editProductModal';
 
 function ModalWrapper(props) {
     switch (props.currentModal) {
@@ -16,6 +23,8 @@ function ModalWrapper(props) {
             return <AddProductModal />
         case DELETE_PRODUCT_MODAL:
             return <DeleteProductModal />
+        case EDIT_PRODUCT_MODAL:
+            return <EditProductModal />
         default:
             return null;
     }

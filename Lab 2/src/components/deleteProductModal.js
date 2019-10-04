@@ -9,7 +9,7 @@ function DeleteProductModal(props) {
         show,
         title = 'Delete Product',
         buttonText = 'Delete Product',
-        params,
+        product,
         closeModal,
         deleteProduct,
     } = props;
@@ -25,13 +25,13 @@ function DeleteProductModal(props) {
                     <Modal.Title>{title}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <h4>Are you sure you want to delete: <strong>{params.name}</strong>?</h4>
+                    <h4>Are you sure you want to delete: <strong>{product.name}</strong>?</h4>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={closeModal}>
                         Close
                     </Button>
-                    <Button variant="success" onClick={() => deleteProduct(params.id)}>
+                    <Button variant="success" onClick={() => deleteProduct(product.id)}>
                         {buttonText}
                     </Button>
                 </Modal.Footer>
@@ -43,8 +43,8 @@ function DeleteProductModal(props) {
 const mapStateToProps = state => {
     return {
         currentModal: state.modal.currentModal,
-        params: state.modal.params,
         show: state.modal.currentModal !== null,
+        product: state.modal.product,
     };
 }
 

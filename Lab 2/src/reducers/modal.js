@@ -11,7 +11,7 @@ export const modal = (state = initialState, action) => {
             return {
                 ...state,
                 currentModal: action.currentModal,
-                params: action.params,
+                product: action.product,
             }
         case CLOSE_MODAL: 
             return {

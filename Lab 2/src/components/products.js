@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { addProductModal, deleteProductModal, fetchProducts } from '../actions';
+import {
+    addProductModal,
+    deleteProductModal,
+    editProductModal,
+    fetchProducts
+} from '../actions';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -13,6 +18,7 @@ function Products(props) {
     const { products,
         addProductModal,
         deleteProductModal,
+        editProductModal,
         fetchProducts,
     } = props;
 
@@ -51,7 +57,7 @@ function Products(props) {
                                             <td>{name}</td>
                                             <td>${price}</td>
                                             <td>{category.name}</td>
-                                            <td className="text-center"><Button variant='secondary' href="/products"> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button onClick={() => deleteProductModal(id, name)} variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
+                                            <td className="text-center"><Button variant='secondary' onClick={() => editProductModal(product)}> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button onClick={() => deleteProductModal(product)} variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
                                         </tr>
                                     );
                                 }
@@ -78,4 +84,11 @@ const mapStateToProps = state => {
     };
 };
 
-export default connect(mapStateToProps, { addProductModal, deleteProductModal, fetchProducts })(Products);
+const mapDispatchToProps = {
+    addProductModal,
+    deleteProductModal,
+    editProductModal,
+    fetchProducts,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Products);

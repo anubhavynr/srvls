@@ -1,8 +1,25 @@
-import { REQUEST_ALL_PRODUCTS, RECEIVE_ALL_PRODUCTS, REQUEST_DELETE_PRODUCT, RECEIVE_DELETE_PRODUCT } from '../actions';
+import {
+    REQUEST_ALL_PRODUCTS,
+    RECEIVE_ALL_PRODUCTS,
+    REQUEST_DELETE_PRODUCT,
+    RECEIVE_DELETE_PRODUCT,
+    REQUEST_EDIT_PRODUCT,
+    RECEIVE_EDIT_PRODUCT,
+} from '../actions';
 
 const initialState = {
     products: [],
     productCount: 0,
+}
+
+function updateProduct(products, updatedProduct) {
+    const productsCopy = products.slice();
+    return productsCopy.map(product => product.id === updatedProduct.id ?  updatedProduct : product);
+}
+
+function deleteProduct(products, productId) {
+    const productsCopy = products.slice();
+    return productsCopy.filter(product => product.id !== productId);
 }
 
 export const products = (state = initialState, action) => {
@@ -18,14 +35,22 @@ export const products = (state = initialState, action) => {
         case REQUEST_DELETE_PRODUCT:
                 return null;
         case RECEIVE_DELETE_PRODUCT: 
-            const productsCopy = state.products.slice();
-
-            const products = productsCopy.filter(product => product.id !== action.id);
+            const deletedProducts = deleteProduct(state.products, action.id);
 
             return {
                 ...state,
-                products,
-                productCount: products.length,
+                products: deletedProducts,
+                productCount: deletedProducts.length,
+            }
+        case REQUEST_EDIT_PRODUCT:
+                return null;
+        case RECEIVE_EDIT_PRODUCT: 
+            const updatedProducts = updateProduct(state.products, action.product);
+
+            return {
+                ...state,
+                products: updatedProducts,
+                productCount: updatedProducts.length,
             }
         default:
             return state;
