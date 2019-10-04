@@ -60,8 +60,9 @@ public class ProductDaoImpl implements ProductDao {
 
     private Product insertProduct(Product product) throws Exception {
         logger.info("ProductDao::insertProduct " + product);
-        if (product.getCategory() != null) {
-            Category category = categoryDao.saveCategory(product.getCategory());
+        Category category = product.getCategory();
+        if (category != null) {
+            category = categoryDao.saveCategory(category);
             product.setCategory(category);
         }
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -77,6 +78,9 @@ public class ProductDaoImpl implements ProductDao {
         } else {
             product.setId(keyHolder.getKey().intValue());
         }
+        if (category != null) {
+            jdbc.update("INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)", new Object[]{product.getId(), product.getCategory().getId()});
+        }
         return product;
     }
 
@@ -84,6 +88,10 @@ public class ProductDaoImpl implements ProductDao {
         if (product.getCategory() != null) {
             Category category = categoryDao.saveCategory(product.getCategory());
             product.setCategory(category);
+            Boolean insertProductCategory = jdbc.queryForObject("SELECT EXISTS (SELECT * FROM product_categories WHERE product_id = ? AND category_id = ?)", new Object[]{product.getId(), category.getId()}, Boolean.class);
+            if (insertProductCategory) {
+                jdbc.update("INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)", new Object[]{product.getId(), category.getId()});
+            }
         }
         jdbc.update(UPDATE_PRODUCT_SQL, new Object[]{product.getSku(), product.getName(), product.getPrice(), product.getId()});
         return product;
