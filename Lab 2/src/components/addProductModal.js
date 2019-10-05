@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { closeModal } from '../actions';
+import {
+    closeModal,
+    addProduct,
+} from '../actions';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -11,8 +14,39 @@ function AddProductModal(props) {
         show,
         title = 'Add Product',
         buttonText = 'Add Product',
+        addProduct,
         closeModal,
     } = props;
+
+    const useInput = initialValue => {
+        const [value, setValue] = useState(initialValue);
+
+        return {
+            value,
+            setValue,
+            reset: () => setValue(''),
+            bind: {
+                value,
+                onChange: event => {
+                    setValue(event.target.value)
+                }
+            },
+        };
+    };
+
+    const { value: sku, bind: bindSku } = useInput('');
+    const { value: name, bind: bindName } = useInput('');
+    const { value: price, bind: bindPrice } = useInput('');
+
+    const submitProductAdd = () => {
+        const product = {
+            sku,
+            name,
+            price,
+        };
+
+        addProduct(product);
+    };
 
     return (
         <>
@@ -28,15 +62,15 @@ function AddProductModal(props) {
                     <Form>
                         <Form.Group controlId="productSKU">
                             <Form.Label>SKU</Form.Label>
-                            <Form.Control type="text" placeholder="Enter SKU" />
+                            <Form.Control type="text" placeholder="Enter SKU" {...bindSku} />
                         </Form.Group>
                         <Form.Group controlId="productName">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type="text" placeholder="Enter product name" />
+                            <Form.Control type="text" placeholder="Enter product name" {...bindName} />
                         </Form.Group>
                         <Form.Group controlId="productName">
                             <Form.Label>Price</Form.Label>
-                            <Form.Control type="text" placeholder="Enter product price" />
+                            <Form.Control type="text" placeholder="Enter product price" {...bindPrice} />
                         </Form.Group>
                         <Form.Group controlId="productCategory">
                             <Form.Label>Category</Form.Label>
@@ -57,7 +91,7 @@ function AddProductModal(props) {
                     <Button variant="secondary" onClick={closeModal}>
                         Close
                     </Button>
-                    <Button variant="success" onClick={closeModal}>
+                    <Button variant="success" onClick={submitProductAdd}>
                         {buttonText}
                     </Button>
                 </Modal.Footer>
@@ -73,4 +107,4 @@ const mapStateToProps = state => {
     };
 }
 
-export default connect(mapStateToProps, { closeModal })(AddProductModal);
+export default connect(mapStateToProps, { closeModal, addProduct })(AddProductModal);

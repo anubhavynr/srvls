@@ -51,6 +51,7 @@ function Products(props) {
                                         price,
                                         category,
                                     } = product;
+                                    console.log('Products component: ', product);
                                     return (
                                         <tr key={id}>
                                             <td>{sku}</td>

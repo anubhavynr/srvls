@@ -1,15 +1,24 @@
 import {
     REQUEST_ALL_PRODUCTS,
     RECEIVE_ALL_PRODUCTS,
-    REQUEST_DELETE_PRODUCT,
-    RECEIVE_DELETE_PRODUCT,
+    REQUEST_ADD_PRODUCT,
+    RECEIVE_ADD_PRODUCT,
     REQUEST_EDIT_PRODUCT,
     RECEIVE_EDIT_PRODUCT,
+    REQUEST_DELETE_PRODUCT,
+    RECEIVE_DELETE_PRODUCT,
 } from '../actions';
 
 const initialState = {
     products: [],
     productCount: 0,
+}
+
+function addProduct(products, product) {
+    const productsCopy = products.slice();
+    productsCopy.push(product);
+    
+    return productsCopy;
 }
 
 function updateProduct(products, updatedProduct) {
@@ -32,25 +41,35 @@ export const products = (state = initialState, action) => {
                 products: action.products,
                 productCount: action.products.length,
             }
-        case REQUEST_DELETE_PRODUCT:
+        case REQUEST_ADD_PRODUCT:
                 return null;
-        case RECEIVE_DELETE_PRODUCT: 
-            const deletedProducts = deleteProduct(state.products, action.id);
+        case RECEIVE_ADD_PRODUCT: 
+            const productsWithAdd = addProduct(state.products, action.product);
 
             return {
                 ...state,
-                products: deletedProducts,
-                productCount: deletedProducts.length,
+                products: productsWithAdd,
+                productCount: productsWithAdd.length,
             }
         case REQUEST_EDIT_PRODUCT:
                 return null;
         case RECEIVE_EDIT_PRODUCT: 
-            const updatedProducts = updateProduct(state.products, action.product);
+            const productsWithUpdate = updateProduct(state.products, action.product);
 
             return {
                 ...state,
-                products: updatedProducts,
-                productCount: updatedProducts.length,
+                products: productsWithUpdate,
+                productCount: productsWithUpdate.length,
+            }
+        case REQUEST_DELETE_PRODUCT:
+                return null;
+        case RECEIVE_DELETE_PRODUCT: 
+            const productsWithDelete = deleteProduct(state.products, action.id);
+
+            return {
+                ...state,
+                products: productsWithDelete,
+                productCount: productsWithDelete.length,
             }
         default:
             return state;

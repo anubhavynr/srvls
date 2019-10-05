@@ -11,6 +11,7 @@ export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const REQUEST_ALL_PRODUCTS = 'REQUEST_ALL_PRODUCTS';
 export const RECEIVE_ALL_PRODUCTS = 'RECEIVE_ALL_PRODUCTS';
 export const REQUEST_ADD_PRODUCT = 'REQUEST_ALL_PRODUCTS';
+export const RECEIVE_ADD_PRODUCT = 'REQUEST_ADD_PRODUCT';
 export const REQUEST_DELETE_PRODUCT = 'REQUEST_DELETE_PRODUCT';
 export const RECEIVE_DELETE_PRODUCT = 'RECEIVE_DELETE_PRODUCT';
 export const REQUEST_EDIT_PRODUCT = 'REQUEST_DELETE_PRODUCT';
@@ -73,10 +74,10 @@ export const receiveAllProducts = products => {
     }
 }
 
-export const deleteProductFinished = (id) => {
+export const addProductFinished = (product) => {
     return {
-        type: RECEIVE_DELETE_PRODUCT,
-        id,
+        type: RECEIVE_ADD_PRODUCT,
+        product,
     }
 };
 
@@ -84,6 +85,13 @@ export const editProductFinished = (product) => {
     return {
         type: RECEIVE_EDIT_PRODUCT,
         product,
+    }
+};
+
+export const deleteProductFinished = (id) => {
+    return {
+        type: RECEIVE_DELETE_PRODUCT,
+        id,
     }
 };
 
@@ -98,13 +106,20 @@ export const fetchProducts = () => {
     };
 };
 
-export const deleteProduct = (id) => {
+export const addProduct = (product) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/products/${id}`;
+        const url = `${config.api.base_url}/products`;
 
-        Axios.delete(url, { data: { id } })
-            .then(() => {
-                dispatch(deleteProductFinished(id));
+        product.category = {
+            id: 4,
+            name: 'Soccer',
+        };
+
+        console.log('product with category: ', product);
+
+        Axios.post(url, product)
+            .then((response) => {
+                dispatch(addProductFinished(response.data));
             }, error => console.error(error))
             .then(() => {
                 dispatch(closeModal());
@@ -119,6 +134,20 @@ export const editProduct = (product) => {
         Axios.put(url, { data: { product } })
             .then(() => {
                 dispatch(editProductFinished(product));
+            }, error => console.error(error))
+            .then(() => {
+                dispatch(closeModal());
+            }, error => console.error(error));
+    }
+};
+
+export const deleteProduct = (id) => {
+    return function(dispatch) {
+        const url = `${config.api.base_url}/products/${id}`;
+
+        Axios.delete(url, { data: { id } })
+            .then(() => {
+                dispatch(deleteProductFinished(id));
             }, error => console.error(error))
             .then(() => {
                 dispatch(closeModal());
