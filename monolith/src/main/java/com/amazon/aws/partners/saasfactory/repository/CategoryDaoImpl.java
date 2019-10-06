@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -26,18 +27,24 @@ public class CategoryDaoImpl implements CategoryDao {
 
     @Override
     public Category getCategory(Integer categoryId) throws Exception {
+        logger.info("CategoryDao::getCategory " + categoryId);
         return jdbc.queryForObject("SELECT category_id, category FROM category WHERE category_id = ?", new Object[]{categoryId}, new CategoryRowMapper());
     }
 
     @Override
     public List<Category> getCategories() throws Exception {
-        return jdbc.query("SELECT category_id, category FROM category", new CategoryRowMapper());
+        logger.info("CategoryDao::getCategories");
+        List<Category> categories = jdbc.query("SELECT category_id, category FROM category", new CategoryRowMapper());
+        if (categories == null) {
+            categories = Collections.emptyList();
+        }
+        logger.info("CategoryDao::getCategories returning " + categories.size() + " categories");
+        return categories;
     }
 
     @Override
     public Category saveCategory(Category category) throws Exception {
-        Integer categoryId = category != null ? category.getId() : null;
-        logger.info("CategoryDao::saveCategory category " + categoryId);
+        logger.info("CategoryDao::saveCategory " + category);
         if (category.getId() != null && category.getId() > 0) {
             return updateCategory(category);
         } else {
@@ -46,7 +53,7 @@ public class CategoryDaoImpl implements CategoryDao {
     }
 
     private Category insertCategory(Category category) throws Exception {
-        logger.info("CategoryDao::insertCategory category");
+        logger.info("CategoryDao::insertCategory " + category);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO category (category) VALUES (?)", Statement.RETURN_GENERATED_KEYS );
@@ -62,14 +69,14 @@ public class CategoryDaoImpl implements CategoryDao {
     }
 
     private Category updateCategory(Category category) throws Exception {
-        logger.info("CategoryDao::updateCategory category " + category.getId());
+        logger.info("CategoryDao::updateCategory " + category);
         jdbc.update("UPDATE category SET category = ? WHERE category_id = ?", new Object[]{category.getName(), category.getId()});
         return category;
     }
 
     @Override
     public void deleteCategory(Category category) throws Exception {
-        logger.info("CategoryDao::deleteCategory category " + category.getId());
+        logger.info("CategoryDao::deleteCategory " + category);
         jdbc.update("DELETE FROM category WHERE category_id = ?", new Object[]{category.getId()});
     }
 

@@ -24,6 +24,24 @@ public class Category implements Serializable {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder category = new StringBuilder();
+        category.append(super.toString());
+        category.append(" {\"id\":");
+        category.append(getId());
+        category.append("\",\"name\":");
+        if (getName() == null) {
+            category.append("null");
+        } else {
+            category.append("\"");
+            category.append(getName());
+            category.append("\"");
+        }
+        category.append("}");
+        return category.toString();
+    }
+
     public Integer getId() {
         return id;
     }
