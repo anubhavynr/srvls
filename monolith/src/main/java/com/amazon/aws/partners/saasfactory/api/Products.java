@@ -1,5 +1,6 @@
 package com.amazon.aws.partners.saasfactory.api;
 
+import com.amazon.aws.partners.saasfactory.domain.Category;
 import com.amazon.aws.partners.saasfactory.domain.Product;
 import com.amazon.aws.partners.saasfactory.service.ProductService;
 import org.slf4j.Logger;
@@ -16,49 +17,63 @@ import java.util.List;
 @RequestMapping(path="/api")
 public class Products {
 
-    private static final Logger logger = LoggerFactory.getLogger(Products.class);
+	private static final Logger logger = LoggerFactory.getLogger(Products.class);
 
-    @Autowired
-    private ProductService productService;
+	@Autowired
+	private ProductService productService;
+
+	@CrossOrigin
+	@GetMapping(path = "/products/{id}")
+	public Product getProduct(@PathVariable Integer id) throws Exception {
+		logger.info("Products::getProduct id = " + id);
+		return productService.getProduct(id);
+	}
+
+	@CrossOrigin
+	@GetMapping(path = "/products")
+	public List<Product> getProducts() throws Exception {
+		logger.info("Products::getProducts");
+		return productService.getProducts();
+	}
+
+	@CrossOrigin
+	@PutMapping(path = "/products/{id}")
+	public Product updateProduct(@PathVariable Integer id, @RequestBody Product product) throws Exception {
+		logger.info("Products::updateProduct id = " + id + ", product = " + product);
+		if (id == null || product == null || !id.equals(product.getId())) {
+			logger.error("Products::updateProduct path variable doesn't equal request body. Throwing HTTP 400.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		return productService.saveProduct(product);
+	}
+
+	@CrossOrigin
+	@PostMapping(path = "/products")
+	public Product insertProduct(@RequestBody Product product) throws Exception {
+		logger.info("Products::insertProduct product = " + product);
+		if (product == null) {
+			logger.error("Products::insertProduct request body is empty. Throwing HTTP 400.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		return productService.saveProduct(product);
+	}
+
+	@CrossOrigin
+	@DeleteMapping(path = "/products/{id}")
+	public ResponseEntity deleteProduct(@PathVariable Integer id, @RequestBody Product product) throws Exception {
+		logger.info("Products::deleteProduct id = " + id + ", product = " + product);
+		if (id == null || product == null || !id.equals(product.getId())) {
+			logger.error("Products::deleteProduct path variable doesn't equal request body. Throwing HTTP 400.");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		productService.deleteProduct(product);
+		return ResponseEntity.ok().build();
+	}
 
     @CrossOrigin
-    @GetMapping(path = "/products/{id}")
-    public Product getProduct(@PathVariable Integer id) throws Exception {
-        return productService.getProduct(id);
-    }
-
-    @CrossOrigin
-    @GetMapping(path = "/products")
-    public List<Product> getProducts() throws Exception {
-        return productService.getProducts();
-    }
-
-    @CrossOrigin
-    @PutMapping(path = "/products/{id}")
-    public Product saveProduct(@PathVariable Integer id, @RequestBody Product product) throws Exception {
-        logger.info("Products::saveProduct [id = " + id + ", product = " + product + ", product.id = " + (product != null ? product.getId() : "null") + "]");
-        if (id == null || product == null || !id.equals(product.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        return productService.saveProduct(product);
-    }
-
-    @CrossOrigin
-    @PostMapping(path = "/products")
-    public Product saveProduct(@RequestBody Product product) throws Exception {
-        if (product == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        return productService.saveProduct(product);
-    }
-
-    @CrossOrigin
-    @DeleteMapping(path = "/products/{id}")
-    public ResponseEntity deleteProduct(@PathVariable Integer id, @RequestBody Product product) throws Exception {
-        if (id == null || product == null || !id.equals(product.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        productService.deleteProduct(product);
-        return ResponseEntity.ok().build();
+    @GetMapping(path = "/categories")
+    public List<Category> getCategories() throws Exception {
+        logger.info("Products::getCategories");
+        return productService.getCategories();
     }
 }

@@ -1,6 +1,8 @@
 package com.amazon.aws.partners.saasfactory.service;
 
+import com.amazon.aws.partners.saasfactory.domain.Category;
 import com.amazon.aws.partners.saasfactory.domain.Product;
+import com.amazon.aws.partners.saasfactory.repository.CategoryDao;
 import com.amazon.aws.partners.saasfactory.repository.ProductDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductDao productDao;
+    @Autowired
+    private CategoryDao categoryDao;
 
     @Override
     public List<Product> getProducts() throws Exception {
@@ -61,5 +65,16 @@ public class ProductServiceImpl implements ProductService {
         productDao.deleteProduct(product);
         timer.stop();
         logger.info("ProductService::deleteProduct exec " + timer.getTotalTimeMillis());
+    }
+
+    @Override
+    public List<Category> getCategories() throws Exception {
+        logger.info("ProductService::getCategories");
+        StopWatch timer = new StopWatch();
+        timer.start();
+        List<Category> categories = categoryDao.getCategories();
+        timer.stop();
+        logger.info("ProductService::getCategories exec " + timer.getTotalTimeMillis());
+        return categories;
     }
 }

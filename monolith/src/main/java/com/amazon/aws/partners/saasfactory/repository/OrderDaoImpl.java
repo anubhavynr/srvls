@@ -21,8 +21,8 @@ public class OrderDaoImpl implements OrderDao {
 
     private final static Logger logger = LoggerFactory.getLogger(OrderDaoImpl.class);
     private final static String SELECT_ORDER_SQL = "SELECT o.order_fulfillment_id, o.order_date, o.ship_date, " +
-            "p.purchaser_id, p.first_name, p.last_name " +
-            "o.ship_to_line1, o.ship_to_line2, o.ship_to_city, o.ship_to_state, o.ship_to_postal_code " +
+            "p.purchaser_id, p.first_name, p.last_name, " +
+            "o.ship_to_line1, o.ship_to_line2, o.ship_to_city, o.ship_to_state, o.ship_to_postal_code, " +
             "o.bill_to_line1, o.bill_to_line2, o.bill_to_city, o.bill_to_state, o.bill_to_postal_code " +
             "FROM order_fulfillment o " +
             "INNER JOIN purchaser p ON o.purchaser_id = p.purchaser_id";

@@ -38,6 +38,33 @@ public class Product implements Serializable {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder product = new StringBuilder();
+        product.append(super.toString());
+        product.append(" {\"id\":");
+        product.append(getId());
+        product.append(",\"sku\":\"");
+        product.append(getSku());
+        product.append("\",\"name\":\"");
+        product.append(getName());
+        product.append("\",\"price\":");
+        product.append(getPrice());
+        product.append(",\"category\":{\"id\":");
+        product.append(getCategory() != null ? getCategory().getId() : "null");
+        product.append(",\"name\":");
+        if (getCategory() == null) {
+            product.append("null");
+        } else {
+            product.append("\"");
+            product.append(getCategory().getName());
+            product.append("\"");
+        }
+        product.append("}");
+        product.append("}");
+        return product.toString();
+    }
+
     public Integer getId() {
         return id;
     }

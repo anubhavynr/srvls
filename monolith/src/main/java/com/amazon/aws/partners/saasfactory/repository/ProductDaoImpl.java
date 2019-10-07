@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -39,6 +40,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Product getProduct(Integer productId) throws Exception {
+        logger.info("ProductDao::getProduct " + productId);
         //String sql = "SELECT p.product_id, p.sku, p.product, p.price FROM product p WHERE p.product_id = ?";
         String sql = SELECT_PRODUCT_SQL.concat(" WHERE p.product_id = ?");
         return jdbc.queryForObject(sql, new Object[]{productId}, new ProductRowMapper());
@@ -46,11 +48,18 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<Product> getProducts() throws Exception {
-        return jdbc.query(SELECT_PRODUCT_SQL, new ProductRowMapper());
+        logger.info("ProductDao::getProducts");
+        List<Product> products = jdbc.query(SELECT_PRODUCT_SQL, new ProductRowMapper());
+        if (products == null) {
+            products = Collections.emptyList();
+        }
+        logger.info("ProductDao::getProducts returning " + products.size() + " products");
+        return products;
     }
 
     @Override
     public Product saveProduct(Product product) throws Exception {
+        logger.info("ProductDao::saveProduct " + product);
         if (product.getId() != null && product.getId() > 0) {
             return updateProduct(product);
         } else {
@@ -85,7 +94,7 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     private Product updateProduct(Product product) throws Exception {
-        logger.info("ProductDao::updateProduct updating product " + product.getId());
+        logger.info("ProductDao::updateProduct " + product);
         if (product.getCategory() != null) {
             Category category = categoryDao.saveCategory(product.getCategory());
             product.setCategory(category);
@@ -101,6 +110,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public void deleteProduct(Product product) throws Exception {
+        logger.info("ProductDao::deleteProduct " + product);
         jdbc.update(DELETE_PRODUCT_SQL, new Object[]{product.getId()});
     }
 

@@ -1,5 +1,6 @@
 package com.amazon.aws.partners.saasfactory.service;
 
+import com.amazon.aws.partners.saasfactory.domain.Category;
 import com.amazon.aws.partners.saasfactory.domain.Product;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface ProductService {
     public Product saveProduct(Product product) throws Exception;
 
     public void deleteProduct(Product product) throws Exception;
+
+    public List<Category> getCategories() throws Exception;
 }
