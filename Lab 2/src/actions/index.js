@@ -115,8 +115,6 @@ export const addProduct = (product) => {
             name: 'Soccer',
         };
 
-        console.log('product with category: ', product);
-
         Axios.post(url, product)
             .then((response) => {
                 dispatch(addProductFinished(response.data));

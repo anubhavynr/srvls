@@ -4,8 +4,10 @@ import { closeModal } from '../actions';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAward } from '@fortawesome/free-solid-svg-icons'
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAward } from '@fortawesome/free-solid-svg-icons';
 
 function SignUpModal(props) {
     const {
@@ -28,6 +30,14 @@ function SignUpModal(props) {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
+                        <Form.Group controlId="signUpformFirstName">
+                            <Form.Label>First Name</Form.Label>
+                            <Form.Control type="text" placeholder="FirstName" />
+                        </Form.Group>
+                        <Form.Group controlId="signUpformLastName">
+                            <Form.Label>Last Name</Form.Label>
+                            <Form.Control type="text" placeholder="LastName" />
+                        </Form.Group>
                         <Form.Group controlId="signUpformEmail">
                             <Form.Label>Email address</Form.Label>
                             <Form.Control type="email" placeholder="Enter email" />
@@ -35,9 +45,17 @@ function SignUpModal(props) {
                                 {privacyMessage} <FontAwesomeIcon icon={faAward} />
                             </Form.Text>
                         </Form.Group>
-                        <Form.Group controlId="signUpformPassword">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" placeholder="Password" />
+                        <Form.Group controlId="signUpformCompany">
+                            <Form.Label>Company</Form.Label>
+                            <Form.Control type="text" placeholder="CompanyName" />
+                        </Form.Group>
+                        <Form.Group controlId="signUpformPlan">
+                            <Form.Label>Plan</Form.Label>
+                            <DropdownButton variant="primary" id="plan-dropdown-button" title="Plan">
+                                <Dropdown.Item>Standard Tier</Dropdown.Item>
+                                <Dropdown.Item>Professional Tier</Dropdown.Item>
+                                <Dropdown.Item>Advanced Tier</Dropdown.Item>
+                            </DropdownButton>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
