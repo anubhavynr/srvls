@@ -31,7 +31,7 @@ function DeleteProductModal(props) {
                     <Button variant="secondary" onClick={closeModal}>
                         Close
                     </Button>
-                    <Button variant="success" onClick={() => deleteProduct(product.id)}>
+                    <Button variant="success" onClick={() => deleteProduct(product)}>
                         {buttonText}
                     </Button>
                 </Modal.Footer>

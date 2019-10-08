@@ -4,7 +4,8 @@ import {
     addProductModal,
     deleteProductModal,
     editProductModal,
-    fetchProducts
+    fetchProducts,
+    fetchProductCategories,
 } from '../actions';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -24,11 +25,16 @@ function Products(props) {
         deleteProductModal,
         editProductModal,
         fetchProducts,
+        fetchProductCategories,
     } = props;
 
     useEffect(() => {
             fetchProducts();
     }, [fetchProducts]);
+
+    useEffect(() => {
+        fetchProductCategories();
+    }, [fetchProductCategories]);
 
     return (
         <Container>
@@ -93,6 +99,7 @@ const mapDispatchToProps = {
     deleteProductModal,
     editProductModal,
     fetchProducts,
+    fetchProductCategories,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Products);

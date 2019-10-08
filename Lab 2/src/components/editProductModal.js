@@ -7,12 +7,12 @@ import {
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Dropdown from 'react-bootstrap/Dropdown';
 
 function EditProductModal(props) {
     const {
         show,
         product,
+        categories,
         title = product ? `Edit ${product.name}` : 'Edit Product',
         buttonText = 'Edit Product',
         editProduct,
@@ -38,14 +38,16 @@ function EditProductModal(props) {
     const { value: sku, bind: bindSku } = useInput(product.sku);
     const { value: name, bind: bindName } = useInput(product.name);
     const { value: price, bind: bindPrice } = useInput(product.price);
+    const { value: categoryId, bind: bindCategory } = useInput(product.category.id);
 
     const submitProductUpdate = () => {
+        const category = categories.find(category => category.id.toString() === categoryId.toString());
         const updatedProduct = {
             id: product.id,
             sku,
             name,
             price,
-            category: product.category,
+            category,
         };
 
         editProduct(updatedProduct);
@@ -77,16 +79,11 @@ function EditProductModal(props) {
                         </Form.Group>
                         <Form.Group controlId="productCategory">
                             <Form.Label>Category</Form.Label>
-                            <Dropdown>
-                                <Dropdown.Toggle variant="primary" id="dropdown-basic">
-                                    Category
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item href="#/action-1">Category 1</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-2">Category 2</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-3">Category 3</Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
+                            <Form.Control as="select" {...bindCategory}>
+                                {
+                                    categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)
+                                }
+                            </Form.Control>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -108,6 +105,7 @@ const mapStateToProps = state => {
         currentModal: state.modal.currentModal,
         show: state.modal.currentModal !== null,
         product: state.modal.product,
+        categories: state.products.categories,
     };
 }
 
