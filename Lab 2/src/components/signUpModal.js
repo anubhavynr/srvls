@@ -12,7 +12,7 @@ import { faAward } from '@fortawesome/free-solid-svg-icons';
 function SignUpModal(props) {
     const {
         show,
-        title = 'SVRLS Sign Up!',
+        title = 'SVRLS Sign Up',
         buttonText = 'Sign Up',
         privacyMessage = 'Your email will never be shared.',
         closeModal,
@@ -39,8 +39,8 @@ function SignUpModal(props) {
                             <Form.Control type="text" placeholder="LastName" />
                         </Form.Group>
                         <Form.Group controlId="signUpformEmail">
-                            <Form.Label>Email address</Form.Label>
-                            <Form.Control type="email" placeholder="Enter email" />
+                            <Form.Label>Email Address</Form.Label>
+                            <Form.Control type="email" placeholder="EmailAddress" />
                             <Form.Text className="text-muted">
                                 {privacyMessage} <FontAwesomeIcon icon={faAward} />
                             </Form.Text>
@@ -51,11 +51,11 @@ function SignUpModal(props) {
                         </Form.Group>
                         <Form.Group controlId="signUpformPlan">
                             <Form.Label>Plan</Form.Label>
-                            <DropdownButton variant="primary" id="plan-dropdown-button" title="Plan">
-                                <Dropdown.Item>Standard Tier</Dropdown.Item>
-                                <Dropdown.Item>Professional Tier</Dropdown.Item>
-                                <Dropdown.Item>Advanced Tier</Dropdown.Item>
-                            </DropdownButton>
+                            <Form.Control as="select">
+                                <option key={1} value={1}>Standard Tier</option>
+                                <option key={2} value={2}>Professional Tier</option>
+                                <option key={3} value={3}>Advanced Tier</option>
+                            </Form.Control>
                         </Form.Group>
                     </Form>
                 </Modal.Body>

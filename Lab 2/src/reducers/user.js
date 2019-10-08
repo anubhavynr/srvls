@@ -1,7 +1,7 @@
 const initialState = {
     firstName: 'Max',
     lastName: 'Mustermann',
-    isAuthenticated: true,
+    isAuthenticated: false,
     tenantId: null,
 };
 

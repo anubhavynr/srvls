@@ -11,21 +11,37 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="signUpModalLongTitle">Sign Up</h5>
+        <h5 class="modal-title" id="signUpModalLongTitle">Monolith Market Sign Up</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"><i class="fas fa-times"></i></span>
         </button>
       </div>
       <div class="modal-body">
         <form>
+            <div class="form-group">
+              <label for="signUpFirstName">First Name</label>
+              <input type="text" class="form-control" id="signUpFirstName" placeholder="FirstName">
+            </div>
+            <div class="form-group">
+              <label for="signUpLastName">Last Name</label>
+              <input type="text" class="form-control" id="signUpLastName" placeholder="LastName">
+            </div>
           <div class="form-group">
-            <label for="signUpEmail1">Email address</label>
-            <input type="email" class="form-control" id="signUpEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+            <label for="signUpEmail1">Email Address</label>
+            <input type="email" class="form-control" id="signUpEmail" aria-describedby="emailHelp" placeholder="EmailAddress">
             <small id="emailHelp" class="form-text text-muted">Your email will never be shared. <i class="fas fa-award"></i> </small>
           </div>
           <div class="form-group">
-            <label for="signUpPassword">Password</label>
-            <input type="password" class="form-control" id="signUpPassword" placeholder="Password">
+            <label for="signUpPassword">Company</label>
+            <input type="text" class="form-control" id="signUpCompany" placeholder="CompanyName">
+          </div>
+          <div class="form-group">
+            <label for="signUpPlan">Plan</label>
+            <select class="form-control" name="plan" id="signUpPlan">
+              <option value="standard">Standard Tier</option>
+              <option value="professional">Professional Tier</option>
+              <option value="advanced">Advanced Tier</option>
+            </select>
           </div>
         </form>
       </div>
