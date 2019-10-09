@@ -1,6 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { signInModal, signUpModal } from '../actions';
+import {
+  signInModal,
+  signUpModal,
+  signOutUser,
+} from '../actions';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import AuthenticatedLink from './authenticatedLink';
@@ -12,6 +16,7 @@ const Navigation = (props) => {
   const {
     signInModal,
     signUpModal,
+    signOutUser,
     currentUser, } = props;
 
   return (
@@ -32,9 +37,13 @@ const Navigation = (props) => {
             <NavDropdown.Item href="#function/4">Function 4</NavDropdown.Item>
           </NavDropdown>
         </Nav>
-        {currentUser.isAuthenticated ?
-          <span>Welcome back, {currentUser.firstName}!</span>
-          : <Form inline>
+        {currentUser.isAuthenticated ? (
+          <Form inline>
+              <span>Welcome back, {currentUser.firstName}!</span>
+              <Button variant="link" onClick={signOutUser}>Sign Out</Button>
+          </Form>
+        ) :
+        <Form inline>
               <Button variant="link" onClick={signInModal}>Sign In</Button>
               <Button variant="success" onClick={signUpModal}>Sign Up</Button>
             </Form>
@@ -44,8 +53,14 @@ const Navigation = (props) => {
   );
 }
 
+const mapDispatchToProps = {
+  signInModal,
+  signUpModal,
+  signOutUser,
+};
+
 const mapStateToProps = state => ({
   currentUser: state.user,
 });
 
-export default connect(mapStateToProps, { signInModal, signUpModal })(Navigation);
+export default connect(mapStateToProps, mapDispatchToProps)(Navigation);

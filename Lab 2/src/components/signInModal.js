@@ -4,6 +4,9 @@ import { closeModal } from '../actions';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import {
+    authenticateUser,
+} from '../actions';
 
 function SignInModal(props) {
     const {
@@ -11,6 +14,7 @@ function SignInModal(props) {
         title = 'SVRLS Sign In',
         buttonText = 'Sign In',
         closeModal,
+        authenticateUser,
     } = props;
 
     return (
@@ -36,10 +40,10 @@ function SignInModal(props) {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={closeModal}>
+                    <Button variant="secondary" onClick={closeModal} >
                         Close
                     </Button>
-                    <Button variant="success" onClick={closeModal}>
+                    <Button variant="success" onClick={authenticateUser} >
                         {buttonText}
                     </Button>
                 </Modal.Footer>
@@ -48,6 +52,11 @@ function SignInModal(props) {
     );
 }
 
+const mapDispatchToProps = {
+  closeModal,
+  authenticateUser,  
+};
+
 const mapStateToProps = state => {
     return {
         currentModal: state.modal.currentModal,
@@ -55,4 +64,4 @@ const mapStateToProps = state => {
     };
 }
 
-export default connect(mapStateToProps, { closeModal })(SignInModal);
+export default connect(mapStateToProps, mapDispatchToProps)(SignInModal);

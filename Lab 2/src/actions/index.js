@@ -19,6 +19,8 @@ export const RECEIVE_DELETE_PRODUCT = 'RECEIVE_DELETE_PRODUCT';
 export const REQUEST_EDIT_PRODUCT = 'REQUEST_DELETE_PRODUCT';
 export const RECEIVE_EDIT_PRODUCT = 'RECEIVE_EDIT_PRODUCT';
 export const ADD_PRODUCT_SUCCESS = 'REQUEST_ALL_PRODUCTS';
+export const REQUEST_AUTHENTICATE_USER = 'REQUEST_AUTHENTICATE_USER';
+export const RECEIVE_AUTHENTICATE_USER = 'RECEIVE_AUTHENTICATE_USER';
 
 export const signInModal = () => {
     return {
@@ -66,42 +68,77 @@ export const closeModal = () => {
 export const requestAllProducts = () => {
     return {
         type: REQUEST_ALL_PRODUCTS,
-    }
-}
+    };
+};
 
 export const receiveAllProducts = products => {
     return {
         type: RECEIVE_ALL_PRODUCTS,
         products,
-    }
-}
+    };
+};
 
 export const receiveProductCategories = categories => {
     return {
         type: RECEIVE_PRODUCT_CATEGORIES,
         categories,
-    }
-}
+    };
+};
 
 export const addProductFinished = (product) => {
     return {
         type: RECEIVE_ADD_PRODUCT,
         product,
-    }
+    };
 };
 
 export const editProductFinished = (product) => {
     return {
         type: RECEIVE_EDIT_PRODUCT,
         product,
-    }
+    };
 };
 
 export const deleteProductFinished = (product) => {
     return {
         type: RECEIVE_DELETE_PRODUCT,
         product,
-    }
+    };
+};
+
+export const receiveUserAuthentication = user => {
+    return {
+        type: RECEIVE_AUTHENTICATE_USER,
+        user,
+    };
+};
+
+export const authenticateUser = () => {
+    return function(dispatch) {
+        const user = {
+            firstName: 'Max',
+            lastName: 'Mustermann',
+            email: 'max@mustermann.com',
+            isAuthenticated: true,
+        }
+            
+        sessionStorage.setItem('isAuthenticated', 'true');
+
+        dispatch(receiveUserAuthentication(user));
+        dispatch(closeModal());
+    };
+};
+
+export const signOutUser = () => {
+    return function(dispatch) {     
+        sessionStorage.removeItem('isAuthenticated');
+
+        const user = {
+            isAuthenticated: false,
+        };
+
+        dispatch(receiveUserAuthentication(user));
+    };
 };
 
 export const fetchProducts = () => {
@@ -123,8 +160,8 @@ export const fetchProductCategories = () => {
         .then(response => {
             dispatch(receiveProductCategories(response.data))
         }, error => console.error(error));
-    }
-}
+    };
+};
 
 export const addProduct = (product) => {
     return function(dispatch) {
@@ -137,7 +174,7 @@ export const addProduct = (product) => {
             .then(() => {
                 dispatch(closeModal());
             }, error => console.error(error));
-    }
+    };
 };
 
 export const editProduct = (product) => {
@@ -165,5 +202,5 @@ export const deleteProduct = (product) => {
             .then(() => {
                 dispatch(closeModal());
             }, error => console.error(error));
-    }
+    };
 };
