@@ -10,6 +10,8 @@ export const EDIT_PRODUCT_MODAL = 'EDIT_PRODUCT_MODAL';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const REQUEST_ALL_PRODUCTS = 'REQUEST_ALL_PRODUCTS';
 export const RECEIVE_ALL_PRODUCTS = 'RECEIVE_ALL_PRODUCTS';
+export const REQUEST_ALL_ORDERS = 'REQUEST_ALL_ORDERS';
+export const RECEIVE_ALL_ORDERS = 'RECEIVE_ALL_ORDERS';
 export const REQUEST_PRODUCT_CATEGORIES = 'REQUEST_PRODUCT_CATEGORIES';
 export const RECEIVE_PRODUCT_CATEGORIES = 'RECEIVE_PRODUCT_CATEGORIES';
 export const REQUEST_ADD_PRODUCT = 'REQUEST_ALL_PRODUCTS';
@@ -113,6 +115,13 @@ export const receiveUserAuthentication = user => {
     };
 };
 
+export const receiveAllOrders = orders => {
+    return {
+        type: RECEIVE_ALL_ORDERS,
+        orders,
+    };
+};
+
 export const authenticateUser = () => {
     return function(dispatch) {
         const user = {
@@ -201,6 +210,17 @@ export const deleteProduct = (product) => {
             }, error => console.error(error))
             .then(() => {
                 dispatch(closeModal());
+            }, error => console.error(error));
+    };
+};
+
+export const fetchOrders = () => {
+    return function(dispatch) {
+        const url = `${config.api.base_url}/orders`;
+    
+        Axios.get(url)
+            .then(response => {
+                dispatch(receiveAllOrders(response.data))
             }, error => console.error(error));
     };
 };

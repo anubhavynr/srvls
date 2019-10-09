@@ -8,7 +8,6 @@ import {
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import AuthenticatedLink from './authenticatedLink';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
@@ -29,13 +28,6 @@ const Navigation = (props) => {
           <AuthenticatedLink isAuthenticated={currentUser.isAuthenticated} linkHref="dashboard" linkText="Dashboard" />
           <AuthenticatedLink isAuthenticated={currentUser.isAuthenticated} linkHref="products" linkText="Products" />
           <AuthenticatedLink isAuthenticated={currentUser.isAuthenticated} linkHref="orders" linkText="Orders" />
-          <NavDropdown title="Functionality" id="functionality-dropdown">
-            <NavDropdown.Item href="funcion/1">Function 1</NavDropdown.Item>
-            <NavDropdown.Item href="function/2">Function 2</NavDropdown.Item>
-            <NavDropdown.Item href="function/3">Function 3</NavDropdown.Item>
-            <NavDropdown.Divider />
-            <NavDropdown.Item href="#function/4">Function 4</NavDropdown.Item>
-          </NavDropdown>
         </Nav>
         {currentUser.isAuthenticated ? (
           <Form inline>
