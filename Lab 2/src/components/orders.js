@@ -4,6 +4,8 @@ import { fetchOrders } from '../actions';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Table from 'react-bootstrap/Table';
+import Tooltip from 'react-bootstrap/Tooltip';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faTimesCircle,
@@ -57,7 +59,7 @@ function Orders(props) {
                                                 <td>{orderDate}</td>
                                                 <td>{totalItems}</td>
                                                 <td>{purchaserId}</td>
-                                                <td className="text-center">{shipDate === null ? <FontAwesomeIcon icon={faTimesCircle} /> : <FontAwesomeIcon icon={faCheckCircle} />}</td>
+                                                <td className="text-center">{shipDate === null ? <FontAwesomeIcon className="text-danger" icon={faTimesCircle} /> : <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-ship-date">{shipDate}</Tooltip>}><FontAwesomeIcon className="text-success" icon={faCheckCircle} /></OverlayTrigger> }</td>
                                             </tr>
                                         );
                                     }
