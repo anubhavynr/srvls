@@ -13,8 +13,8 @@ function Home() {
             <Container fluid>
                 <Row>
                     <Col>
-                        <h1 className="display-2 text-light mb-2 mt-5"><strong>SVRLS Storefront</strong> </h1>
-                        <p className="lead text-light mb-5">Serve more, manage less</p>
+                        <h1 className="display-2 text-light mb-2 mt-5"><strong>SaaS Commerce</strong> </h1>
+                        <p className="lead text-light mb-5">Your SaaS commerce solution</p>
                         <p>
                             <Button href="#" variant='danger'>Get Started Now <FontAwesomeIcon icon={faArrowRight}/></Button>
                         </p>
