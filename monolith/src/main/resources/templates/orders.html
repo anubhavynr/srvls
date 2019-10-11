@@ -120,7 +120,7 @@
                         <td th:text="${order.orderDate}">10/10/2019</td>
                         <td th:text="${#arrays.length(order.lineItems)}">3</td>
                         <td th:text="${order.purchaser.id}">1</td>
-                        <td class="text-center"><span th:class="'text-' + ( (${order.shipDate} != null)? 'success' : 'danger')"><i class="fas" th:classappend="${order.shipDate != null} ?  'fa-check-circle' : 'fa-times-circle'"></i></td>
+                        <td class="text-center"><span th:class="'text-' + ( (${order.shipDate} != null)? 'success' : 'danger')"><i class="fas" th:classappend="${order.shipDate != null} ?  'fa-check-circle' : 'fa-times-circle'"></i></span></td>
                     </tr>
             </table>
             </div>
