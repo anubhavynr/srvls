@@ -116,7 +116,7 @@
             </thead>
                     <tr th:each="order : ${orders}">
                         <td th:text="${order.id}">ABC</td>
-                        <td th:text="${#numbers.formatCurrency(order.lineItems.extendedPurchasePrice)}">Shoes</td>
+                        <td th:text="${#numbers.formatCurrency(order.lineItems.total)}">Shoes</td>
                         <td th:text="${order.orderDate}">Air Jordan</td>
                         <td th:text="${#arrays.length(order.lineItems)}">100.00</td>
                         <td th:text="${order.urchaser.id}">100.00</td>
