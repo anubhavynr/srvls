@@ -120,7 +120,7 @@
                         <td th:text="${order.orderDate}">10/10/2019</td>
                         <td th:text="${#arrays.length(order.lineItems)}">3</td>
                         <td th:text="${order.purchaser.id}">1</td>
-                        <td class="text-center"><span class="glyphicon" th:classappend="${order.shipDate} ?  'glyphicon-ok-sign' : 'glyphicon-remove-sign'"></span></td>
+                        <td class="text-center"><span class="glyphicon" th:classappend="${order.shipDate != null} ?  'glyphicon-ok-sign' : 'glyphicon-remove-sign'"></span></td>
                     </tr>
             </table>
             </div>
