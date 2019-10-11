@@ -115,11 +115,11 @@
                 </tr>
             </thead>
                     <tr th:each="order : ${orders}">
-                        <td th:text="${order.id}">ABC</td>
-                        <td th:text="${#numbers.formatCurrency(order.lineItems.total)}">Shoes</td>
-                        <td th:text="${order.orderDate}">Air Jordan</td>
-                        <td th:text="${#arrays.length(order.lineItems)}">100.00</td>
-                        <td th:text="${order.urchaser.id}">100.00</td>
+                        <td th:text="${order.id}">1</td>
+                        <td th:text="${#numbers.formatCurrency(order.total)}">100.00</td>
+                        <td th:text="${order.orderDate}">10/10/2019</td>
+                        <td th:text="${#arrays.length(order.lineItems)}">3</td>
+                        <td th:text="${order.purchaser.id}">1</td>
                         <td class="text-center"><span class="glyphicon" th:classappend="${order.shipDate} ?  'glyphicon-ok-sign' : 'glyphicon-remove-sign'"></span></td>
                     </tr>
             </table>
