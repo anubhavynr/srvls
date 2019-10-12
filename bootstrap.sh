@@ -1,12 +1,13 @@
 #!/bin/bash
 
-#N Virginia
-#Ohio
-#Oregon
-#Ireland
-#Frankfurt
-#Singapore
-#Tokyo
+# Supported regios (Cloud9 limitation)
+# us-east-1      N Virginia 
+# us-east-2      Ohio
+# us-west-2      Oregon
+# eu-west-1      Ireland
+# eu-central-1   Frankfurt
+# ap-southeast-1 Singapore
+# ap-northeast-1 Tokyo
 
 sudo yum install -y java-1.8.0-openjdk-devel
 sudo update-alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
