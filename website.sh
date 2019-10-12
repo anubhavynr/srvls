@@ -9,10 +9,10 @@ MY_AWS_REGION=$(aws configure list | grep region | awk '{print $2}')
 echo "AWS Region = $MY_AWS_REGION"
 API_GATEWAY_URL=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "ApiGatewayEndpoint") | .OutputValue')
 echo "API Gateway Invoke URL = $API_GATEWAY_URL"
-S3_WEBSITE_URL=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "WebsiteURL") | .OutputValue')
-echo "S3 website URL = $S3_WEBSITE_URL"
-S3_WEBSITE_BUCKET=$(echo $S3_WEBSITE_URL | sed -e 's@^.*://@@' -e 's/[\.].*$//')
+S3_WEBSITE_BUCKET=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "WebsiteS3Bucket") | .OutputValue')
 echo "S3 website bucket = $S3_WEBSITE_BUCKET"
+CLOUDFRONT_DISTRIBUTION=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "CloudFrontDistributionDNS") | .OutputValue')
+echo "CloudFront distribution URL = $CLOUDFRONT_DISTRIBUTION"
 echo
 
 # Edit src/shared/config.js in the ReactJS codebase
@@ -37,7 +37,5 @@ aws s3 sync --delete --acl public-read . s3://$S3_WEBSITE_BUCKET
 #echo "http://$WEBSITE_BUCKET-website-$MY_AWS_REGION.amazonaws.com"
 echo
 echo "Access your website at..."
-echo $S3_WEBSITE_URL
-
-#aws s3api create-bucket --region $MY_AWS_REGION --bucket $WEBSITE_BUCKET --create-bucket-configuration LocationConstraint=$MY_AWS_REGION
-#aws s3api put-bucket-website --bucket $WEBSITE_BUCKET --website-configuration '{"IndexDocument":{"Suffix":"index.html"}}'
+echo $CLOUDFRONT_DISTRIBUTION
+echo
