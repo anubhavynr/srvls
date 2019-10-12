@@ -1,0 +1,80 @@
+<html>
+<head>
+  <title>
+    <INSERT TITLE HERE>
+  </title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <nav class="navbar navbar-expand-lg">
+      <a class="navbar-brand" href="#">Brand</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBootcamp"
+        aria-controls="navbarBootcamp" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarBootcamp">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard.html">Dashboard</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="/products">Products</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/orders">Orders</span></a>
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+            <span>Welcome back, User!</span>
+            <button class="btn btn-lilnk my-2 my-sm-0" type="button">Sign Out</button>
+        </form>
+      </div>
+    </nav>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="jumbotron">
+          <h2>Orders</h2>
+          <hr>
+          <div class="container">
+            <div class="row">
+            <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order Number</th>
+                    <th>Order Total</th>
+                    <th>Order Date</th>
+                    <th>Total Items</th>
+                    <th>Purchaser</th>
+                    <th class="text-center">Shipped</th>
+                </tr>
+            </thead>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.id}">1</td>
+                        <td th:text="${#numbers.formatCurrency(order.total)}">100.00</td>
+                        <td th:text="${order.orderDate}">10/10/2019</td>
+                        <td th:text="${#arrays.length(order.lineItems)}">3</td>
+                        <td th:text="${order.purchaser.id}">1</td>
+                        <td class="text-center"><span th:class="'text-' + ( (${order.shipDate} != null)? 'success' : 'danger')"><i class="fas" th:classappend="${order.shipDate != null} ?  'fa-check-circle' : 'fa-times-circle'"></i></span></td>
+                    </tr>
+            </table>
+            </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <h4><b>version 0.1</b> </h4>
+    </div>
+  </footer>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/scripts.js"></script>
+</body>
+</html>

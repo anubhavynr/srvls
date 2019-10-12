@@ -7,13 +7,13 @@ import {
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Dropdown from 'react-bootstrap/Dropdown';
 
 function AddProductModal(props) {
     const {
         show,
         title = 'Add Product',
         buttonText = 'Add Product',
+        categories,
         addProduct,
         closeModal,
     } = props;
@@ -37,12 +37,15 @@ function AddProductModal(props) {
     const { value: sku, bind: bindSku } = useInput('');
     const { value: name, bind: bindName } = useInput('');
     const { value: price, bind: bindPrice } = useInput('');
+    const { value: categoryId, bind: bindCategory } = useInput('');
 
     const submitProductAdd = () => {
+        const category = categories.find(category => category.id.toString() === categoryId.toString());
         const product = {
             sku,
             name,
             price,
+            category,
         };
 
         addProduct(product);
@@ -74,16 +77,11 @@ function AddProductModal(props) {
                         </Form.Group>
                         <Form.Group controlId="productCategory">
                             <Form.Label>Category</Form.Label>
-                            <Dropdown>
-                                <Dropdown.Toggle variant="primary" id="dropdown-basic">
-                                    Category
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                    <Dropdown.Item href="#/action-1">Category 1</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-2">Category 2</Dropdown.Item>
-                                    <Dropdown.Item href="#/action-3">Category 3</Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
+                            <Form.Control as="select" {...bindCategory}>
+                                {
+                                    categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)
+                                }
+                            </Form.Control>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -104,7 +102,13 @@ const mapStateToProps = state => {
     return {
         currentModal: state.modal.currentModal,
         show: state.modal.currentModal !== null,
+        categories: state.products.categories,
     };
 }
 
-export default connect(mapStateToProps, { closeModal, addProduct })(AddProductModal);
+const mapDispatchToProps = {
+    addProduct,
+    closeModal,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddProductModal);

@@ -12,13 +12,13 @@ export const modal = (state = initialState, action) => {
                 ...state,
                 currentModal: action.currentModal,
                 product: action.product,
-            }
+            };
         case CLOSE_MODAL: 
             return {
                 ...state,
                 currentModal: null,
-            }
+            };
         default:
             return state;
-    }    
-}
+    };    
+};

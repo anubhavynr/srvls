@@ -7,11 +7,14 @@ import {
     RECEIVE_EDIT_PRODUCT,
     REQUEST_DELETE_PRODUCT,
     RECEIVE_DELETE_PRODUCT,
+    REQUEST_PRODUCT_CATEGORIES,
+    RECEIVE_PRODUCT_CATEGORIES,
 } from '../actions';
 
 const initialState = {
     products: [],
     productCount: 0,
+    categories: [],
 }
 
 function addProduct(products, product) {
@@ -26,13 +29,20 @@ function updateProduct(products, updatedProduct) {
     return productsCopy.map(product => product.id === updatedProduct.id ?  updatedProduct : product);
 }
 
-function deleteProduct(products, productId) {
+function deleteProduct(products, deletedProduct) {
     const productsCopy = products.slice();
-    return productsCopy.filter(product => product.id !== productId);
+    return productsCopy.filter(product => product.id !== deletedProduct.id);
 }
 
 export const products = (state = initialState, action) => {
     switch (action.type) {
+        case REQUEST_PRODUCT_CATEGORIES:
+            return null;
+        case RECEIVE_PRODUCT_CATEGORIES:
+            return {
+                ...state,
+                categories: action.categories,
+            }
         case REQUEST_ALL_PRODUCTS:
             return null;
         case RECEIVE_ALL_PRODUCTS:
@@ -64,7 +74,7 @@ export const products = (state = initialState, action) => {
         case REQUEST_DELETE_PRODUCT:
                 return null;
         case RECEIVE_DELETE_PRODUCT: 
-            const productsWithDelete = deleteProduct(state.products, action.id);
+            const productsWithDelete = deleteProduct(state.products, action.product);
 
             return {
                 ...state,

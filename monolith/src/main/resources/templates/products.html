@@ -6,66 +6,48 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/all.min.css" rel="stylesheet">
 </head>
-<!-- Sign Up Modal -->
-<div class="modal fade" id="signUpModalCenter" tabindex="-1" role="dialog" aria-labelledby="signUpModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="signUpModalLongTitle">Sign Up</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true"><i class="fas fa-times"></i></span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="signUpEmail1">Email address</label>
-            <input type="email" class="form-control" id="signUpEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-            <small id="emailHelp" class="form-text text-muted">Your email will never be shared. <i class="fas fa-award"></i> </small>
-          </div>
-          <div class="form-group">
-            <label for="signUpPassword">Password</label>
-            <input type="password" class="form-control" id="signUpPassword" placeholder="Password">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-success">Sign Up</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Sign In Modal -->
-<div class="modal fade" id="signInModalCenter" tabindex="-1" role="dialog" aria-labelledby="signInModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="signInModalLongTitle">Sign In</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true"><i class="fas fa-times"></i></span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="form-group">
-            <label for="signInEmail1">Email address</label>
-            <input type="email" class="form-control" id="signInEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-          </div>
-          <div class="form-group">
-            <label for="signUpPassword">Password</label>
-            <input type="password" class="form-control" id="signInPassword" placeholder="Password">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-success">Sign In</button>
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModalCenter" tabindex="-1" role="dialog" aria-labelledby="addProductModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addProductModalLongTitle">Add Product</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="fas fa-times"></i></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="addProductSku">SKU</label>
+              <input type="text" class="form-control" id="addProductSku" aria-describedby="skuHelp" placeholder="Enter SKU">
+            </div>
+            <div class="form-group">
+              <label for="addProductName">Name</label>
+              <input type="text" class="form-control" id="addProductName" placeholder="Enter product name">
+            </div>
+            <div class="form-group">
+                <label for="addProductPrice">Price</label>
+                <input type="text" class="form-control" id="addProductPrice" placeholder="Enter product price">
+            </div>
+            <div class="form-group">
+              <label for="addProductCategory">Category</label>
+              <select class="form-control" id="addProductCategory">
+                <option>Baseball</option>
+                <option>Soccer</option>
+                <option>Basketball</option>
+                <option>Football</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success">Add Product</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 <body>
   <div class="container">
     <nav class="navbar navbar-expand-lg">
@@ -78,18 +60,21 @@
       <div class="collapse navbar-collapse" id="navbarBootcamp">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Dashboard</a>
+            <a class="nav-link" href="/dashboard.html">Dashboard</a>
           </li>
           <li class="nav-item active">
-            <a class="nav-link" href="#">Products <span class="sr-only">(current)</span></span></a>
+            <a class="nav-link" href="/products">Products</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/orders">Orders</span></a>
           </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
-          <button class="btn btn-lilnk my-2 my-sm-0" type="button" data-toggle="modal" data-target="#signInModalCenter">Sign In</button>
-          <button class="btn btn-success my-2 my-sm-0" type="button" data-toggle="modal" data-target="#signUpModalCenter">Sign Up</button>
+          <span>Welcome back, User!</span>
+          <button class="btn btn-lilnk my-2 my-sm-0" type="button">Sign Out</button>
         </form>
       </div>
     </nav>
@@ -97,10 +82,9 @@
       <div class="col-md-12">
         <div class="jumbotron">
           <h2>Products</h2>
-          <hr>
           <div class="container">
-            <div class="row col-md-6 col-md-offset-2 custyle">
-            <table class="table table-striped custab">
+            <div class="row">
+            <table class="table table-striped">
             <thead>
                 <tr>
                     <th>SKU</th>
@@ -115,9 +99,14 @@
                         <td th:text="${product.category.name}">Shoes</td>
                         <td th:text="${product.name}">Air Jordan</td>
                         <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
-                        <td class="text-center"><a class='btn btn-secondary btn-xs' href="#"><span class="glyphicon glyphicon-edit"></span> Edit</a> <a href="#" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-remove"></span> Del</a></td>
+                        <td class="text-center"><a class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a href="#" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
                     </tr>
             </table>
+            </div>
+            <div class="row">
+              <div class="col">
+                <button class="btn btn-success float-right" data-toggle="modal" data-target="#addProductModalCenter">Add Product <i class="fas fa-plus"></i></button>
+              </div>
             </div>
         </div>
         </div>

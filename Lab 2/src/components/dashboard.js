@@ -6,8 +6,16 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowCircleRight, faChartLine, faLongArrowAltRight, faLongArrowAltUp, faLongArrowAltDown, faListOl, faTags } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+    faArrowCircleRight,
+    faChartLine,
+    faLongArrowAltRight,
+    faLongArrowAltUp,
+    faLongArrowAltDown,
+    faListOl,
+    faTags,
+} from '@fortawesome/free-solid-svg-icons';
 
 function Dashboard(props) {
     const { productCount,

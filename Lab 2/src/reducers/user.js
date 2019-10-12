@@ -1,13 +1,25 @@
+import {
+    REQUEST_AUTHENTICATE_USER,
+    RECEIVE_AUTHENTICATE_USER,
+} from '../actions';
+
 const initialState = {
     firstName: 'Max',
     lastName: 'Mustermann',
-    isAuthenticated: true,
+    isAuthenticated: sessionStorage.getItem('isAuthenticated') === 'true' ? true : false,
     tenantId: null,
 };
 
 export const user = (state = initialState, action) => {
     switch (action.type) {
+        case REQUEST_AUTHENTICATE_USER:
+            return null;
+        case RECEIVE_AUTHENTICATE_USER:
+            return {
+                ...state,
+                ...action.user,
+            }
         default:
             return state;
-    }    
+    };
 };

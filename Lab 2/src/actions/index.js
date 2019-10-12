@@ -10,6 +10,10 @@ export const EDIT_PRODUCT_MODAL = 'EDIT_PRODUCT_MODAL';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const REQUEST_ALL_PRODUCTS = 'REQUEST_ALL_PRODUCTS';
 export const RECEIVE_ALL_PRODUCTS = 'RECEIVE_ALL_PRODUCTS';
+export const REQUEST_ALL_ORDERS = 'REQUEST_ALL_ORDERS';
+export const RECEIVE_ALL_ORDERS = 'RECEIVE_ALL_ORDERS';
+export const REQUEST_PRODUCT_CATEGORIES = 'REQUEST_PRODUCT_CATEGORIES';
+export const RECEIVE_PRODUCT_CATEGORIES = 'RECEIVE_PRODUCT_CATEGORIES';
 export const REQUEST_ADD_PRODUCT = 'REQUEST_ALL_PRODUCTS';
 export const RECEIVE_ADD_PRODUCT = 'REQUEST_ADD_PRODUCT';
 export const REQUEST_DELETE_PRODUCT = 'REQUEST_DELETE_PRODUCT';
@@ -17,6 +21,8 @@ export const RECEIVE_DELETE_PRODUCT = 'RECEIVE_DELETE_PRODUCT';
 export const REQUEST_EDIT_PRODUCT = 'REQUEST_DELETE_PRODUCT';
 export const RECEIVE_EDIT_PRODUCT = 'RECEIVE_EDIT_PRODUCT';
 export const ADD_PRODUCT_SUCCESS = 'REQUEST_ALL_PRODUCTS';
+export const REQUEST_AUTHENTICATE_USER = 'REQUEST_AUTHENTICATE_USER';
+export const RECEIVE_AUTHENTICATE_USER = 'RECEIVE_AUTHENTICATE_USER';
 
 export const signInModal = () => {
     return {
@@ -64,35 +70,84 @@ export const closeModal = () => {
 export const requestAllProducts = () => {
     return {
         type: REQUEST_ALL_PRODUCTS,
-    }
-}
+    };
+};
 
 export const receiveAllProducts = products => {
     return {
         type: RECEIVE_ALL_PRODUCTS,
         products,
-    }
-}
+    };
+};
+
+export const receiveProductCategories = categories => {
+    return {
+        type: RECEIVE_PRODUCT_CATEGORIES,
+        categories,
+    };
+};
 
 export const addProductFinished = (product) => {
     return {
         type: RECEIVE_ADD_PRODUCT,
         product,
-    }
+    };
 };
 
 export const editProductFinished = (product) => {
     return {
         type: RECEIVE_EDIT_PRODUCT,
         product,
-    }
+    };
 };
 
-export const deleteProductFinished = (id) => {
+export const deleteProductFinished = (product) => {
     return {
         type: RECEIVE_DELETE_PRODUCT,
-        id,
-    }
+        product,
+    };
+};
+
+export const receiveUserAuthentication = user => {
+    return {
+        type: RECEIVE_AUTHENTICATE_USER,
+        user,
+    };
+};
+
+export const receiveAllOrders = orders => {
+    return {
+        type: RECEIVE_ALL_ORDERS,
+        orders,
+    };
+};
+
+export const authenticateUser = () => {
+    return function(dispatch) {
+        const user = {
+            firstName: 'Max',
+            lastName: 'Mustermann',
+            email: 'max@mustermann.com',
+            isAuthenticated: true,
+        }
+            
+        sessionStorage.setItem('isAuthenticated', 'true');
+
+        dispatch(receiveUserAuthentication(user));
+        dispatch(closeModal());
+    };
+};
+
+export const signOutUser = () => {
+    return function(dispatch) {     
+        sessionStorage.removeItem('isAuthenticated');
+
+        const user = {
+            isAuthenticated: false,
+        };
+
+        dispatch(receiveUserAuthentication(user));
+    };
 };
 
 export const fetchProducts = () => {
@@ -106,16 +161,20 @@ export const fetchProducts = () => {
     };
 };
 
+export const fetchProductCategories = () => {
+    return function(dispatch) {
+        const url = `${config.api.base_url}/categories`;
+
+        Axios.get(url)
+        .then(response => {
+            dispatch(receiveProductCategories(response.data))
+        }, error => console.error(error));
+    };
+};
+
 export const addProduct = (product) => {
     return function(dispatch) {
         const url = `${config.api.base_url}/products`;
-
-        product.category = {
-            id: 4,
-            name: 'Soccer',
-        };
-
-        console.log('product with category: ', product);
 
         Axios.post(url, product)
             .then((response) => {
@@ -124,14 +183,14 @@ export const addProduct = (product) => {
             .then(() => {
                 dispatch(closeModal());
             }, error => console.error(error));
-    }
+    };
 };
 
 export const editProduct = (product) => {
     return function(dispatch) {
         const url = `${config.api.base_url}/products/${product.id}`;
 
-        Axios.put(url, { data: { product } })
+        Axios.put(url, product)
             .then(() => {
                 dispatch(editProductFinished(product));
             }, error => console.error(error))
@@ -141,16 +200,27 @@ export const editProduct = (product) => {
     }
 };
 
-export const deleteProduct = (id) => {
+export const deleteProduct = (product) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/products/${id}`;
+        const url = `${config.api.base_url}/products/${product.id}`;
 
-        Axios.delete(url, { data: { id } })
+        Axios.delete(url, product)
             .then(() => {
-                dispatch(deleteProductFinished(id));
+                dispatch(deleteProductFinished(product));
             }, error => console.error(error))
             .then(() => {
                 dispatch(closeModal());
             }, error => console.error(error));
-    }
+    };
+};
+
+export const fetchOrders = () => {
+    return function(dispatch) {
+        const url = `${config.api.base_url}/orders`;
+    
+        Axios.get(url)
+            .then(response => {
+                dispatch(receiveAllOrders(response.data))
+            }, error => console.error(error));
+    };
 };
