@@ -33,7 +33,7 @@ public class ProductsController {
 
 		productService.saveProduct(product);
 		List<Product> products = productService.getProducts();
-		model.addAttribute("products", products;
+		model.addAttribute("products", products);
 		return "products";
 	}
 }
