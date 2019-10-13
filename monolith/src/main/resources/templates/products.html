@@ -17,34 +17,34 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
-            <div class="form-group">
+          <form action="#" th:action="@{/addUser" th:object="${product}" method="POST">
+            <div class="form-group" th:object="${product}">
               <label for="addProductSku">SKU</label>
-              <input type="text" class="form-control" id="addProductSku" aria-describedby="skuHelp" placeholder="Enter SKU">
+              <input type="text" class="form-control" id="addProductSku" th:field="*{sku}" aria-describedby="skuHelp" placeholder="Enter SKU" th:value="*{sku}">
             </div>
             <div class="form-group">
               <label for="addProductName">Name</label>
-              <input type="text" class="form-control" id="addProductName" placeholder="Enter product name">
+              <input type="text" class="form-control" id="addProductName" th:field="*{name}" placeholder="Enter product name">
             </div>
             <div class="form-group">
                 <label for="addProductPrice">Price</label>
-                <input type="text" class="form-control" id="addProductPrice" placeholder="Enter product price">
+                <input type="text" class="form-control" id="addProductPrice" th:field="*{price}" placeholder="Enter product price">
             </div>
             <div class="form-group">
               <label for="addProductCategory">Category</label>
-              <select class="form-control" id="addProductCategory">
-                <option>Baseball</option>
-                <option>Soccer</option>
-                <option>Basketball</option>
-                <option>Football</option>
+              <select class="form-control" id="addProductCategory" th:field="*{category}">
+                <option value="1">Baseball</option>
+                <option value="2">Soccer</option>
+                <option value="3">Basketball</option>
+                <option value="4">Football</option>
               </select>
             </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-success">Add Product</button>
-        </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success">Add Product</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
