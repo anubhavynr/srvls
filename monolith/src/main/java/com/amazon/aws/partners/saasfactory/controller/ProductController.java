@@ -1,5 +1,6 @@
 package com.amazon.aws.partners.saasfactory.controller;
 
+import javax.validation.Valid;
 import com.amazon.aws.partners.saasfactory.domain.Product;
 import com.amazon.aws.partners.saasfactory.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
