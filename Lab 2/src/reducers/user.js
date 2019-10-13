@@ -4,7 +4,7 @@ import {
 } from '../actions';
 
 const initialState = {
-    firstName: 'Max',
+    firstName: 'User',
     lastName: 'Mustermann',
     isAuthenticated: sessionStorage.getItem('isAuthenticated') === 'true' ? true : false,
     tenantId: null,
