@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import javax.validation.Valid;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
@@ -22,4 +25,14 @@ public class ProductsController {
 		return "products";
 	}
 
+	@PostMapping("/addProduct")
+	public String productAddForm(@Valid Product product, BindingResult result, Model model) throws Exception {
+		if (result.hasErrors()) {
+			return "add-product";
+		}
+
+		productService.saveProduct(product);
+		model.addAttribute("products", productService.getProducts());
+		return "products";
+	}
 }
