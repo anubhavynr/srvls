@@ -26,13 +26,14 @@ public class ProductsController {
 	}
 
 	@PostMapping("/addProduct")
-	public String productAddForm(@Valid Product product, BindingResult result, Model model) throws Exception {
+	public String addProduct(@Valid Product product, BindingResult result, Model model) throws Exception {
 		if (result.hasErrors()) {
 			return "add-product";
 		}
 
 		productService.saveProduct(product);
-		model.addAttribute("products", productService.getProducts());
+		List<Product> products = productService.getProducts();
+		model.addAttribute("products", products;
 		return "products";
 	}
 }
