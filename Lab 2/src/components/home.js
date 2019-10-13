@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { signUpModal } from '../actions';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -7,16 +9,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import bgImage from '../assets/green-02@2x.png';
 
-function Home() {
+function Home(props) {
+    const { signUpModal } = props;
+
     return (
         <Container style={{ backgroundImage: `url(${bgImage})`, backgroundSize: 'cover' }}>
-            <Container fluid>
+            <Container fluid style={{height: '40vh'}}>
                 <Row>
                     <Col>
-                        <h1 className="display-2 text-light mb-2 mt-5"><strong>SaaS Commerce</strong> </h1>
+                        <h1 className="display-2 text-light"><strong>SaaS Commerce</strong> </h1>
                         <p className="lead text-light mb-5">Your SaaS commerce solution</p>
                         <p>
-                            <Button href="#" variant='danger'>Get Started Now <FontAwesomeIcon icon={faArrowRight}/></Button>
+                            <Button variant='danger' onClick={signUpModal}>Get Started Now <FontAwesomeIcon icon={faArrowRight}/></Button>
                         </p>
                     </Col>
                 </Row>
@@ -25,4 +29,4 @@ function Home() {
     )
 }
 
-export default Home;
+export default connect(() => ({}), { signUpModal })(Home);

@@ -11,7 +11,7 @@ import {
 function SignInModal(props) {
     const {
         show,
-        title = 'SVRLS Sign In',
+        title = 'Sign In',
         buttonText = 'Sign In',
         closeModal,
         authenticateUser,

@@ -125,7 +125,7 @@ export const receiveAllOrders = orders => {
 export const authenticateUser = () => {
     return function(dispatch) {
         const user = {
-            firstName: 'Max',
+            firstName: 'User',
             lastName: 'Mustermann',
             email: 'max@mustermann.com',
             isAuthenticated: true,

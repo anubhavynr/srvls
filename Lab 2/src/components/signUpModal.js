@@ -10,7 +10,7 @@ import { faAward } from '@fortawesome/free-solid-svg-icons';
 function SignUpModal(props) {
     const {
         show,
-        title = 'SVRLS Sign Up',
+        title = 'Sign Up',
         buttonText = 'Sign Up',
         privacyMessage = 'Your email will never be shared.',
         closeModal,
