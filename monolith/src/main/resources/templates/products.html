@@ -17,7 +17,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <form action="#" th:action="@{/addProduct" th:object="${product}" method="POST">
+          <form action="#" th:action="@{/addProduct}" th:object="${product}" method="POST">
             <div class="form-group" th:object="${product}">
               <label for="addProductSku">SKU</label>
               <input type="text" class="form-control" id="addProductSku" th:field="*{sku}" aria-describedby="skuHelp" placeholder="Enter SKU" th:value="*{sku}">
