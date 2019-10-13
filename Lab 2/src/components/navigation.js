@@ -23,7 +23,7 @@ const Navigation = (props) => {
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
-          <Nav.Link href="/">Home</Nav.Link>
+          <Nav.Link className="text-success" href="/">Home</Nav.Link>
           <AuthenticatedLink isAuthenticated={currentUser.isAuthenticated} linkHref="dashboard" linkText="Dashboard" />
           <AuthenticatedLink isAuthenticated={currentUser.isAuthenticated} linkHref="products" linkText="Products" />
           <AuthenticatedLink isAuthenticated={currentUser.isAuthenticated} linkHref="orders" linkText="Orders" />

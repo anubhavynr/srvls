@@ -9,7 +9,7 @@ const AuthenticatedLink = (props) => {
     linkText,
 } = props;
 
-  return isAuthenticated ? <Nav.Link href={linkHref}>{linkText}</Nav.Link> : null;
+  return isAuthenticated ? <Nav.Link className="text-success" href={linkHref}>{linkText}</Nav.Link> : null;
 }
 
 AuthenticatedLink.propTypes = {
