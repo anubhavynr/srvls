@@ -8,6 +8,8 @@ public interface CategoryDao {
 
     public Category getCategory(Integer categoryId) throws Exception;
 
+    public Category getCategoryByName(String name) throws Exception;
+
     public List<Category> getCategories() throws Exception;
 
     public Category saveCategory(Category category) throws Exception;

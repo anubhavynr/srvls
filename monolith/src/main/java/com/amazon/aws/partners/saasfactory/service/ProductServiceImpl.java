@@ -77,4 +77,26 @@ public class ProductServiceImpl implements ProductService {
         logger.info("ProductService::getCategories exec " + timer.getTotalTimeMillis());
         return categories;
     }
+
+    @Override
+    public Category getCategory(Integer categoryId) throws Exception {
+        logger.info("ProductService::getCategory");
+        StopWatch timer = new StopWatch();
+        timer.start();
+        Category category = categoryDao.getCategory(categoryId);
+        timer.stop();
+        logger.info("ProductService::getCategory exec " + timer.getTotalTimeMillis());
+        return category;
+    }
+
+    @Override
+    public Category getCategoryByName(String name) throws Exception {
+        logger.info("ProductService::getCategoryByName");
+        StopWatch timer = new StopWatch();
+        timer.start();
+        Category category = categoryDao.getCategoryByName(name);
+        timer.stop();
+        logger.info("ProductService::getCategoryByName exec " + timer.getTotalTimeMillis());
+        return category;
+    }
 }

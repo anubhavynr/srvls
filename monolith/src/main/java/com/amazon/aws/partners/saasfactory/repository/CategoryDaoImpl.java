@@ -32,6 +32,12 @@ public class CategoryDaoImpl implements CategoryDao {
     }
 
     @Override
+    public Category getCategoryByName(String name) throws Exception {
+        logger.info("CategoryDao::getCategoryByName " + name);
+        return jdbc.queryForObject("SELECT category_id, category FROM category WHERE category = ?", new Object[]{name}, new CategoryRowMapper());
+    }
+
+    @Override
     public List<Category> getCategories() throws Exception {
         logger.info("CategoryDao::getCategories");
         List<Category> categories = jdbc.query("SELECT category_id, category FROM category", new CategoryRowMapper());

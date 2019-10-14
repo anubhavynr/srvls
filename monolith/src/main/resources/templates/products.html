@@ -6,121 +6,116 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/all.min.css" rel="stylesheet">
 </head>
-
 <!-- Add Product Modal -->
-<!-- <div class="modal fade" id="addProductModalCenter" tabindex="-1" role="dialog" aria-labelledby="addProductModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addProductModalLongTitle">Add Product</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true"><i class="fas fa-times"></i></span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form action="#" th:action="@{/addProduct}" method="POST">
-            <div class="form-group">
-              <label for="addProductSku">SKU</label>
-              <input type="text" class="form-control" id="addProductSku"  th:field="*{sku}" aria-describedby="skuHelp" placeholder="Enter SKU">
-            </div>
-            <div class="form-group">
-              <label for="addProductName">Name</label>
-              <input type="text" class="form-control" th:field="*{name}" id="addProductName" placeholder="Enter product name">
-            </div>
-            <div class="form-group">
-                <label for="addProductPrice">Price</label>
-                <input type="text" class="form-control" th:field="*{price}" id="addProductPrice" placeholder="Enter product price">
-            </div>
-            <div class="form-group">
-              <label for="addProductCategory">Category</label>
-              <select class="form-control" id="addProductCategory">
-                <option value="1">Baseball</option>
-                <option value="2">Soccer</option>
-                <option value="3">Basketball</option>
-                <option value="4">Football</option>
-              </select>
-            </div>
+<div class="modal fade" id="addProductModalCenter" tabindex="-1" role="dialog" aria-labelledby="addProductModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProductModalLongTitle">Add Product</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"><i class="fas fa-times"></i></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addProductForm" action="#" th:action="@{/products}" method="post">
+          <div class="form-group">
+            <label for="addProductSku">SKU</label>
+            <input type="text" class="form-control" id="addProductSku" name="sku" aria-describedby="skuHelp" placeholder="Enter SKU">
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success">Add Product</button>
+          <div class="form-group">
+            <label for="addProductName">Name</label>
+            <input type="text" class="form-control" id="addProductName" name="name" placeholder="Enter product name">
+          </div>
+          <div class="form-group">
+            <label for="addProductPrice">Price</label>
+            <input type="text" class="form-control" id="addProductPrice" name="price" placeholder="Enter product price">
+          </div>
+          <div class="form-group">
+            <label for="addProductCategory">Category</label>
+            <select class="form-control" id="addProductCategory" name="category">
+              <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+            </select>
           </div>
         </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-success" form="addProductForm">Add Product</button>
       </div>
     </div>
-  </div> -->
+  </div>
+</div>
 <body>
-  <div class="container">
-    <nav class="navbar navbar-expand-lg">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBootcamp"
-        aria-controls="navbarBootcamp" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+<div class="container">
+  <nav class="navbar navbar-expand-lg">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarBootcamp"
+            aria-controls="navbarBootcamp" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <div class="collapse navbar-collapse" id="navbarBootcamp">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/dashboard.html">Dashboard</a>
-          </li>
-          <li class="nav-item active">
-            <a class="nav-link" href="/products">Products</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/orders">Orders</span></a>
-          </li>
-        </ul>
-        <form class="form-inline my-2 my-lg-0">
-          <span>Welcome back, User!</span>
-          <button class="btn btn-link" type="button">Sign Out</button>
-        </form>
-      </div>
-    </nav>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="jumbotron">
-          <h2>Products</h2>
-          <div class="container">
-            <div class="row">
+    <div class="collapse navbar-collapse" id="navbarBootcamp">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/dashboard.html">Dashboard</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/products">Products</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/orders">Orders</span></a>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <span>Welcome back, User!</span>
+        <button class="btn btn-link" type="button">Sign Out</button>
+      </form>
+    </div>
+  </nav>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="jumbotron">
+        <h2>Products</h2>
+        <div class="container">
+          <div class="row">
             <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>SKU</th>
-                    <th>Category</th>
-                    <th>Product Name</th>
-                    <th>Price</th>
-                    <th class="text-center">Action</th>
-                </tr>
-            </thead>
-                    <tr th:each="product : ${products}">
-                        <td th:text="${product.sku}">ABC</td>
-                        <td th:text="${product.category.name}">Shoes</td>
-                        <td th:text="${product.name}">Air Jordan</td>
-                        <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
-                        <td class="text-center"><a th:href="@{/editProduct/{id}(id=${product.id})}" class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a th:href="@{/deleteAProduct/{id}(id=${product.id})}" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
-                    </tr>
+              <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th class="text-center">Action</th>
+              </tr>
+              </thead>
+              <tr th:each="product : ${products}">
+                <td th:text="${product.sku}">ABC</td>
+                <td th:text="${product.category.name}">Shoes</td>
+                <td th:text="${product.name}">Air Jordan</td>
+                <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
+                <td class="text-center"><a class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a href="#" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
+              </tr>
             </table>
+          </div>
+          <div class="row">
+            <div class="col">
+              <button class="btn btn-success float-right" data-toggle="modal" data-target="#addProductModalCenter">Add Product <i class="fas fa-plus"></i></button>
             </div>
-            <div class="row">
-              <div class="col">
-                <!-- <a class="btn btn-success float-right" href="/addProduct" data-toggle="modal" data-target="#addProductModalCenter">Add Product <i class="fas fa-plus"></i></a> -->
-                <a class="btn btn-success float-right" href="/addProduct">Add Product <i class="fas fa-plus"></i></a>
-              </div>
-            </div>
-        </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  <footer class="footer">
-    <div class="container">
-      <h4><b>version 0.1</b> </h4>
-    </div>
-  </footer>
-  <script src="js/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/scripts.js"></script>
+</div>
+<footer class="footer">
+  <div class="container">
+    <h4><b>version 0.1</b> </h4>
+  </div>
+</footer>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/scripts.js"></script>
 </body>
 </html>
