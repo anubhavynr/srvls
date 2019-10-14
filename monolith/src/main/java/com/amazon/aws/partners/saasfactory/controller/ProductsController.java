@@ -24,17 +24,17 @@ public class ProductsController {
 		return "products";
 	}
 
-	@GetMapping("/addnewproduct")
-	public String showAddNewProductForm(Product product) {
-		return "addProduct";
-	}
+	// @GetMapping("/addnewproduct")
+	// public String showAddNewProductForm(Product product) {
+	// 	return "addProduct";
+	// }
 
-	@PostMapping("/addProduct")
-	public String addProduct(@Valid Product product, Model model) throws Exception {
-		productService.saveProduct(product);
-		List<Product> products = productService.getProducts();
-		// model.addAttribute("products", products);
-		// return "products";
-		return "redirect:/";
-	}
+	// @PostMapping("/addProduct")
+	// public String addProduct(@Valid Product product, Model model) throws Exception {
+	// 	productService.saveProduct(product);
+	// 	List<Product> products = productService.getProducts();
+	// 	// model.addAttribute("products", products);
+	// 	// return "products";
+	// 	return "redirect:/";
+	// }
 }
