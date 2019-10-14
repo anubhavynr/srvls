@@ -30,7 +30,7 @@ public class ProductController {
     }
     
     @PostMapping("/deleteProduct/{id}")
-	public String addProduct(@PathVariable("id") int id, Model model) throws Exception {
+	public String deleteProduct(@PathVariable("id") int id, Model model) throws Exception {
         Product product = productService.getProduct(id);
 		productService.deleteProduct(product);
 		return "redirect:/products";
