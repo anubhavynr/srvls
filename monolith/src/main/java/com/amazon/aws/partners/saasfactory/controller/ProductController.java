@@ -31,7 +31,7 @@ public class ProductController {
 		return "deleteProduct";
     }
     
-    @GetMapping("/editproduct/{id}")
+    @GetMapping("/editProduct/{id}")
 	public String showEditProductForm(@PathVariable("id") Integer id, Model model) throws Exception {
         Product product = productService.getProduct(id);
         model.addAttribute("product", product);
@@ -53,7 +53,7 @@ public class ProductController {
 		return "redirect:/products";
     }
 
-    @PostMapping("/editProduct")
+    @PostMapping("/updateProduct")
     public String editProduct(@Valid Product product, Model model) throws Exception {
         productService.saveProduct(product);
 
