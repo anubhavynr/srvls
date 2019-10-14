@@ -18,7 +18,7 @@ public class ProductController {
 	@Autowired
 	private ProductService productService;
 
-	@GetMapping("/addproduct")
+	@GetMapping("/addProduct")
 	public String showAddNewProductForm(Product product) {
 		return "addProduct";
     }
