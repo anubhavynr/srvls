@@ -6,6 +6,7 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/all.min.css" rel="stylesheet">
 </head>
+
 <!-- Add Product Modal -->
 <div class="modal fade" id="addProductModalCenter" tabindex="-1" role="dialog" aria-labelledby="addProductModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -17,18 +18,18 @@
           </button>
         </div>
         <div class="modal-body">
-          <form action="#" method="POST">
+          <form action="#" th:action="@{/addProduct}" th:object="${product}" method="POST">
             <div class="form-group">
               <label for="addProductSku">SKU</label>
-              <input type="text" class="form-control" id="addProductSku" aria-describedby="skuHelp" placeholder="Enter SKU" th:value="*{sku}">
+              <input type="text" class="form-control" id="addProductSku"  th:field="*{sku}" aria-describedby="skuHelp" placeholder="Enter SKU">
             </div>
             <div class="form-group">
               <label for="addProductName">Name</label>
-              <input type="text" class="form-control" id="addProductName" placeholder="Enter product name">
+              <input type="text" class="form-control" th:field="*{name}" id="addProductName" placeholder="Enter product name">
             </div>
             <div class="form-group">
                 <label for="addProductPrice">Price</label>
-                <input type="text" class="form-control" id="addProductPrice" placeholder="Enter product price">
+                <input type="text" class="form-control" th:field="*{price}" id="addProductPrice" placeholder="Enter product price">
             </div>
             <div class="form-group">
               <label for="addProductCategory">Category</label>
