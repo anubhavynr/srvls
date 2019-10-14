@@ -25,15 +25,15 @@ public class ProductsController {
 		return "products";
 	}
 
-	// @PostMapping("/addProduct")
-	// public String addProduct(@Valid Product product, BindingResult result, Model model) throws Exception {
-	// 	if (result.hasErrors()) {
-	// 		return "add-product";
-	// 	}
+	@PostMapping("/addProduct")
+	public String addProduct(@Valid Product product, BindingResult result, Model model) throws Exception {
+		if (result.hasErrors()) {
+			return "add-product";
+		}
 
-	// 	productService.saveProduct(product);
-	// 	List<Product> products = productService.getProducts();
-	// 	model.addAttribute("products", products);
-	// 	return "products";
-	// }
+		productService.saveProduct(product);
+		List<Product> products = productService.getProducts();
+		model.addAttribute("products", products);
+		return "products";
+	}
 }
