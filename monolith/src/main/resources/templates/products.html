@@ -98,14 +98,13 @@
                         <td th:text="${product.category.name}">Shoes</td>
                         <td th:text="${product.name}">Air Jordan</td>
                         <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
-                        <td class="text-center"><a class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a href="#" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
+                        <td class="text-center"><a class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a th:href="@{/deleteProduct/{id}(id=${product.id})}" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
                     </tr>
             </table>
             </div>
             <div class="row">
               <div class="col">
-                <!-- <button class="btn btn-success float-right" data-toggle="modal" data-target="#addProductModalCenter">Add Product <i class="fas fa-plus"></i></button> -->
-                <a href="/addnewproduct">Add Product <i class="fas fa-plus"></i></a>
+                <a class="btn btn-success float-right" href="/addnewproduct" data-toggle="modal" data-target="#addProductModalCenter">Add Product <i class="fas fa-plus"></i></a>
               </div>
             </div>
         </div>

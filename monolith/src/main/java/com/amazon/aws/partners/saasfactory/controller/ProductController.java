@@ -25,6 +25,13 @@ public class ProductController {
 	@PostMapping("/addProduct")
 	public String addProduct(@Valid Product product, Model model) throws Exception {
 		productService.saveProduct(product);
-		return "redirect:/";
-	}
+		return "redirect:/products";
+    }
+    
+    @PostMapping("/deleteProduct/{id}")
+	public String addProduct(@VPathVariable("id") int id, Model model) throws Exception {
+        Product product = productService.getProduct(id);
+		productService.deleteProduct(product);
+		return "redirect:/products";
+    }
 }
