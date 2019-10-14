@@ -24,30 +24,39 @@ public class ProductController {
     }
     
     @GetMapping("/deleteproduct/{id}")
-	public String showDeleteProductForm(Product product) {
+	public String showDeleteProductForm(@PathVariable("id") Integer id, Model model) {
+        Product product = productService(id);
+        model.addAttribute("product", product);
+
 		return "deleteProduct";
     }
     
     @GetMapping("/editproduct/{id}")
-	public String showEditProductForm(Product product) {
-		return "editProduct";
+	public String showEditProductForm(@PathVariable("id") Integer id, Model model) {
+        Product product = productService.getProduct(id);
+        model.addAttribute("product", product);
+
+        return "editProduct";
 	}
 
 	@PostMapping("/addProduct")
 	public String addProduct(@Valid Product product, Model model) throws Exception {
-		productService.saveProduct(product);
+        productService.saveProduct(product);
+        
 		return "redirect:/products";
     }
     
     @PostMapping("/deleteProduct")
 	public String deleteProduct(@Valid Product product, Model model) throws Exception {
-		productService.deleteProduct(product);
+        productService.deleteProduct(product);
+        
 		return "redirect:/products";
     }
 
     @PostMapping("/editProduct")
     public String editProduct(@Valid Product product, Model model) throws Exception {
         productService.saveProduct(product);
+        
 		return "redirect:/products";        
     }
 }
