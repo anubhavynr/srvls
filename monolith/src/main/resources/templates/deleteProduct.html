@@ -1,0 +1,11 @@
+<html>
+    <body>
+        <h1>
+            Are you sure you want to delete this product?
+        </h1>
+        <form action="#" th:action="@{/deleteProduct/${product.id}}" th:object="${product}" method="post">
+            <input type="text" disabled th:field="*{name}" id="name" placeholder="Name">
+            <input type="submit" value="Delete Product">   
+        </form>
+    </body>
+</html>

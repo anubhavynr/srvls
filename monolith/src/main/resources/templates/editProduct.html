@@ -1,0 +1,15 @@
+<html>
+    <body>
+        <form action="#" th:action="@{/editProduct}" th:object="${product}" method="post">
+            <label for="id">ID</label>
+            <input type="text" disabled th:field="*{id}" id="id">
+            <label for="sku">SKU</label>
+            <input type="text" th:field="*{sku}" id="sku" placeholder="SKU">
+            <label for="name">Name</label>
+            <input type="text" th:field="*{name}" id="name" placeholder="Name">
+            <label for="price">Price</label>
+            <input type="text" th:field="*{price}" id="price" placeholder="price">
+            <input type="submit" value="Add Product">   
+        </form>
+    </body>
+</html>

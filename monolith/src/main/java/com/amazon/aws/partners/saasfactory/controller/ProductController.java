@@ -18,9 +18,19 @@ public class ProductController {
 	@Autowired
 	private ProductService productService;
 
-	@GetMapping("/addnewproduct")
+	@GetMapping("/addproduct")
 	public String showAddNewProductForm(Product product) {
 		return "addProduct";
+    }
+    
+    @GetMapping("/deleteproduct/{id}")
+	public String showDeleteProductForm(Product product) {
+		return "deleteProduct";
+    }
+    
+    @GetMapping("/editproduct/{id}")
+	public String showEditProductForm(Product product) {
+		return "editProduct";
 	}
 
 	@PostMapping("/addProduct")
@@ -29,10 +39,15 @@ public class ProductController {
 		return "redirect:/products";
     }
     
-    @PostMapping("/deleteProduct/{id}")
-	public String deleteProduct(@PathVariable("id") Integer id, Model model) throws Exception {
-        Product product = productService.getProduct(id);
+    @PostMapping("/deleteProduct")
+	public String deleteProduct(@Valid Product product, Model model) throws Exception {
 		productService.deleteProduct(product);
 		return "redirect:/products";
+    }
+
+    @PostMapping("/editProduct")
+    public String editProduct(@Valid Product product, Model model) throws Exception {
+        productService.saveProduct(product);
+		return "redirect:/products";        
     }
 }
