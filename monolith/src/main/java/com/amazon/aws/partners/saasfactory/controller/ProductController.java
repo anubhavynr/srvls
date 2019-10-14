@@ -54,7 +54,7 @@ public class ProductController {
     }
 
     @PostMapping("/updateProduct")
-    public String editProduct(@Valid Product product, Model model) throws Exception {
+    public String updateProduct(@Valid Product product, Model model) throws Exception {
         productService.saveProduct(product);
 
 		return "redirect:/products";        
