@@ -98,7 +98,7 @@
                         <td th:text="${product.category.name}">Shoes</td>
                         <td th:text="${product.name}">Air Jordan</td>
                         <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
-                        <td class="text-center"><a th:href="@{/editProduct/{id}(id=${product.id})}" class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a th:href="@{/deleteProduct/{id}(id=${product.id})}" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
+                        <td class="text-center"><a th:href="@{/editProduct/{id}(id=${product.id})}" class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a th:href="@{/deleteAProduct/{id}(id=${product.id})}" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
                     </tr>
             </table>
             </div>
