@@ -47,7 +47,7 @@ public class ProductController {
     }
     
     @GetMapping("/deleteProduct")
-	public String deleteProduct(@Valid Product product, Model model) throws Exception {
+	public String deleteProduct(Product product, Model model) throws Exception {
 		return "deleteProduct";
     }
 
