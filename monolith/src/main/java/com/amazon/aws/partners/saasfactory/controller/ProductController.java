@@ -24,7 +24,7 @@ public class ProductController {
     }
     
     @GetMapping("/deleteproduct/{id}")
-	public String showDeleteProductForm(@PathVariable("id") Integer id, Model model) {
+	public String showDeleteProductForm(@PathVariable("id") Integer id, Model model) throws Exception {
         Product product = productService.getProduct(id);
         model.addAttribute("product", product);
 
@@ -32,7 +32,7 @@ public class ProductController {
     }
     
     @GetMapping("/editproduct/{id}")
-	public String showEditProductForm(@PathVariable("id") Integer id, Model model) {
+	public String showEditProductForm(@PathVariable("id") Integer id, Model model) throws Exception {
         Product product = productService.getProduct(id);
         model.addAttribute("product", product);
 
