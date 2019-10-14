@@ -17,22 +17,22 @@
           </button>
         </div>
         <div class="modal-body">
-          <form action="#" th:action="@{/addProduct}" th:object="${product}" method="POST">
+          <form action="#" method="POST">
             <div class="form-group">
               <label for="addProductSku">SKU</label>
-              <input type="text" class="form-control" id="addProductSku" th:field="*{sku}" aria-describedby="skuHelp" placeholder="Enter SKU" th:value="*{sku}">
+              <input type="text" class="form-control" id="addProductSku" aria-describedby="skuHelp" placeholder="Enter SKU" th:value="*{sku}">
             </div>
             <div class="form-group">
               <label for="addProductName">Name</label>
-              <input type="text" class="form-control" id="addProductName" th:field="*{name}" placeholder="Enter product name">
+              <input type="text" class="form-control" id="addProductName" placeholder="Enter product name">
             </div>
             <div class="form-group">
                 <label for="addProductPrice">Price</label>
-                <input type="text" class="form-control" id="addProductPrice" th:field="*{price}" placeholder="Enter product price">
+                <input type="text" class="form-control" id="addProductPrice" placeholder="Enter product price">
             </div>
             <div class="form-group">
               <label for="addProductCategory">Category</label>
-              <select class="form-control" id="addProductCategory" th:field="*{category}">
+              <select class="form-control" id="addProductCategory">
                 <option value="1">Baseball</option>
                 <option value="2">Soccer</option>
                 <option value="3">Basketball</option>
