@@ -25,7 +25,7 @@ public class ProductController {
     
     @GetMapping("/deleteproduct/{id}")
 	public String showDeleteProductForm(@PathVariable("id") Integer id, Model model) {
-        Product product = productService(id);
+        Product product = productService.getProduct(id);
         model.addAttribute("product", product);
 
 		return "deleteProduct";
@@ -56,7 +56,7 @@ public class ProductController {
     @PostMapping("/editProduct")
     public String editProduct(@Valid Product product, Model model) throws Exception {
         productService.saveProduct(product);
-        
+
 		return "redirect:/products";        
     }
 }
