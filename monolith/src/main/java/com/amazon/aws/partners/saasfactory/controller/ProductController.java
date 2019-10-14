@@ -46,6 +46,11 @@ public class ProductController {
 		return "redirect:/products";
     }
     
+    @GetMapping("/deleteProduct")
+	public String deleteProduct(@Valid Product product, Model model) throws Exception {
+		return "deleteProduct";
+    }
+
     @PostMapping("/deleteProduct")
 	public String deleteProduct(@Valid Product product, Model model) throws Exception {
         productService.deleteProduct(product);
