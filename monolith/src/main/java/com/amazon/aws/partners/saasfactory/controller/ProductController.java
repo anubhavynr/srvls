@@ -24,7 +24,13 @@ public class ProductController {
 
 	@PostMapping("/addProduct")
 	public String addProduct(Product product, Model model) throws Exception {
-		productService.saveProduct(product);
+        Product newProduct = new Product();
+        newProduct.sku = product.sku;
+        newProduct.name = product.name;
+        newProduct.price = product.price;
+        newProduct.category = new category(3, "Baseball");
+
+		productService.saveProduct(newProduct);
 		return "redirect:/";
 	}
 }
