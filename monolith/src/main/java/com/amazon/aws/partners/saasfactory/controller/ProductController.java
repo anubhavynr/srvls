@@ -23,7 +23,7 @@ public class ProductController {
 	}
 
 	@PostMapping("/addProduct")
-	public String addProduct(@Valid Product product, Model model) throws Exception {
+	public String addProduct(Product product, Model model) throws Exception {
 		productService.saveProduct(product);
 		return "redirect:/";
 	}
