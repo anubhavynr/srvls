@@ -3,7 +3,7 @@
         <h1>
             Are you sure you want to delete this product?
         </h1>
-        <form action="#" th:action="@{/deleteProduct" th:object="${product}" method="post">
+        <form action="#" th:action="@{/deleteProduct}" th:object="${product}" method="post">
             <input type="text" disabled th:field="*{id}" th:value="${product.id}">
             <input type="text" disabled th:field="*{sku}" th:value="${product.sku}">
             <input type="text" disabled th:field="*{name}" th:value="${product.name}">
