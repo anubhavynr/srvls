@@ -64,8 +64,26 @@ public class OrderDaoImpl implements OrderDao {
     private Order insertOrder(Order order) throws Exception {
         logger.info("OrderDao::insertOrder " + order);
         // First, make sure we have an updated purchaser
-        //Purchaser purchaser = purchaserDao.savePurchaser(order.getPurchaser());
-        //Integer purchaserId = purchaser.getId();
+        Purchaser purchaser = order.getPurchaser();
+        Integer purchaserId = null;
+        if (purchaser != null) {
+            purchaserId = purchaser.getId();
+            if (purchaserId == null || purchaserId < 1) {
+                KeyHolder keyHolder = new GeneratedKeyHolder();
+                jdbc.update(connection -> {
+                    PreparedStatement ps = connection.prepareStatement("INSERT INTO purchaser (first_name, last_name) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    ps.setString(1, purchaser.getFirstName());
+                    ps.setString(2, purchaser.getLastName());
+                    return ps;
+                }, keyHolder);
+                if (!keyHolder.getKeys().isEmpty()) {
+                    purchaser.setId((Integer) keyHolder.getKeys().get("purchaser_id"));
+                } else {
+                    purchaser.setId(keyHolder.getKey().intValue());
+                }
+            }
+            order.setPurchaser(purchaser);
+        }
 
         // Now insert the order
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -73,7 +91,7 @@ public class OrderDaoImpl implements OrderDao {
             PreparedStatement ps = connection.prepareStatement(INSERT_ORDER_SQL, Statement.RETURN_GENERATED_KEYS);
             ps.setDate(1, order.getOrderDate() != null ? new java.sql.Date(order.getOrderDate().getTime()) : null);
             ps.setDate(2, order.getShipDate() != null ? new java.sql.Date(order.getShipDate().getTime()) : null);
-            //ps.setInt(3, purchaser.getId());
+            ps.setInt(3, order.getPurchaser() != null ? order.getPurchaser().getId() : null);
             Address shipAddress = order.getShipAddress();
             if (shipAddress == null) {
                 shipAddress = new Address();
@@ -110,7 +128,10 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     private Order updateOrder(Order order) throws Exception {
-
+        Purchaser purchaser = order.getPurchaser();
+        if (purchaser == null) {
+            purchaser = new Purchaser();
+        }
         Address shipTo = order.getShipAddress();
         if (shipTo == null) {
             shipTo = new Address();
@@ -122,7 +143,7 @@ public class OrderDaoImpl implements OrderDao {
         jdbc.update(UPDATE_ORDER_SQL,
                 order.getOrderDate(),
                 order.getShipDate(),
-                order.getPurchaser().getId(),
+                purchaser.getId(),
                 shipTo.getLine1(),
                 shipTo.getLine2(),
                 shipTo.getCity(),
