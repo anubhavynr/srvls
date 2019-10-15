@@ -5,6 +5,7 @@ export const SET_CURRENT_MODAL = 'SET_CURRENT_MODAL';
 export const SIGN_IN_MODAL = 'SIGN_IN_MODAL';
 export const SIGN_UP_MODAL = 'SIGN_UP_MODAL';
 export const ADD_PRODUCT_MODAL = 'ADD_PRODUCT_MODAL';
+export const ADD_ORDER_MODAL = 'ADD_ORDER_MODAL';
 export const DELETE_PRODUCT_MODAL = 'DELETE_PRODUCT_MODAL';
 export const EDIT_PRODUCT_MODAL = 'EDIT_PRODUCT_MODAL';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
@@ -20,6 +21,12 @@ export const REQUEST_DELETE_PRODUCT = 'REQUEST_DELETE_PRODUCT';
 export const RECEIVE_DELETE_PRODUCT = 'RECEIVE_DELETE_PRODUCT';
 export const REQUEST_EDIT_PRODUCT = 'REQUEST_DELETE_PRODUCT';
 export const RECEIVE_EDIT_PRODUCT = 'RECEIVE_EDIT_PRODUCT';
+export const REQUEST_ADD_ORDER = 'REQUEST_ALL_ORDER';
+export const RECEIVE_ADD_ORDER = 'REQUEST_ADD_ORDER';
+export const REQUEST_DELETE_ORDER = 'REQUEST_DELETE_ORDER';
+export const RECEIVE_DELETE_ORDER = 'RECEIVE_DELETE_ORDER';
+export const REQUEST_EDIT_ORDER = 'REQUEST_DELETE_ORDER';
+export const RECEIVE_EDIT_ORDER = 'RECEIVE_EDIT_ORDER';
 export const ADD_PRODUCT_SUCCESS = 'REQUEST_ALL_PRODUCTS';
 export const REQUEST_AUTHENTICATE_USER = 'REQUEST_AUTHENTICATE_USER';
 export const RECEIVE_AUTHENTICATE_USER = 'RECEIVE_AUTHENTICATE_USER';
@@ -42,6 +49,13 @@ export const addProductModal = () => {
     return {
         type: SET_CURRENT_MODAL,
         currentModal: ADD_PRODUCT_MODAL,
+    };
+};
+
+export const addOrderModal = () => {
+    return {
+        type: SET_CURRENT_MODAL,
+        currentModal: ADD_ORDER_MODAL,
     };
 };
 
@@ -105,6 +119,27 @@ export const deleteProductFinished = (product) => {
     return {
         type: RECEIVE_DELETE_PRODUCT,
         product,
+    };
+};
+
+export const addOrderFinished = (order) => {
+    return {
+        type: RECEIVE_ADD_ORDER,
+        order,
+    };
+};
+
+export const editOrderFinished = (order) => {
+    return {
+        type: RECEIVE_EDIT_ORDER,
+        order,
+    };
+};
+
+export const deleteOrderFinished = (order) => {
+    return {
+        type: RECEIVE_DELETE_ORDER,
+        order,
     };
 };
 
@@ -221,6 +256,48 @@ export const fetchOrders = () => {
         Axios.get(url)
             .then(response => {
                 dispatch(receiveAllOrders(response.data))
+            }, error => console.error(error));
+    };
+};
+
+export const addOrder = (order) => {
+    return function(dispatch) {
+        const url = `${config.api.base_url}/orders`;
+
+        Axios.post(url, order)
+            .then((response) => {
+                dispatch(addOrderFinished(response.data));
+            }, error => console.error(error))
+            .then(() => {
+                dispatch(closeModal());
+            }, error => console.error(error));
+    };
+};
+
+export const editOrder = (order) => {
+    return function(dispatch) {
+        const url = `${config.api.base_url}/orders/${order.id}`;
+
+        Axios.put(url, order)
+            .then(() => {
+                dispatch(editOrderFinished(order));
+            }, error => console.error(error))
+            .then(() => {
+                dispatch(closeModal());
+            }, error => console.error(error));
+    }
+};
+
+export const deleteOrder = (order) => {
+    return function(dispatch) {
+        const url = `${config.api.base_url}/orders/${order.id}`;
+
+        Axios.delete(url, order)
+            .then(() => {
+                dispatch(deleteOrderFinished(order));
+            }, error => console.error(error))
+            .then(() => {
+                dispatch(closeModal());
             }, error => console.error(error));
     };
 };
