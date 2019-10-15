@@ -52,6 +52,18 @@ public class ProductsController {
 		return "redirect:/products";
 	}
 
+	@PostMapping("/updateProduct")
+	public String updateProduct(@ModelAttribute Product product, BindingResult bindingResult, Model model) throws Exception {
+		LOGGER.info("ProductsController::updateProduct " + product);
+		if (bindingResult.hasErrors()) {
+
+		}
+		model.addAttribute("product", product);
+
+		product = productService.saveProduct(product);
+		return "redirect:/products";
+	}
+
 	@PostMapping("/deleteProduct")
 	public String deleteProduct(@ModelAttribute Product product) throws Exception {
 		LOGGER.info("ProductsController::deleteProduct " + product.getId());

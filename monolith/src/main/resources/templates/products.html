@@ -56,7 +56,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form id="editProductForm" th:action="@{/products}" method="post">
+        <form id="editProductForm" th:action="@{/updateProduct}" method="post">
           <div class="form-group">
             <label for="editProductSku">SKU</label>
             <input type="text" class="form-control" id="editProductSku" name="sku" aria-describedby="skuHelp" placeholder="Enter SKU">
@@ -75,6 +75,7 @@
               <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
             </select>
           </div>
+          <input type="hidden" id="editProductId" name="id" value=""/>
         </form>
       </div>
       <div class="modal-footer">
@@ -156,7 +157,7 @@
                 <td th:text="${product.category.name}">Shoes</td>
                 <td th:text="${product.name}">Air Jordan</td>
                 <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
-                <td class="text-center"><a class='btn btn-secondary btn-xs' data-toggle="modal" data-target="#editProductModalCenter">Edit <i class="fas fa-edit"></i></a> <a class="btn btn-danger btn-xs" data-toggle="modal" th:attr="data-product-id=${product.id},data-product-name=${product.name}" data-target="#deleteProductModalCenter">Del <i class="fas fa-trash"></i></a></td>
+                <td class="text-center"><a class='btn btn-secondary btn-xs' data-toggle="modal" data-target="#editProductModalCenter" th:attr="data-product-id=${product.id},data-product-sku=${product.sku},data-product-name=${product.name},data-product-price=${product.price},data-product-category=${product.category.id}">Edit <i class="fas fa-edit"></i></a> <a class="btn btn-danger btn-xs" data-toggle="modal" th:attr="data-product-id=${product.id},data-product-name=${product.name}" data-target="#deleteProductModalCenter">Del <i class="fas fa-trash"></i></a></td>
               </tr>
             </table>
           </div>
@@ -186,6 +187,22 @@ $(document).ready(function() {
     $(".modal-body #deleteProductId").val(productId);
     $(".modal-body #deleteProductName").text(productName);
     $("#deleteProductModalCenter").modal("show");
+  });
+});
+
+$(document).ready(function() {
+  $("#editProductModalCenter").on("show.bs.modal", function(e) {
+    var productId = $(e.relatedTarget).data("product-id");
+    var productSku = $(e.relatedTarget).data("product-sku");
+    var productName = $(e.relatedTarget).data("product-name");
+    var productPrice = $(e.relatedTarget).data("product-price");
+    var productCategory = $(e.relatedTarget).data("product-category");
+    $(".modal-body #editProductId").val(productId);
+    $(".modal-body #editProductSku").val(productSku);
+    $(".modal-body #editProductName").val(productName);
+    $(".modal-body #editProductPrice").val(productPrice);
+    $(".modal-body #editProductCategory").val(productCategory);
+    $("#editProductModalCenter").modal("show");
   });
 });
 </script>
