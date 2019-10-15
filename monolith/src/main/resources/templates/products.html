@@ -17,7 +17,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <form id="addProductForm" action="#" th:action="@{/products}" method="post">
+        <form id="addProductForm" th:action="@{/products}" method="post">
           <div class="form-group">
             <label for="addProductSku">SKU</label>
             <input type="text" class="form-control" id="addProductSku" name="sku" aria-describedby="skuHelp" placeholder="Enter SKU">
@@ -45,6 +45,67 @@
     </div>
   </div>
 </div>
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModalCenter" tabindex="-1" role="dialog" aria-labelledby="editProductModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProductModalLongTitle">Edit Product</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="fas fa-times"></i></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editProductForm" th:action="@{/products}" method="post">
+            <div class="form-group">
+              <label for="editProductSku">SKU</label>
+              <input type="text" class="form-control" id="editProductSku" name="sku" aria-describedby="skuHelp" placeholder="Enter SKU">
+            </div>
+            <div class="form-group">
+              <label for="editProductName">Name</label>
+              <input type="text" class="form-control" id="editProductName" name="name" placeholder="Enter product name">
+            </div>
+            <div class="form-group">
+              <label for="editProductPrice">Price</label>
+              <input type="text" class="form-control" id="editProductPrice" name="price" placeholder="Enter product price">
+            </div>
+            <div class="form-group">
+              <label for="editProductCategory">Category</label>
+              <select class="form-control" id="editProductCategory" name="category">
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-success" form="editProductForm">Save Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Delete Product Modal -->
+<div class="modal fade" id="deleteProductModalCenter" tabindex="-1" role="dialog" aria-labelledby="deleteProductModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteProductModalLongTitle">Delete Product</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"><i class="fas fa-times"></i></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="deleteProductForm" th:action="@{/products}" method="post">
+            <h4>Are you sure you want to delete: <strong>NAME</strong></h4>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-success" form="deleteProductForm">Delete Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
 <body>
 <div class="container">
   <nav class="navbar navbar-expand-lg">
@@ -95,7 +156,7 @@
                 <td th:text="${product.category.name}">Shoes</td>
                 <td th:text="${product.name}">Air Jordan</td>
                 <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
-                <td class="text-center"><a class='btn btn-secondary btn-xs' href="#">Edit <i class="fas fa-edit" ></i></a> <a href="#" class="btn btn-danger btn-xs">Del <i class="fas fa-trash" ></i></a></td>
+                <td class="text-center"><a class='btn btn-secondary btn-xs' data-toggle="modal" data-target="#editProductModalCenter">Edit <i class="fas fa-edit" ></i></a> <a class="btn btn-danger btn-xs" data-toggle="modal" data-target="#deleteProductModalCenter">Del <i class="fas fa-trash" ></i></a></td>
               </tr>
             </table>
           </div>
