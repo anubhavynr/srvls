@@ -52,6 +52,13 @@ public class ProductsController {
 		return "redirect:/products";
 	}
 
+	@PostMapping("/deleteProduct")
+	public String deleteProduct(@ModelAttribute Product product) throws Exception {
+		LOGGER.info("ProductsController::deleteProduct " + product.getId());
+		productService.deleteProduct(product);
+		return "redirect:/products";
+	}
+
 	class CategoryEditor extends PropertyEditorSupport {
 		@Override
 		public String getAsText() {
