@@ -28,10 +28,10 @@
             <a class="nav-link" href="/orders">Orders</span></a>
           </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-            <span>Welcome back, User!</span>
-            <button class="btn btn-link" type="button">Sign Out</button>
-        </form>
+          <form th:if="${isAuthenticated}" class="form-inline my-2 my-lg-0">
+              <span th:text="'Welcome back, ' + ${username} ?: ''"></span>
+              <button class="btn btn-link" type="button">Sign Out</button>
+          </form>
       </div>
     </nav>
     <div class="row">
