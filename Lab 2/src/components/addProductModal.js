@@ -56,6 +56,7 @@ function AddProductModal(props) {
             <Modal
                 show={show}
                 onHide={closeModal}
+                backdrop='static'
                 centered
             >
                 <Modal.Header closeButton>
