@@ -17,7 +17,7 @@ const initialState = {
 function addOrder(orders, order) {
     const ordersCopy = orders.slice();
     ordersCopy.push(order);
-    
+
     return ordersCopy;
 }
 

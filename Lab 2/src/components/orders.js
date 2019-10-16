@@ -36,6 +36,8 @@ function Orders(props) {
         fetchProducts();
     }, [fetchProducts]);
 
+    orders.sort((a, b) => b.id - a.id);
+
     return (
         <Container>
             <h2>Orders</h2>

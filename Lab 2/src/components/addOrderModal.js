@@ -121,8 +121,10 @@ function AddOrderModal(props) {
         }
 
         const order = {
-            orderDate: moment().format('YYYY-MM-DD'),
+            orderDate: moment().format('YYYY-MM-DD').toString(),
             purchaser: {
+                firstName,
+                lastName,
                 id: 1,
             },
             shipAddress: address,
@@ -139,6 +141,7 @@ function AddOrderModal(props) {
             <Modal
                 show={show}
                 onHide={closeModal}
+                backdrop='static'
                 centered
             >
                 <Modal.Header closeButton>
