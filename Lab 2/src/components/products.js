@@ -40,6 +40,11 @@ function Products(props) {
         <Container>
             <h2>Products</h2>
             <Container>
+                <Row className='mb-2'>
+                    <Col>
+                        <Button onClick={addProductModal} variant='success' className="float-right"> Add Product <FontAwesomeIcon icon={faPlus} /></Button>
+                    </Col>
+                </Row>
                 <Row>
                     <Table>
                         <thead>
@@ -53,35 +58,30 @@ function Products(props) {
                         </thead>
                         <tbody>
                             {
-                                products ? 
-                                products.map((product) => {
-                                    const { id,
-                                        sku,
-                                        name,
-                                        price,
-                                        category,
-                                    } = product;
-                                    return (
-                                        <tr key={id}>
-                                            <td>{sku}</td>
-                                            <td>{name}</td>
-                                            <td>${price}</td>
-                                            <td>{category.name}</td>
-                                            <td className="text-center"><Button variant='secondary' onClick={() => editProductModal(product)}> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button onClick={() => deleteProductModal(product)} variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
-                                        </tr>
-                                    );
-                                }
-                                )
-                                :
-                                null
+                                products ?
+                                    products.map((product) => {
+                                        const { id,
+                                            sku,
+                                            name,
+                                            price,
+                                            category,
+                                        } = product;
+                                        return (
+                                            <tr key={id}>
+                                                <td>{sku}</td>
+                                                <td>{name}</td>
+                                                <td>${price}</td>
+                                                <td>{category.name}</td>
+                                                <td className="text-center"><Button variant='secondary' onClick={() => editProductModal(product)}> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button onClick={() => deleteProductModal(product)} variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
+                                            </tr>
+                                        );
+                                    }
+                                    )
+                                    :
+                                    null
                             }
                         </tbody>
                     </Table>
-                </Row>
-                <Row>
-                    <Col>
-                        <Button onClick={addProductModal} variant='success' className="float-right"> Add Product <FontAwesomeIcon icon={faPlus} /></Button>
-                    </Col>
                 </Row>
             </Container>
         </Container>

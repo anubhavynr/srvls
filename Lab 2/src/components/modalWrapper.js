@@ -4,16 +4,18 @@ import {
     SIGN_IN_MODAL,
     SIGN_UP_MODAL,
     ADD_PRODUCT_MODAL,
-    ADD_ORDER_MODAL,
     DELETE_PRODUCT_MODAL,
-    EDIT_PRODUCT_MODAL
+    EDIT_PRODUCT_MODAL,
+    ADD_ORDER_MODAL,
+    EDIT_ORDER_MODAL,
 } from '../actions';
 import SignInModal from './signInModal';
 import SignUpModal from './signUpModal';
 import AddProductModal from './addProductModal';
-import AddOrderModal from './addOrderModal';
 import DeleteProductModal from './deleteProductModal';
 import EditProductModal from './editProductModal';
+import AddOrderModal from './addOrderModal';
+import EditOrderModal from './editOrderModal';
 
 function ModalWrapper(props) {
     switch (props.currentModal) {
@@ -23,12 +25,14 @@ function ModalWrapper(props) {
             return <SignUpModal />
         case ADD_PRODUCT_MODAL:
             return <AddProductModal />
-        case ADD_ORDER_MODAL:
-            return <AddOrderModal />
         case DELETE_PRODUCT_MODAL:
             return <DeleteProductModal />
         case EDIT_PRODUCT_MODAL:
             return <EditProductModal />
+        case ADD_ORDER_MODAL:
+            return <AddOrderModal />
+        case EDIT_ORDER_MODAL:
+            return <EditOrderModal />
         default:
             return null;
     }

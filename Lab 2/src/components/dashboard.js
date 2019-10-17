@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { fetchProducts } from '../actions';
+import {
+    fetchProducts,
+    fetchOrders,
+ } from '../actions';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -21,11 +24,16 @@ function Dashboard(props) {
     const { productCount,
         orderCount,
         fetchProducts,
+        fetchOrders,
     } = props;
     
     useEffect(() => {
             fetchProducts();
     }, [fetchProducts]);
+
+    useEffect(() => {
+        fetchOrders();
+    }, [fetchOrders]);
 
     //REMOVE ME
     const trend = [faLongArrowAltRight, faLongArrowAltUp, faLongArrowAltDown][Math.floor(Math.random() * 3)];
@@ -104,11 +112,16 @@ function Dashboard(props) {
     )
 }
 
+const mapDispatchToProps = {
+    fetchProducts,
+    fetchOrders,
+};
+
 const mapStateToProps = state => {
     return {
-        productCount: state.products.productCount,
+        productCount: state.products ? state.products.productCount : 0,
         orderCount: state.orders ? state.orders.orderCount : 0,
     }
 }
 
-export default connect(mapStateToProps, { fetchProducts })(Dashboard);
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

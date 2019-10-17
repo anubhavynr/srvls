@@ -5,9 +5,11 @@ export const SET_CURRENT_MODAL = 'SET_CURRENT_MODAL';
 export const SIGN_IN_MODAL = 'SIGN_IN_MODAL';
 export const SIGN_UP_MODAL = 'SIGN_UP_MODAL';
 export const ADD_PRODUCT_MODAL = 'ADD_PRODUCT_MODAL';
-export const ADD_ORDER_MODAL = 'ADD_ORDER_MODAL';
-export const DELETE_PRODUCT_MODAL = 'DELETE_PRODUCT_MODAL';
 export const EDIT_PRODUCT_MODAL = 'EDIT_PRODUCT_MODAL';
+export const DELETE_PRODUCT_MODAL = 'DELETE_PRODUCT_MODAL';
+export const ADD_ORDER_MODAL = 'ADD_ORDER_MODAL';
+export const EDIT_ORDER_MODAL = 'EDIT_ORDER_MODAL';
+export const DELETE_ORDER_MODAL = 'DELETE_ORDER_MODAL';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const REQUEST_ALL_PRODUCTS = 'REQUEST_ALL_PRODUCTS';
 export const RECEIVE_ALL_PRODUCTS = 'RECEIVE_ALL_PRODUCTS';
@@ -52,13 +54,6 @@ export const addProductModal = () => {
     };
 };
 
-export const addOrderModal = () => {
-    return {
-        type: SET_CURRENT_MODAL,
-        currentModal: ADD_ORDER_MODAL,
-    };
-};
-
 export const editProductModal = (product) => {
     return {
         type: SET_CURRENT_MODAL,
@@ -72,6 +67,29 @@ export const deleteProductModal = (product) => {
         type: SET_CURRENT_MODAL,
         currentModal: DELETE_PRODUCT_MODAL,
         product,
+    };
+};
+
+export const addOrderModal = () => {
+    return {
+        type: SET_CURRENT_MODAL,
+        currentModal: ADD_ORDER_MODAL,
+    };
+};
+
+export const editOrderModal = (order) => {
+    return {
+        type: SET_CURRENT_MODAL,
+        currentModal: EDIT_ORDER_MODAL,
+        order,
+    };
+};
+
+export const deleteOrderModal = (order) => {
+    return {
+        type: SET_CURRENT_MODAL,
+        currentModal: DELETE_ORDER_MODAL,
+        order,
     };
 };
 
@@ -279,8 +297,8 @@ export const editOrder = (order) => {
         const url = `${config.api.base_url}/orders/${order.id}`;
 
         Axios.put(url, order)
-            .then(() => {
-                dispatch(editOrderFinished(order));
+            .then((response) => {
+                dispatch(editOrderFinished(response.data));
             }, error => console.error(error))
             .then(() => {
                 dispatch(closeModal());
