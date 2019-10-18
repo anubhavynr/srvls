@@ -141,6 +141,12 @@
       <div class="jumbotron">
         <h2>Products</h2>
         <div class="container">
+          <div class="row mb-2">
+            <div class="col">
+              <button class="btn btn-success float-right" data-toggle="modal" data-target="#addProductModalCenter">Add Product <i
+                  class="fas fa-plus"></i></button>
+            </div>
+          </div>
           <div class="row">
             <table class="table table-striped">
               <thead>
@@ -160,11 +166,6 @@
                 <td class="text-center"><a class='btn btn-secondary btn-xs' data-toggle="modal" data-target="#editProductModalCenter" th:attr="data-product-id=${product.id},data-product-sku=${product.sku},data-product-name=${product.name},data-product-price=${product.price},data-product-category=${product.category.id}">Edit <i class="fas fa-edit"></i></a> <a class="btn btn-danger btn-xs" data-toggle="modal" th:attr="data-product-id=${product.id},data-product-name=${product.name}" data-target="#deleteProductModalCenter">Del <i class="fas fa-trash"></i></a></td>
               </tr>
             </table>
-          </div>
-          <div class="row">
-            <div class="col">
-              <button class="btn btn-success float-right" data-toggle="modal" data-target="#addProductModalCenter">Add Product <i class="fas fa-plus"></i></button>
-            </div>
           </div>
         </div>
       </div>
