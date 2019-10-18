@@ -43,11 +43,8 @@ function AddOrderModal(props) {
     const { value: city, bind: bindCity } = useInput('');
     const { value: state, bind: bindState } = useInput('');
     const { value: zipCode, bind: bindZipCode } = useInput('');
-    const { value: product1, bind: bindProduct1 } = useInput('');
     const { value: quantity1, bind: bindQuantity1 } = useInput('');
-    const { value: product2, bind: bindProduct2 } = useInput('');
     const { value: quantity2, bind: bindQuantity2 } = useInput('');
-    const { value: product3, bind: bindProduct3 } = useInput('');
     const { value: quantity3, bind: bindQuantity3 } = useInput('');
 
     const submitOrderAdd = () => {
@@ -121,7 +118,7 @@ function AddOrderModal(props) {
         }
 
         const order = {
-            orderDate: moment().format('YYYY-MM-DD').toString(),
+            orderDate: moment().format('YYYY-MM-DD'),
             purchaser: {
                 firstName,
                 lastName,
@@ -194,28 +191,28 @@ function AddOrderModal(props) {
                         <h4>Products</h4>
                             {
                                 products[0] ?
-                                    (
-                                        <Form.Row>
-                                            <Form.Group as={Col} md={{offset: 1}} controlId="product1Check">
-                                                <Form.Check label={`${products[0].name} (${products[0].sku})`} {...bindProduct1} />
-                                            </Form.Group>
-                                            <Form.Group as={Col} controlId="productQuantity1">
-                                                <Form.Control type="text" placeholder="Enter Quantity" {...bindQuantity1} />
-                                            </Form.Group>
-                                        </Form.Row>
-                                    ) : 
+                                (
+                                    <Form.Row className='mb-2'>
+                                        <Col md={{ offset: 1 }}>
+                                            <Form.Label>{`${products[0].name} (${products[0].sku}):`}</Form.Label>
+                                        </Col>
+                                        <Col>
+                                            <Form.Control type="text" placeholder="Enter Quantity" {...bindQuantity1} />
+                                        </Col>
+                                    </Form.Row>
+                                ) : 
                                     null
                             }
                             {
                                 products[1] ?
                                 (
-                                    <Form.Row>
-                                        <Form.Group as={Col} md={{offset: 1}} controlId="product2Check">
-                                            <Form.Check label={`${products[1].name} (${products[1].sku})`} {...bindProduct2} />
-                                        </Form.Group>
-                                        <Form.Group as={Col} controlId="productQuantity2">
+                                    <Form.Row className='mb-2'>
+                                        <Col md={{ offset: 1 }}>
+                                            <Form.Label>{`${products[1].name} (${products[1].sku}):`}</Form.Label>
+                                        </Col>
+                                        <Col>
                                             <Form.Control type="text" placeholder="Enter Quantity" {...bindQuantity2} />
-                                        </Form.Group>
+                                        </Col>
                                     </Form.Row>
                                 ) : 
                                 null
@@ -223,13 +220,13 @@ function AddOrderModal(props) {
                             {
                                 products[2] ?
                                 (
-                                    <Form.Row>
-                                        <Form.Group as={Col} md={{offset: 1}} controlId="product13Check">
-                                            <Form.Check label={`${products[2].name} (${products[2].sku})`} {...bindProduct3} />
-                                        </Form.Group>
-                                        <Form.Group as={Col} controlId="productQuantity3">
+                                    <Form.Row className='mb-2'>
+                                        <Col md={{ offset: 1 }}>
+                                            <Form.Label>{`${products[2].name} (${products[2].sku}):`}</Form.Label>
+                                        </Col>
+                                        <Col>
                                             <Form.Control type="text" placeholder="Enter Quantity" {...bindQuantity3} />
-                                        </Form.Group>
+                                        </Col>
                                     </Form.Row>
                                 ) : 
                                 null

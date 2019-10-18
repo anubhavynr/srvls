@@ -125,7 +125,7 @@ function EditProductModal(props) {
 
         const order = {
             id: orderId,
-            orderDate: moment().format('YYYY-MM-DD').toString(),
+            orderDate: moment().format('L'),
             purchaser: {
                 firstName,
                 lastName,
@@ -200,10 +200,10 @@ function EditProductModal(props) {
                                 (
                                     <Form.Row className='mb-2'>
                                         <Col md={{offset: 1}}>
-                                            <Form.Label for="productQuantity1">{`${products[0].name} (${products[0].sku}):`}</Form.Label>
+                                            <Form.Label>{`${products[0].name} (${products[0].sku}):`}</Form.Label>
                                         </Col>
                                         <Col>
-                                            <Form.Control type="text" inline controlId="productQuantity1" placeholder="Enter Quantity" {...bindQuantity1} />
+                                            <Form.Control type="text" placeholder="Enter Quantity" {...bindQuantity1} />
                                         </Col>
                                     </Form.Row>
                                 ) : 
@@ -214,10 +214,10 @@ function EditProductModal(props) {
                                 (
                                     <Form.Row className='mb-2'>
                                         <Col md={{offset: 1}}>
-                                            <Form.Label for="productQuantity2">{`${products[1].name} (${products[1].sku}):`}</Form.Label>
+                                            <Form.Label>{`${products[1].name} (${products[1].sku}):`}</Form.Label>
                                         </Col>
                                         <Col>
-                                            <Form.Control type="text" inline controlId="productQuantity2" placeholder="Enter Quantity" {...bindQuantity2} />
+                                            <Form.Control type="text" placeholder="Enter Quantity" {...bindQuantity2} />
                                         </Col>
                                     </Form.Row>
                                 ) : 
@@ -228,10 +228,10 @@ function EditProductModal(props) {
                                 (
                                     <Form.Row>
                                         <Col md={{offset: 1}}>
-                                            <Form.Label for="productQuantity3">{`${products[2].name} (${products[2].sku}):`}</Form.Label>
+                                            <Form.Label>{`${products[2].name} (${products[2].sku}):`}</Form.Label>
                                         </Col>
                                         <Col>
-                                            <Form.Control type="text" inline controlId="productQuantity3" placeholder="Enter Quantity" {...bindQuantity3} />
+                                            <Form.Control type="text" placeholder="Enter Quantity" {...bindQuantity3} />
                                         </Col>
                                     </Form.Row>
                                 ) : 

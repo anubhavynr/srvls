@@ -82,7 +82,7 @@ function Orders(props) {
                                             <tr key={id}>
                                                 <td>{id}</td>
                                                 <td>${total}</td>
-                                                <td>{moment(orderDate).format('MM/DD/YYYY')}</td>
+                                                <td>{moment(orderDate).format('L')}</td>
                                                 <td>{totalItems}</td>
                                                 <td>{purchaserId}</td>
                                                 <td className="text-center">{shipDate === null ? <FontAwesomeIcon className="text-danger" icon={faTimesCircle} /> : <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-ship-date">{shipDate}</Tooltip>}><FontAwesomeIcon className="text-success" icon={faCheckCircle} /></OverlayTrigger>}</td>

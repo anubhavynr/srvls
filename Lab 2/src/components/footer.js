@@ -1,8 +1,6 @@
 import React from 'react';
 import config from '../shared/config';
 
-console.log(config);
-
 function Footer() {
     return (
         <h4>
