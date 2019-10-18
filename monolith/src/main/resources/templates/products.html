@@ -163,7 +163,7 @@
                 <td th:text="${product.category.name}">Shoes</td>
                 <td th:text="${product.name}">Air Jordan</td>
                 <td th:text="${#numbers.formatCurrency(product.price)}">100.00</td>
-                <td class="text-center"><a class='btn btn-secondary btn-xs' data-toggle="modal" data-target="#editProductModalCenter" th:attr="data-product-id=${product.id},data-product-sku=${product.sku},data-product-name=${product.name},data-product-price=${product.price},data-product-category=${product.category.id}">Edit <i class="fas fa-edit"></i></a> <a class="btn btn-danger btn-xs" data-toggle="modal" th:attr="data-product-id=${product.id},data-product-name=${product.name}" data-target="#deleteProductModalCenter">Del <i class="fas fa-trash"></i></a></td>
+                <td class="text-center"><a class='btn btn-secondary btn-xs text-white' data-toggle="modal" data-target="#editProductModalCenter" th:attr="data-product-id=${product.id},data-product-sku=${product.sku},data-product-name=${product.name},data-product-price=${product.price},data-product-category=${product.category.id}">Edit <i class="fas fa-edit"></i></a> <a class="btn btn-danger btn-xs text-white" data-toggle="modal" th:attr="data-product-id=${product.id},data-product-name=${product.name}" data-target="#deleteProductModalCenter">Del <i class="fas fa-trash"></i></a></td>
               </tr>
             </table>
           </div>
