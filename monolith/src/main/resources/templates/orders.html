@@ -1,11 +1,103 @@
 <html>
 <head>
   <title>
-    <INSERT TITLE HERE>
+    Orders
   </title>
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/all.min.css" rel="stylesheet">
 </head>
+<!-- Add Order Modal -->
+<div class="modal fade" id="addOrderModalCenter" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addOrderModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProductModalLongTitle">Add Order</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"><i class="fas fa-times"></i></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addOrderForm" th:action="@{/orders}" method="post">
+          <h4>Purchaser</h4>
+          <div class="form-group">
+            <label for="addOrderFirstName">First Name</label>
+            <input type="text" class="form-control" id="addOrderFirstName" name="firstName" aria-describedby="firstNameHelp" placeholder="Enter First Name">
+          </div>
+          <div class="form-group">
+            <label for="addOrderLastName">Last Name</label>
+            <input type="text" class="form-control" id="addOrderFirstName" name="lastName" aria-describedby="lastNameHelp" placeholder="Enter First Name">
+          </div>
+          <h4>Shipping Information</h4>
+          <div class="form-group">
+            <label for="addOrderAddress">Address</label>
+            <input type="text" class="form-control" id="addOrderAddress" name="address" placeholder="Enter Address">
+          </div>
+          <div class="form-group">
+            <label for="addOrderAddress2">Address 2</label>
+            <input type="text" class="form-control" id="addOrderAddress2" name="address2" placeholder="Enter Address 2">
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="form-group">
+                <label for="addOrderCity">City</label>
+                <input type="text" class="form-control" id="addOrderCity" name="city" placeholder="Enter City">
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="addOrderState">State</label>
+                <select class="form-control" id="addOrderState" name="state">
+                  <option value="CA">CA</option>
+                  <option value="FL">FL</option>
+                  <option value="GA">GA</option>
+                  <option value="NV">NV</option>
+                  <option value="OR">OR</option>
+                  <option value="TX">TX</option>
+                  <option value="WA">WA</option>
+                </select>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="addOrderPostalCode">Postal Code</label>
+                <input type="text" class="form-control" id="addOrderPostalCode" name="postalCode" placeholder="Enter Postal Code">
+              </div>
+            </div>
+          </div>
+          <h4>Products</h4>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity1" th:text="${products[0].name (products[0].sku)}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity1" placeholder="Enter Quantity" />
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity2" th:text="${products[1].name (products[1].sku)}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity2" placeholder="Enter Quantity" />
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity3" th:text="${products[2].name (products[2].sku)}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity3" placeholder="Enter Quantity" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-success" form="addProductForm">Add Order</button>
+      </div>
+    </div>
+  </div>
+</div>
 <body>
   <div class="container">
     <nav class="navbar navbar-expand-lg">
@@ -39,6 +131,11 @@
         <div class="jumbotron">
           <h2>Orders</h2>
           <div class="container">
+            <div class="row mb-2">
+              <div class="col">
+                <button class="btn btn-success float-right" data-toggle="modal" data-target="#addOrderModalCenter">Add Order <i class="fas fa-plus"></i></button>
+              </div>
+            </div>
             <div class="row">
             <table class="table table-striped">
             <thead>
