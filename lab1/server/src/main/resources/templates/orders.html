@@ -6,12 +6,35 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/all.min.css" rel="stylesheet">
 </head>
+<!-- Delete Order Modal -->
+<div class="modal fade" id="deleteOrderModalCenter" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="deleteOrderModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteOrderModalLongTitle">Delete Order</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true"><i class="fas fa-times"></i></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="deleteOrderForm" th:action="@{/deleteOrder}" method="post">
+          <h4>Are you sure you want to delete order: <span id="deleteOrderText" style="font-weight: bold">ID</span></h4>
+          <input type="hidden" id="deleteOrderId" name="id" value=""/>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-success" form="deleteOrderForm">Delete Order</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Add Order Modal -->
 <div class="modal fade" id="addOrderModalCenter" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addOrderModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addProductModalLongTitle">Add Order</h5>
+        <h5 class="modal-title" id="addOrderModalLongTitle">Add Order</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true"><i class="fas fa-times"></i></span>
         </button>
@@ -25,7 +48,7 @@
           </div>
           <div class="form-group">
             <label for="addOrderLastName">Last Name</label>
-            <input type="text" class="form-control" id="addOrderFirstName" name="lastName" aria-describedby="lastNameHelp" placeholder="Enter First Name">
+            <input type="text" class="form-control" id="addOrderLastName" name="lastName" aria-describedby="lastNameHelp" placeholder="Enter Last Name">
           </div>
           <h4>Shipping Information</h4>
           <div class="form-group">
@@ -66,34 +89,18 @@
           </div>
           <h4>Products</h4>
           <div class="row mb-2">
-            <div class="col md-offset-1">
-              <label for="quantity1" th:text="${products[0].name (products[0].sku)}"></label>
+              <div class="col md-offset-1">
+                <label for="quantity1" th:text="${products[0].name}"></label>
+              </div>
+              <div class="col">
+                  <input type="text" id="quantity1" placeholder="Enter Quantity" />
+              </div>
             </div>
-            <div class="col">
-                <input type="text" id="quantity1" placeholder="Enter Quantity" />
-            </div>
-          </div>
-          <div class="row mb-2">
-            <div class="col md-offset-1">
-              <label for="quantity2" th:text="${products[1].name (products[1].sku)}"></label>
-            </div>
-            <div class="col">
-                <input type="text" id="quantity2" placeholder="Enter Quantity" />
-            </div>
-          </div>
-          <div class="row mb-2">
-            <div class="col md-offset-1">
-              <label for="quantity3" th:text="${products[2].name (products[2].sku)}"></label>
-            </div>
-            <div class="col">
-                <input type="text" id="quantity3" placeholder="Enter Quantity" />
-            </div>
-          </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-success" form="addProductForm">Add Order</button>
+        <button type="submit" class="btn btn-success" form="addOrderForm">Add Order</button>
       </div>
     </div>
   </div>
@@ -146,6 +153,7 @@
                     <th>Total Items</th>
                     <th>Purchaser</th>
                     <th class="text-center">Shipped</th>
+                    <th class="text-center">Action</th>
                 </tr>
             </thead>
                     <tr th:each="order : ${orders}">
@@ -155,6 +163,7 @@
                         <td th:text="${#arrays.length(order.lineItems)}">3</td>
                         <td th:text="${order.purchaser.id}">1</td>
                         <td class="text-center"><span th:class="'text-' + ( (${order.shipDate} != null)? 'success' : 'danger')"><i class="fas" th:classappend="${order.shipDate != null} ?  'fa-check-circle' : 'fa-times-circle'"></i></span></td>
+                        <td class="text-center"><a class="btn btn-danger btn-xs text-white" data-toggle="modal" th:attr="data-order-id=${order.id}" data-target="#deleteOrderModalCenter">Del <i class="fas fa-trash"></i></a></td>
                     </tr>
             </table>
             </div>
@@ -171,5 +180,15 @@
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
   <script src="js/scripts.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $("#deleteOrderModalCenter").on("show.bs.modal", function(e) {
+        var orderId = $(e.relatedTarget).data("order-id");
+        $("#deleteOrderText").text(orderId);
+        $("#deleteOrderId").val(orderId);
+        $("#deleteOrderModalCenter").modal("show");
+      });
+    });
+</script>
 </body>
 </html>

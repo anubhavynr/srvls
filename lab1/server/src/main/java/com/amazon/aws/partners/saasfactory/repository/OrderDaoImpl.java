@@ -11,7 +11,11 @@ import java.util.Map;
 
 import javax.swing.tree.RowMapper;
 
-import com.amazon.aws.partners.saasfactory.domain.*;
+import com.amazon.aws.partners.saasfactory.domain.Address;
+import com.amazon.aws.partners.saasfactory.domain.Order;
+import com.amazon.aws.partners.saasfactory.domain.OrderLineItem;
+import com.amazon.aws.partners.saasfactory.domain.Product;
+import com.amazon.aws.partners.saasfactory.domain.Purchaser;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +170,8 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public void deleteOrder(Order order) throws Exception {
+        logger.info("OrderDao::deleteOrder " + order);
+        
         deleteOrderLineItems(order.getId());
         jdbc.update(DELETE_ORDER_SQL, new Object[]{order.getId()});
     }
