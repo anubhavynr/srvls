@@ -179,13 +179,13 @@ function AddOrderModal(props) {
                                 <Form.Label>State</Form.Label>
                                 <Form.Control as="select" {...bindState}>
                                     {
-                                        ['CA', 'GA', 'NV', 'NY', 'OR', 'TX', 'FL', 'WA'].map(state => <option key={state} value={state}>{state}</option>)
+                                        ['CA', 'FL', 'GA', 'NV', 'NY', 'OR', 'TX', 'WA'].map(state => <option key={state} value={state}>{state}</option>)
                                     }
                                 </Form.Control>
                             </Form.Group>
                             <Form.Group as={Col} controlId="shippingZipCode">
                                 <Form.Label>Zip Code</Form.Label>
-                                <Form.Control type="text" placeholder="Enter Zip Code" {...bindZipCode} />
+                                <Form.Control type="text" placeholder="Enter Postal Code" {...bindZipCode} />
                             </Form.Group>
                         </Form.Row>
                         <h4>Products</h4>
