@@ -7,7 +7,7 @@
   <link href="css/all.min.css" rel="stylesheet">
 </head>
 <!-- Add Order Modal -->
-<div class="modal fade" id="addOrderModalCenter" tabindex="-1" role="dialog" aria-labelledby="addOrderModalCenterTitle" aria-hidden="true">
+<div class="modal fade" id="addOrderModalCenter" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addOrderModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -36,34 +36,59 @@
             <label for="addOrderAddress2">Address 2</label>
             <input type="text" class="form-control" id="addOrderAddress2" name="address2" placeholder="Enter Address 2">
           </div>
-          <div class="row">
-<div class="col">
-              <div class="form-group">
-                <label for="addOrderCity">City</label>
-                <input type="text" class="form-control" id="addOrderCity" name="city" placeholder="Enter City">
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-group">
-                <label for="addOrderState">State</label>
-                <select class="form-control" id="addOrderState" name="state">
-                  <option value="CA">CA</option>
-                  <option value="FL">FL</option>
-                  <option value="GA">GA</option>
-                  <option value="NV">NV</option>
-                  <option value="OR">OR</option>
-                  <option value="TX">TX</option>
-                  <option value="WA">WA</option>
-                </select>
-              </div>
-            </div>
-              <div class="col">
-                <div class="form-group">
-                  <label for="addOrderPostalCode">Postal Code</label>
-                  <input type="text" class="form-control" id="addOrderPostalCode" name="postalCode" placeholder="Enter Postal Code">
-                </div>
-              </div>
- </div>
+          <div class="row">
+            <div class="col">
+              <div class="form-group">
+                <label for="addOrderCity">City</label>
+                <input type="text" class="form-control" id="addOrderCity" name="city" placeholder="Enter City">
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="addOrderState">State</label>
+                <select class="form-control" id="addOrderState" name="state">
+                  <option value="CA">CA</option>
+                  <option value="FL">FL</option>
+                  <option value="GA">GA</option>
+                  <option value="NV">NV</option>
+                  <option value="OR">OR</option>
+                  <option value="TX">TX</option>
+                  <option value="WA">WA</option>
+                </select>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="addOrderPostalCode">Postal Code</label>
+                <input type="text" class="form-control" id="addOrderPostalCode" name="postalCode" placeholder="Enter Postal Code">
+              </div>
+            </div>
+          </div>
+          <h4>Products</h4>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity1" th:text="${products[0].name (products[0].sku)}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity1" placeholder="Enter Quantity" />
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity2" th:text="${products[1].name (products[1].sku)}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity2" placeholder="Enter Quantity" />
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity3" th:text="${products[2].name (products[2].sku)}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity3" placeholder="Enter Quantity" />
+            </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
