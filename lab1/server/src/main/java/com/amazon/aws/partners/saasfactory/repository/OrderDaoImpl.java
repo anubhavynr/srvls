@@ -1,20 +1,24 @@
 package com.amazon.aws.partners.saasfactory.repository;
 
-import com.amazon.aws.partners.saasfactory.domain.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
-
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.tree.RowMapper;
+
+import com.amazon.aws.partners.saasfactory.domain.*;
+
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class OrderDaoImpl implements OrderDao {
@@ -35,6 +39,7 @@ public class OrderDaoImpl implements OrderDao {
             "bill_to_line1 = ?, bill_to_line2 = ?, bill_to_city = ?, bill_to_state = ?, bill_to_postal_code = ? " +
             "WHERE order_fulfillment_id = ?";
     private final static String DELETE_ORDER_SQL = "DELETE FROM order_fulfillment WHERE order_fulfillment_id = ?";
+    private final static String DELETE_ORDER_LINE_ITEMS_SQL = "DELETE FROM order_line_item WHERE order_fulfillment_id = ?";
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -161,6 +166,7 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public void deleteOrder(Order order) throws Exception {
+        deleteOrderLineItems(order.getId());
         jdbc.update(DELETE_ORDER_SQL, new Object[]{order.getId()});
     }
 
@@ -178,6 +184,10 @@ public class OrderDaoImpl implements OrderDao {
             insertedItems.add(saveOrderLineItem(lineItem));
         }
         return insertedItems;
+    }
+    
+    private void deleteOrderLineItems(Integer orderId) throws Exception {
+        jdbc.update(DELETE_ORDER_LINE_ITEMS_SQL, orderId);
     }
 
     private OrderLineItem saveOrderLineItem(OrderLineItem lineItem) throws Exception {
