@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>
-    <INSERT TITLE HERE>
+    Dashboard
   </title>
   <link href="css/bootstrap.min.css" rel="stylesheet">
   <link href="css/all.min.css" rel="stylesheet">
@@ -20,7 +20,7 @@
             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
           </li>
           <li class="nav-item active">
-            <a class="nav-link" href="/dashboard.html">Dashboard</a>
+            <a class="nav-link" href="/dashboard">Dashboard</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/products">Products</span></a>
@@ -29,8 +29,8 @@
             <a class="nav-link" href="/orders">Orders</span></a>
           </li>
         </ul>
-        <form class="form-inline my-2 my-lg-0">
-          <span>Welcome back, User!</span>
+        <form th:if="${isAuthenticated}" class="form-inline my-2 my-lg-0">
+          <span th:text="'Welcome back, ' + ${username} ?: ''"></span>
           <button class="btn btn-link" type="button">Sign Out</button>
         </form>
       </div>
@@ -51,7 +51,7 @@
                                     <i class="fas fa-list-ol fa-5x" ></i>
                                 </div>
                                 <div class="col">
-                                    <p>Orders: 5</p>
+                                    <p th:text="'Orders: ' + ${orderCount} ?: ''">Orders: 5</p>
                                 </div>
                               </div>
                             </div>
@@ -72,7 +72,7 @@
                                     <i class="fas fa-tags fa-5x"></i>
                                 </div>
                                 <div class="col">
-                                    <p>Products: 17</p>
+                                    <p th:text="'Products: ' + ${productCount} ?: ''">Products: 17</p>
                                 </div>
                               </div>
                             </div>
@@ -93,14 +93,14 @@
                                     <i class="fas fa-chart-line fa-5x"></i>
                                 </div>
                                 <div class="col">
-                                    <p>Trend: <i class="fas fa-long-arrow-alt-up"></i></p>
+                                    <p>Trend: <i th:class="'fas fa-long-arrow-alt-' + ${trend}"></i></p>
                                 </div>
                               </div>
                             </div>
                         <div class="card-footer bg-gray">
                             <div class="row">
                                 <div class="col">
-                                <a style="text-decoration: none" href="/dashboard.html">Details <i class="fas fa-arrow-circle-right"></i></a>
+                                <a style="text-decoration: none" href="/dashboard">Details <i class="fas fa-arrow-circle-right"></i></a>
                                 </div>
                               </div>
                             </div>

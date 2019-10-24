@@ -94,21 +94,25 @@
         <li class="nav-item active">
           <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/dashboard.html">Dashboard</a>
+        <li class="nav-item" th:unless="${isAnonymous}">
+          <a class="nav-link" href="/dashboard">Dashboard</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" th:unless="${isAnonymous}">
           <a class="nav-link" href="/products">Products</span></a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" th:unless="${isAnonymous}">
           <a class="nav-link" href="/orders">Orders</span></a>
         </li>
       </ul>
-      <form class="form-inline my-2 my-lg-0">
+      <form class="form-inline my-2 my-lg-0" th:if="${isAnonymous}">
         <button class="btn btn-link my-2 my-sm-0" type="button" data-toggle="modal" data-target="#signInModalCenter">Sign In</button>
         <button class="btn btn-success my-2 my-sm-0" type="button" data-toggle="modal" data-target="#signUpModalCenter">Sign Up</button>
       </form>
-    </div>
+      <form class="form-inline my-2 my-lg-0" th:unless="${isAnonymous}">
+              <span th:text="'Welcome back, ' + ${username} ?: ''"></span>
+              <button class="btn btn-link" type="button">Sign Out</button>
+          </form>
+      </div>
   </nav>
   <div class="row">
     <div class="col-md-12">

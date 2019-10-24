@@ -118,16 +118,19 @@
             <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/dashboard.html">Dashboard</a>
+            <a class="nav-link" href="/dashboard">Dashboard</a>
           </li>
           <li class="nav-item active">
-            <a class="nav-link" href="/products">Products</span></a>
+            <a class="nav-link" href="/products">Products</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/orders">Orders</span></a>
+            <a class="nav-link" href="/orders">Orders</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="${isAuthenticated} ? 'ACTIVE' : 'RETIRED'"></a>
           </li>
         </ul>
-          <form th:if="${isAuthenticated}" class="form-inline my-2 my-lg-0">
+          <form th:if="${isAuthenticated == false}" class="form-inline my-2 my-lg-0">
               <span th:text="'Welcome back, ' + ${username} ?: ''"></span>
               <button class="btn btn-link" type="button">Sign Out</button>
           </form>
