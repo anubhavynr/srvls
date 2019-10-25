@@ -44,32 +44,32 @@
           <h4>Purchaser</h4>
           <div class="form-group">
             <label for="addOrderFirstName">First Name</label>
-            <input type="text" class="form-control" id="addOrderFirstName" name="firstName" aria-describedby="firstNameHelp" placeholder="Enter First Name">
+            <input type="text" class="form-control" id="addOrderFirstName" name="purchaser.firstName" aria-describedby="firstNameHelp" placeholder="Enter First Name">
           </div>
           <div class="form-group">
             <label for="addOrderLastName">Last Name</label>
-            <input type="text" class="form-control" id="addOrderLastName" name="lastName" aria-describedby="lastNameHelp" placeholder="Enter Last Name">
+            <input type="text" class="form-control" id="addOrderLastName" name="purchaser.lastName" aria-describedby="lastNameHelp" placeholder="Enter Last Name">
           </div>
           <h4>Shipping Information</h4>
           <div class="form-group">
             <label for="addOrderAddress">Address</label>
-            <input type="text" class="form-control" id="addOrderAddress" name="address" placeholder="Enter Address">
+            <input type="text" class="form-control" id="addOrderAddress" name="shipAddress.line1" placeholder="Enter Address">
           </div>
           <div class="form-group">
             <label for="addOrderAddress2">Address 2</label>
-            <input type="text" class="form-control" id="addOrderAddress2" name="address2" placeholder="Enter Address 2">
+            <input type="text" class="form-control" id="addOrderAddress2" name="shipAddress.line2" placeholder="Enter Address 2">
           </div>
           <div class="row">
             <div class="col">
               <div class="form-group">
                 <label for="addOrderCity">City</label>
-                <input type="text" class="form-control" id="addOrderCity" name="city" placeholder="Enter City">
+                <input type="text" class="form-control" id="addOrderCity" name="shipAddress.city" placeholder="Enter City">
               </div>
             </div>
             <div class="col">
               <div class="form-group">
                 <label for="addOrderState">State</label>
-                <select class="form-control" id="addOrderState" name="state">
+                <select class="form-control" id="addOrderState" name="shipAddress.state">
                   <option value="CA">CA</option>
                   <option value="FL">FL</option>
                   <option value="GA">GA</option>
@@ -83,19 +83,38 @@
             <div class="col">
               <div class="form-group">
                 <label for="addOrderPostalCode">Postal Code</label>
-                <input type="text" class="form-control" id="addOrderPostalCode" name="postalCode" placeholder="Enter Postal Code">
+                <input type="text" class="form-control" id="addOrderPostalCode" name="shipAddress.postalCode" placeholder="Enter Postal Code">
               </div>
             </div>
           </div>
           <h4>Products</h4>
           <div class="row mb-2">
-              <div class="col md-offset-1">
-                <label for="quantity1" th:text="${products[0].name}"></label>
-              </div>
-              <div class="col">
-                  <input type="text" id="quantity1" placeholder="Enter Quantity" />
-              </div>
+            <div class="col md-offset-1">
+              <label for="quantity1" th:text="${products[0].name}"></label>
             </div>
+            <div class="col">
+                <input type="text" id="quantity1" name="lineItems[0].quantity" value="0" placeholder="Enter Quantity" />
+                <input type="hidden" id="lineItemProduct1" name="lineItems[0].product.id" th:value="${products[0].id}"/>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity2" th:text="${products[1].name}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity2" name="lineItems[1].quantity" value="0" placeholder="Enter Quantity" />
+                <input type="hidden" id="lineItemProduct2" name="lineItems[1].product.id" th:value="${products[1].id}"/>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col md-offset-1">
+              <label for="quantity3" th:text="${products[2].name}"></label>
+            </div>
+            <div class="col">
+                <input type="text" id="quantity3" name="lineItems[2].quantity" value="0" placeholder="Enter Quantity" />
+                <input type="hidden" id="lineItemProduct3" name="lineItems[2].product.id" th:value="${products[2].id}"/>
+            </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
