@@ -29,7 +29,7 @@ public class DefaultController {
     
     @ModelAttribute("isAnonymous")
     public boolean isAnonymous() {
-        return SecurityContextHolder.getContext().getAuthentication().getName() == "anonymousUser";
+        return "anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
     @RequestMapping(value = {"/", "/index"}, method = {RequestMethod.GET, RequestMethod.POST})
