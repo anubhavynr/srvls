@@ -257,7 +257,7 @@ export const deleteProduct = (product) => {
     return function(dispatch) {
         const url = `${config.api.base_url}/products/${product.id}`;
 
-        Axios.delete(url, product)
+        Axios.delete(url, { data: product })
             .then(() => {
                 dispatch(deleteProductFinished(product));
             }, error => console.error(error))
@@ -310,8 +310,14 @@ export const deleteOrder = (order) => {
     return function(dispatch) {
         const url = `${config.api.base_url}/orders/${order.id}`;
 
-        Axios.delete(url, order)
-            .then(() => {
+        console.log('order body: ', order);
+
+        Axios.delete(url, { data: order })
+            .then((response) => {
+
+                console.log('delete order response: ', response);
+
+
                 dispatch(deleteOrderFinished(order));
             }, error => console.error(error))
             .then(() => {

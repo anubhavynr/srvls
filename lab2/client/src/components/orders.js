@@ -5,6 +5,7 @@ import {
     fetchProducts,
     addOrderModal,
     editOrderModal,
+    deleteOrderModal,
 } from '../actions';
 import Container from 'react-bootstrap/Container';
 import Button from 'react-bootstrap/Button';
@@ -30,6 +31,7 @@ function Orders(props) {
         fetchProducts,
         addOrderModal,
         editOrderModal,
+        deleteOrderModal,
      } = props;
 
     useEffect(() => {
@@ -86,7 +88,7 @@ function Orders(props) {
                                                 <td>{totalItems}</td>
                                                 <td>{purchaserId}</td>
                                                 <td className="text-center">{shipDate === null ? <FontAwesomeIcon className="text-danger" icon={faTimesCircle} /> : <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-ship-date">{shipDate}</Tooltip>}><FontAwesomeIcon className="text-success" icon={faCheckCircle} /></OverlayTrigger>}</td>
-                                                <td className="text-center"><Button variant='secondary' onClick={() => editOrderModal(order)}> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button onClick={() => {}} variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
+                                                <td className="text-center"><Button variant='secondary' onClick={() => editOrderModal(order)}> Edit <FontAwesomeIcon icon={faEdit} /></Button> <Button onClick={() => deleteOrderModal(order)} variant='danger'> Del <FontAwesomeIcon icon={faTrash} /></Button></td>
                                             </tr>
                                         );
                                     }
@@ -102,17 +104,18 @@ function Orders(props) {
     )
 }
 
-const mapStateToProps = state => {
-    return {
-        orders: state.orders.orders,
-    };
-};
-
 const mapDispatchToProps = {
     fetchOrders,
     fetchProducts,
     addOrderModal,
     editOrderModal,
-}
+    deleteOrderModal,
+};
+
+const mapStateToProps = state => {
+    return {
+        orders: state.orders.orders,
+    };
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Orders);
