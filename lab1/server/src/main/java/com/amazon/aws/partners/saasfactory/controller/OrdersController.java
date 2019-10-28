@@ -50,44 +50,19 @@ public class OrdersController {
 		}
 		
 		model.addAttribute("order", order);
-		
-		Date date = new Date();
-		
-		order.setOrderDate(date);
+
+		order.setOrderDate(new Date());
 		order.setBillAddress(order.getShipAddress());
-		
-		List<OrderLineItem> lineItems = order.getLineItems();
-		OrderLineItem lineItem1 = lineItems.get(0);
-		OrderLineItem lineItem2 = lineItems.get(1);
-		OrderLineItem lineItem3 = lineItems.get(2);
-		
-		if(lineItem1 != null) {
-			Product product1 = productService.getProduct(lineItem1.getProduct().getId());	
-			lineItem1.setUnitPurchasePrice(product1.getPrice());
-		}
-		
-		if(lineItem2 != null) {
-			Product product2 = productService.getProduct(lineItem2.getProduct().getId());	
-			lineItem2.setUnitPurchasePrice(product2.getPrice());
-		}
-		
-		if(lineItem3 != null) {
-			Product product3 = productService.getProduct(lineItem3.getProduct().getId());	
-			lineItem3.setUnitPurchasePrice(product3.getPrice());
-		}
-		
-		if(lineItem3.getQuantity() == 0) {
-			lineItems.remove(2);
-		}
-		
-		if(lineItem2.getQuantity() == 0) {
-			lineItems.remove(1);
-		}
-		
-		if(lineItem1.getQuantity() == 0) {
-			lineItems.remove(0);
-		}
-		
+
+		order.getLineItems().removeIf(item -> item == null || 0 == item.getQuantity());
+		order.getLineItems().forEach(item -> {
+			try {
+				item.setUnitPurchasePrice(productService.getProduct(item.getProduct().getId()).getPrice());
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		});
+
 		order = orderService.saveOrder(order);
 		
 		return "redirect:/orders";
