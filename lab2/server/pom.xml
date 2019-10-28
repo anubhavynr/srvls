@@ -98,7 +98,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     </dependencies>
 
     <build>
-        <finalName>monolith</finalName>
+        <finalName>application</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

@@ -9,4 +9,4 @@ DB_PASS=$(aws ssm get-parameters --region $AWS_REGION --names DB_PASS | jq -r '.
 
 export AWS_REGION DB_HOST DB_NAME DB_USER DB_PASS
 
-java -jar /home/ec2-user/monolith.jar > /dev/null 2> /dev/null < /dev/null &
+java -jar /home/ec2-user/application.jar > /dev/null 2> /dev/null < /dev/null &
