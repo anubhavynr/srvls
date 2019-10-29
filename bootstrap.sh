@@ -23,10 +23,11 @@ DIST_REPO=https://github.com/brtrvn/srvls.git
 git config --global credential.helper '!aws codecommit credential-helper $@'
 git config --global credential.UseHttpPath true
 
+cd /home/ec2-user/environment
 git clone --mirror $DIST_REPO github-dist
 cd github-dist
 git push https://git-codecommit.$MY_REGION.amazonaws.com/v1/repos/saas-factory-serverless-workshop --all
 cd ..
 rm -rf github-dist
 git clone https://git-codecommit.$MY_REGION.amazonaws.com/v1/repos/saas-factory-serverless-workshop
-cd saas-factory-serverless-workshop
+cd /home/ec2-user/environment/saas-factory-serverless-workshop
