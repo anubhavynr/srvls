@@ -310,14 +310,8 @@ export const deleteOrder = (order) => {
     return function(dispatch) {
         const url = `${config.api.base_url}/orders/${order.id}`;
 
-        console.log('order body: ', order);
-
         Axios.delete(url, { data: order })
             .then((response) => {
-
-                console.log('delete order response: ', response);
-
-
                 dispatch(deleteOrderFinished(order));
             }, error => console.error(error))
             .then(() => {

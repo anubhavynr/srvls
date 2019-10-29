@@ -15,6 +15,7 @@ function EditProductModal(props) {
         show,
         order,
         orderId = order.id,
+        purchaserId = order.purchaser.id,
         products,
         title = order ? `Edit Order ${order.id}` : 'Edit Order',
         buttonText = 'Edit Order',
@@ -125,11 +126,11 @@ function EditProductModal(props) {
 
         const order = {
             id: orderId,
-            orderDate: moment().format('L'),
+            orderDate: moment().format('YYYY-MM-DD'),
             purchaser: {
                 firstName,
                 lastName,
-                id: 1,
+                id: purchaserId,
             },
             shipAddress: address,
             billAddress: address,

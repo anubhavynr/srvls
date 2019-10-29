@@ -165,7 +165,13 @@ public class OrderDaoImpl implements OrderDao {
                 billTo.getPostalCode(),
                 order.getId()
         );
-        return order;
+        
+        deleteOrderLineItems(order.getId());
+        saveOrderLineItems(order.getId(), order.getLineItems());
+        
+        Order updatedOrder = getOrder(order.getId());
+        
+        return updatedOrder;
     }
 
     @Override
