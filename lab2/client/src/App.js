@@ -4,14 +4,16 @@ import { Provider, connect } from 'react-redux';
 import Container from 'react-bootstrap/Container';
 import Jumbotron from 'react-bootstrap/Jumbotron';
 
-import Navigation from './components/navigation';
-import PrivateRoute from './components/privateRoute';
-import Home from './components/home';
-import Dashboard from './components/dashboard';
-import Products from './components/products';
-import Orders from './components/orders';
-import Footer from './components/footer';
-import Modal from './components/modalWrapper';
+import {
+  Navigation,
+  PrivateRoute,
+} from './components/navigation';
+import { Home } from './components/home';
+import { Dashboard } from './components/dashboard';
+import { Products } from './components/products';
+import { Orders } from './components/orders';
+import { Footer } from './components/layout';
+import { ModalWrapper as Modal } from './components/modals';
 
 const App = ({ store, currentUser }) => {
   const { isAuthenticated } = currentUser;
