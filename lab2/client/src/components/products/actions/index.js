@@ -78,7 +78,7 @@ export const addProduct = (product) => {
         const url = `${config.api.base_url}/products`;
 
         Axios.post(url, product)
-            .then((response) => {
+            .then(response => {
                 dispatch(addProductFinished(response.data));
             }, error => console.error(error))
             .then(() => {

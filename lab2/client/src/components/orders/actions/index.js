@@ -52,7 +52,7 @@ export const addOrder = (order) => {
         const url = `${config.api.base_url}/orders`;
 
         Axios.post(url, order)
-            .then((response) => {
+            .then(response => {
                 dispatch(addOrderFinished(response.data));
             }, error => console.error(error))
             .then(() => {
@@ -66,7 +66,7 @@ export const editOrder = (order) => {
         const url = `${config.api.base_url}/orders/${order.id}`;
 
         Axios.put(url, order)
-            .then((response) => {
+            .then(response => {
                 dispatch(editOrderFinished(response.data));
             }, error => console.error(error))
             .then(() => {
@@ -80,7 +80,7 @@ export const deleteOrder = (order) => {
         const url = `${config.api.base_url}/orders/${order.id}`;
 
         Axios.delete(url, { data: order })
-            .then((response) => {
+            .then(response => {
                 dispatch(deleteOrderFinished(order));
             }, error => console.error(error))
             .then(() => {
