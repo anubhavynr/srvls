@@ -230,7 +230,7 @@ export const addProduct = (product) => {
         const url = `${config.api.base_url}/products`;
 
         Axios.post(url, product)
-            .then((response) => {
+            .then(response => {
                 dispatch(addProductFinished(response.data));
             }, error => console.error(error))
             .then(() => {
@@ -283,7 +283,7 @@ export const addOrder = (order) => {
         const url = `${config.api.base_url}/orders`;
 
         Axios.post(url, order)
-            .then((response) => {
+            .then(response => {
                 dispatch(addOrderFinished(response.data));
             }, error => console.error(error))
             .then(() => {
@@ -297,7 +297,7 @@ export const editOrder = (order) => {
         const url = `${config.api.base_url}/orders/${order.id}`;
 
         Axios.put(url, order)
-            .then((response) => {
+            .then(response => {
                 dispatch(editOrderFinished(response.data));
             }, error => console.error(error))
             .then(() => {
@@ -310,14 +310,8 @@ export const deleteOrder = (order) => {
     return function(dispatch) {
         const url = `${config.api.base_url}/orders/${order.id}`;
 
-        console.log('order body: ', order);
-
         Axios.delete(url, { data: order })
-            .then((response) => {
-
-                console.log('delete order response: ', response);
-
-
+            .then(response => {
                 dispatch(deleteOrderFinished(order));
             }, error => console.error(error))
             .then(() => {

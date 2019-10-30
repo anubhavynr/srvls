@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux';
-import { modal } from './modal';
-import { products } from './products';
-import { orders } from './orders';
-import { user } from './user';
+import { modal } from '../components/modals/reducers';
+import { products } from '../components/products/reducers';
+import { orders } from '../components/orders/reducers';
+import { user } from '../components/user/reducers';
 
 const rootReducer = combineReducers({
     modal,
