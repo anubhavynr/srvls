@@ -1,20 +1,6 @@
 package com.amazon.aws.partners.saasfactory.repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.amazon.aws.partners.saasfactory.domain.Address;
-import com.amazon.aws.partners.saasfactory.domain.Order;
-import com.amazon.aws.partners.saasfactory.domain.OrderLineItem;
-import com.amazon.aws.partners.saasfactory.domain.Product;
-import com.amazon.aws.partners.saasfactory.domain.Purchaser;
-
+import com.amazon.aws.partners.saasfactory.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +9,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class OrderDaoImpl implements OrderDao {
