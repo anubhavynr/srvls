@@ -1,0 +1,1719 @@
+---
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS SaaS Factory Serverless SaaS Workshop - Lab 2
+Parameters:
+  LoadBalancerDNS:
+    Description: Application Load Balancer DNS name for API Gateway to proxy
+    Type: String
+  CodeCommitRepoName:
+    Description: CodeCommit repository name for CodePipeline
+    Type: String
+  CodeCommitRepoURL:
+    Description: CodeCommit repository clone URL for CodePipeline
+    Type: String
+  WorkshopS3Bucket:
+    Description: S3 bucket where you uploaded the Lambda code packages
+    Type: String
+Resources:
+  LambdaExecutionRoleLab2:
+    Type: AWS::IAM::Role
+    DependsOn:
+      - CodePipelineBucketLab2
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-cfn-lambda-role-lab2-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-cfn-lambda-policy-lab2-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:ListBucketVersions
+                  - s3:GetBucketVersioning
+                  - s3:DeleteObject
+                  - s3:DeleteObjectVersion
+                Resource:
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}/*
+  LambdaClearS3BucketLogsLab2:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-clear-bucket-lab2-${AWS::Region}
+      RetentionInDays: 30
+  LambdaClearS3BucketLab2:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-clear-bucket-lab2-${AWS::Region}
+      Role: !GetAtt LambdaExecutionRoleLab2.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.ClearS3Bucket
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: ClearS3Bucket.jar
+  InvokeLambdaClearS3BucketCodePipelineBucketLab2:
+    Type: Custom::CustomResource
+    DependsOn:
+      - CodePipelineBucketLab2
+    Properties:
+      ServiceToken: !GetAtt LambdaClearS3BucketLab2.Arn
+      Bucket: !Ref CodePipelineBucketLab2
+  CodePipelineBucketLab2:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: !Sub saas-factory-srvls-wrkshp-pipeline-lab2-${AWS::Region}
+  CodeBuildRoleLab2:
+    Type: AWS::IAM::Role
+    DependsOn: CodePipelineBucketLab2
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-codebuild-role-lab2-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-codebuild-policy-lab2-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}/*
+  CodeBuildProjectLab2Logs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/codebuild/saas-factory-srvls-wrkshp-lab2
+      RetentionInDays: 30
+  CodeBuildProjectLab2:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: saas-factory-srvls-wrkshp-lab2
+      Tags:
+        - Key: Name
+          Value: saas-factory-srvls-wrkshp-lab2
+      ServiceRole: !GetAtt CodeBuildRoleLab2.Arn
+      TimeoutInMinutes: 10
+      Artifacts:
+        Type: S3
+        Location: !Ref CodePipelineBucketLab2
+        Path: '/'
+        Name: lab2
+        Packaging: ZIP
+      Environment:
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        Image: aws/codebuild/standard:2.0
+        Type: LINUX_CONTAINER
+      Source:
+        Type: CODECOMMIT
+        Location: !Ref CodeCommitRepoURL
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                docker: 18
+            build:
+              commands:
+                - cd lab2/server
+                - mvn clean package
+          artifacts:
+            files:
+              - lab2/server/target/application.jar
+              - lab2/server/scripts/*.sh
+              - lab2/server/appspec.yml
+            discard-paths: yes
+          cache:
+            paths:
+              - '/root/.m2/**/*'
+  CodeDeployRoleLab2:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-codedeploy-role-lab2-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codedeploy.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-codedeploy-policy-lab2-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:RunInstance
+                  - ec2:CreateTags
+                  - iam:PassRole
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}/*
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:DescribeParameters
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:*
+  CodeDeployProjectLab2:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: saas-factory-srvls-wrkshp-codedeploy-lab2
+      ComputePlatform: Server
+  CodeDeployDeploymentGroupLab2:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    DependsOn: CodeDeployRoleLab2
+    Properties:
+      ApplicationName: !Ref CodeDeployProjectLab2
+      ServiceRoleArn: !GetAtt CodeDeployRoleLab2.Arn
+      DeploymentGroupName: saas-factory-srvls-wrkshp-lab2
+  CodePipelineRoleLab2:
+    Type: AWS::IAM::Role
+    DependsOn: CodePipelineBucketLab2
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-codepipeline-role-lab2-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-codepipeline-policy-lab2-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: '*'
+                Condition:
+                  StringEqualsIfExists:
+                    iamPassedToService:
+                      - ec2.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                Resource:
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}
+                  - !Sub arn:aws:s3:::${CodePipelineBucketLab2}/*
+              - Effect: Allow
+                Action:
+                  - codecommit:GetBranch
+                  - codecommit:GetCommit
+                  - codecommit:UploadArchive
+                  - codecommit:GetUploadArchiveStatus
+                  - codecommit:CancelUploadArchive
+                Resource:
+                  - !Sub arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepoName}
+              - Effect: Allow
+                Action:
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - codedeploy:CreateDeployment
+                  - codedeploy:GetApplication
+                  - codedeploy:GetApplicationRevision
+                  - codedeploy:GetDeployment
+                  - codedeploy:GetDeploymentConfig
+                  - codedeploy:RegisterApplicationRevision
+                Resource: '*'
+  CodePipelineLab2:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: saas-factory-srvls-wrkshp-pipeline-lab2
+      RoleArn: !GetAtt CodePipelineRoleLab2.Arn
+      ArtifactStore:
+        Location: !Ref CodePipelineBucketLab2
+        Type: S3
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: SourceAction
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeCommit
+                Version: 1
+              Configuration:
+                BranchName: master
+                RepositoryName: !Ref CodeCommitRepoName
+                PollForSourceChanges: false
+              RunOrder: 1
+              OutputArtifacts:
+                - Name: App
+        - Name: Build
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref CodeBuildProjectLab2
+              InputArtifacts:
+                - Name: App
+              OutputArtifacts:
+                - Name: AppDeploy
+        - Name: Deploy
+          Actions:
+            - Name: DeployAction
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CodeDeploy
+                Version: 1
+              Configuration:
+                ApplicationName: !Ref CodeDeployProjectLab2
+                DeploymentGroupName: !Ref CodeDeployDeploymentGroupLab2
+              InputArtifacts:
+                - Name: AppDeploy
+  CloudWatchEventRoleForCloudTrailLab2:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-cloudwatch-event-role-lab2-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-cloudwatch-event-policy-lab2-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codepipeline:StartPipelineExecution
+                Resource: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipelineLab2}
+  CloudWatchEventRuleForCodePipelineLab2:
+    Type: AWS::Events::Rule
+    DependsOn: CloudWatchEventRoleForCloudTrailLab2
+    Properties:
+      EventPattern:
+        source:
+          - aws.codecommit
+        detail-type:
+          - 'CodeCommit Repository State Change'
+        detail:
+          event:
+            - referenceCreated
+            - referenceUpdated
+          referenceType:
+            - branch
+          referenceName:
+            - master
+      Targets:
+        - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipelineLab2}
+          RoleArn: !GetAtt CloudWatchEventRoleForCloudTrailLab2.Arn
+          Id: !Ref CodePipelineLab2
+  LambdaUpdateDeploymentGroupLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-update-deploymentgroup-${AWS::Region}
+      RetentionInDays: 30
+  LambdaUpdateDeploymentGroupRole:
+    Type: AWS::IAM::Role
+    DependsOn:
+      - CodeDeployProjectLab2
+      - CodeDeployDeploymentGroupLab2
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-update-deploymentgroup-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-update-deploymentgroup-policy-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - codedeploy:GetDeploymentGroup
+                  - codedeploy:UpdateDeploymentGroup
+                Resource:
+                  - !Sub arn:aws:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${CodeDeployProjectLab2}/${CodeDeployDeploymentGroupLab2}
+  LambdaUpdateDeploymentGroup:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-update-deploymentgroup-${AWS::Region}
+      Role: !GetAtt LambdaUpdateDeploymentGroupRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.UpdateDeploymentGroup
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: UpdateDeploymentGroup.jar
+  TenantServiceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: saas-factory-srvls-wrkshp-tenants
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  TenantServiceExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-tenantsvc-lambda-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-tenantsvc-lambda-policy-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*
+  RegistrationServiceExecutionRole:
+    Type: AWS::IAM::Role
+    DependsOn: LambdaUpdateDeploymentGroup
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-regsvc-lambda-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-regsvc-lambda-policy-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:CreateStack
+                Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*
+                Condition:
+                  ForAllValues:StringEquals:
+                    cloudformation:TemplateUrl: [!Sub 'https://${WorkshopS3Bucket}.s3-${AWS::Region}.amazonaws.com/onboard-tenant.template']
+              - Effect: Allow
+                Action:
+                  - ssm:PutParameter
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ssm:DescribeParameters
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+              - Effect: Allow
+                Action:
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*:log-stream:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutRetentionPolicy
+                  - logs:DescribeLogGroups
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+              - Effect: Allow
+                Action:
+                  - s3:Get*
+                  - s3:List*
+                Resource:
+                  - !Sub arn:aws:s3:::${WorkshopS3Bucket}
+                  - !Sub arn:aws:s3:::${WorkshopS3Bucket}/*
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeVpcs
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeKeyPairs
+                  - ec2:DescribeImages
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:DescribeTargetGroups
+                  - elasticloadbalancing:CreateTargetGroup
+                  - elasticloadbalancing:ModifyTargetGroupAttributes
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - autoscaling:CreateLaunchConfiguration
+                Resource: !Sub arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:launchConfiguration:*:launchConfigurationName/*
+              - Effect: Allow
+                Action:
+                  - autoscaling:CreateAutoScalingGroup
+                  - autoscaling:UpdateAutoScalingGroup
+                Resource: !Sub arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/*
+              - Effect: Allow
+                Action:
+                  - autoscaling:DescribeAutoScalingGroups
+                  - autoscaling:DescribeLaunchConfigurations
+                  - autoscaling:DescribeScalingActivities
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:CreateRole
+                  - iam:GetRolePolicy
+                  - iam:PutRolePolicy
+                  - iam:PassRole
+                Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/*
+              - Effect: Allow
+                Action:
+                  - iam:CreateInstanceProfile
+                  - iam:AddRoleToInstanceProfile
+                Resource: !Sub arn:aws:iam::${AWS::AccountId}:instance-profile/*
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt LambdaUpdateDeploymentGroup.Arn 
+  TenantServiceGetByIdLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-tenants-get-by-id-${AWS::Region}
+      RetentionInDays: 30
+  TenantServiceGetById:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-tenants-get-by-id-${AWS::Region}
+      Role: !GetAtt TenantServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.TenantService::getTenant
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: TenantService-lambda.zip
+  TenantServiceGetAllLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-tenants-get-all-${AWS::Region}
+      RetentionInDays: 30
+  TenantServiceGetAll:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-tenants-get-all-${AWS::Region}
+      Role: !GetAtt TenantServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.TenantService::getTenants
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: TenantService-lambda.zip
+  TenantServiceUpdateLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-tenants-update-${AWS::Region}
+      RetentionInDays: 30
+  TenantServiceUpdate:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-tenants-update-${AWS::Region}
+      Role: !GetAtt TenantServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.TenantService::updateTenant
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: TenantService-lambda.zip
+  TenantServiceInsertLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-tenants-insert-${AWS::Region}
+      RetentionInDays: 30
+  TenantServiceInsert:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-tenants-insert-${AWS::Region}
+      Role: !GetAtt TenantServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.TenantService::insertTenant
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: TenantService-lambda.zip
+  TenantServiceDeleteLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-tenants-delete-${AWS::Region}
+      RetentionInDays: 30
+  TenantServiceDelete:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-tenants-delete-${AWS::Region}
+      Role: !GetAtt TenantServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.TenantService::deleteTenant
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: TenantService-lambda.zip
+  TenantServiceNextDatabaseLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-tenants-next-db-${AWS::Region}
+      RetentionInDays: 30
+  TenantServiceNextDatabase:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-tenants-next-db-${AWS::Region}
+      Role: !GetAtt TenantServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.TenantService::nextAvailableDatabase
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: TenantService-lambda.zip
+  RegistrationServiceRegisterLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-reg-register-${AWS::Region}
+      RetentionInDays: 30
+  RegistrationServiceRegister:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-reg-register-${AWS::Region}
+      Role: !GetAtt RegistrationServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 600
+      MemorySize: 768
+      Handler: com.amazon.aws.partners.saasfactory.RegistrationService::register
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: RegistrationService-lambda.zip
+  ApiGatewayLoggingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-apigw-log-lab2-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+  ApiGatewayLab2Api:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: saas-factory-srvls-wrkshp-lab2
+      EndpointConfiguration:
+        Types: [REGIONAL]
+  ApiGatewayLoggingAccount:
+    Type: AWS::ApiGateway::Account
+    DependsOn:
+      - ApiGatewayLab2Api
+      - ApiGatewayLoggingRole
+    Properties:
+      CloudWatchRoleArn: !GetAtt ApiGatewayLoggingRole.Arn
+  ProductServiceProductsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !GetAtt ApiGatewayLab2Api.RootResourceId
+      PathPart: products
+  ProductServiceProductByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !Ref ProductServiceProductsResource
+      PathPart: '{id}'
+  ProductServiceCategoriesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !GetAtt ApiGatewayLab2Api.RootResourceId
+      PathPart: categories
+  ProductServiceCategoryByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !Ref ProductServiceCategoriesResource
+      PathPart: '{id}'
+  OrderServiceOrdersResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !GetAtt ApiGatewayLab2Api.RootResourceId
+      PathPart: orders
+  OrderServiceOrderByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !Ref OrderServiceOrdersResource
+      PathPart: '{id}'
+  ProductServiceProductsResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceProductsResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  ProductServiceProductByIdResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceProductByIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,PUT,DELETE,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  ProductServiceCategoriesResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceCategoriesResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  ProductServiceCategoryByIdResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceCategoryByIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,PUT,DELETE,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  OrderServiceOrdersResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref OrderServiceOrdersResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  OrderServiceOrderByIdResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref OrderServiceOrderByIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,PUT,DELETE,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  ProductServiceGetAllMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceProductsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub http://${LoadBalancerDNS}/api/products
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceGetByIdMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceProductByIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceUpdateMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceProductByIdResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: PUT
+        Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceInsertMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceProductsResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: POST
+        Uri: !Sub http://${LoadBalancerDNS}/api/products
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceProductByIdResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: DELETE
+        Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceGetAllCategoriesMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceCategoriesResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub http://${LoadBalancerDNS}/api/categories
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceGetCategoryByIdMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceCategoryByIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceUpdateCategoryMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceCategoryByIdResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: PUT
+        Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceInsertCategoryMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceCategoriesResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: POST
+        Uri: !Sub http://${LoadBalancerDNS}/api/categories
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  ProductServiceDeleteCategoryMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref ProductServiceCategoryByIdResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: DELETE
+        Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  OrderServiceGetAllOrdersMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref OrderServiceOrdersResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub http://${LoadBalancerDNS}/api/orders
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  OrderServiceGetOrderByIdMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref OrderServiceOrderByIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub http://${LoadBalancerDNS}/api/orders/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  OrderServiceUpdateOrderMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref OrderServiceOrderByIdResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: PUT
+        Uri: !Sub http://${LoadBalancerDNS}/api/orders/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  OrderServiceInsertOrderMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref OrderServiceOrdersResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: POST
+        Uri: !Sub http://${LoadBalancerDNS}/api/orders
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  OrderServiceDeleteOrderMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref OrderServiceOrderByIdResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: DELETE
+        Uri: !Sub http://${LoadBalancerDNS}/api/orders/{id}
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceTenantsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !GetAtt ApiGatewayLab2Api.RootResourceId
+      PathPart: tenants
+  TenantServiceByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !Ref TenantServiceTenantsResource
+      PathPart: '{id}'
+  TenantServicePoolResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !Ref TenantServiceTenantsResource
+      PathPart: pool
+  TenantServiceNextDatabaseResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !Ref TenantServicePoolResource
+      PathPart: database
+  TenantServiceTenantsResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceTenantsResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  TenantServiceTenantByIdResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceByIdResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,PUT,DELETE,OPTIONS,POST'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  TenantServiceGetAllMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceTenantsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceGetAll.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceGetAllLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt TenantServiceGetAll.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab2Api}/*/GET/tenants
+  TenantServiceGetByIdMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceByIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceGetById.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceGetByIdLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt TenantServiceGetById.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab2Api}/*/GET/tenants/{id}
+  TenantServiceUpdateMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceByIdResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceUpdate.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceUpdateLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt TenantServiceUpdate.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab2Api}/*/PUT/tenants/{id}
+  TenantServiceInsertMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceTenantsResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceInsert.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceInsertLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt TenantServiceInsert.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab2Api}/*/POST/tenants
+  TenantServiceDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceByIdResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      RequestParameters: {method.request.path.id: true}
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceDelete.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceDeleteLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt TenantServiceDelete.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab2Api}/*/DELETE/tenants/{id}
+  TenantServiceNextDatabaseMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref TenantServiceNextDatabaseResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceNextDatabase.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceNextDatabaseLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt TenantServiceNextDatabase.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab2Api}/*/GET/tenants/pool/database
+  RegistrationServiceRegisterResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ParentId: !GetAtt ApiGatewayLab2Api.RootResourceId
+      PathPart: registration
+  RegistrationServiceRegisterResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref RegistrationServiceRegisterResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  RegistrationServiceRegisterMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      ResourceId: !Ref RegistrationServiceRegisterResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RegistrationServiceRegister.Arn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  RegistrationServiceRegisterLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt RegistrationServiceRegister.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab2Api}/*/POST/registration
+  ApiGatewayLab2ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ProductServiceProductsResourceCORS
+      - ProductServiceProductByIdResourceCORS
+      - ProductServiceGetAllMethod
+      - ProductServiceGetByIdMethod
+      - ProductServiceUpdateMethod
+      - ProductServiceInsertMethod
+      - ProductServiceDeleteMethod
+      - ProductServiceCategoriesResourceCORS
+      - ProductServiceCategoryByIdResourceCORS
+      - ProductServiceGetAllCategoriesMethod
+      - ProductServiceGetCategoryByIdMethod
+      - ProductServiceUpdateCategoryMethod
+      - ProductServiceInsertCategoryMethod
+      - ProductServiceDeleteCategoryMethod
+      - OrderServiceOrdersResourceCORS
+      - OrderServiceOrderByIdResourceCORS
+      - OrderServiceGetAllOrdersMethod
+      - OrderServiceGetOrderByIdMethod
+      - OrderServiceUpdateOrderMethod
+      - OrderServiceInsertOrderMethod
+      - OrderServiceDeleteOrderMethod
+      - TenantServiceTenantsResourceCORS
+      - TenantServiceTenantByIdResourceCORS
+      - TenantServiceGetAllMethod
+      - TenantServiceGetByIdMethod
+      - TenantServiceUpdateMethod
+      - TenantServiceInsertMethod
+      - TenantServiceDeleteMethod
+      - TenantServiceNextDatabaseMethod
+      - RegistrationServiceRegisterResourceCORS
+      - RegistrationServiceRegisterMethod
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+  ApiGatewayLab2ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref ApiGatewayLab2Api
+      StageName: v1
+      DeploymentId: !Ref ApiGatewayLab2ApiDeployment
+  SSMParamAPI:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: API_GW
+      Type: String
+      Value: !Sub 'https://${ApiGatewayLab2Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayLab2ApiStage}'
+  SSMParamPipeLineBucket:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: PIPELINE_BUCKET
+      Type: String
+      Value: !Ref CodePipelineBucketLab2
+  SSMParamCodeDeployApp:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: CODE_DEPLOY
+      Type: String
+      Value: !Ref CodeDeployProjectLab2
+  SSMParamDeploymentGroup:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: DEPLOYMENT_GROUP
+      Type: String
+      Value: !Ref CodeDeployDeploymentGroupLab2
+  SSMParamDeploymentGroupLambda:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: CODE_DEPLOY_LAMBDA
+      Type: String
+      Value: !GetAtt LambdaUpdateDeploymentGroup.Arn 
+Outputs:
+  ApiGatewayEndpointLab2:
+    Description: API Gateway Invoke URL
+    Value: !Sub 'https://${ApiGatewayLab2Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiGatewayLab2ApiStage}'
+  CodeDeployApplicationLab2:
+    Description: CodeDeploy Application for Lab 2
+    Value: !Ref CodeDeployProjectLab2
+  CodeDeployDeploymentGroupLab2:
+    Description: CodeDeploy Deployment Group for Lab 2
+    Value: !Ref CodeDeployDeploymentGroupLab2
+...

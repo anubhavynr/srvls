@@ -1,0 +1,331 @@
+---
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS SaaS Factory Serverless SaaS Workshop - Lab 3
+Parameters:
+  RDSSecurityGroup:
+    Description: Security Group for communication to RDS cluster
+    Type: String
+  SubnetPrivateA:
+    Description: Private subnet 1 of 2 that RDS is deployed to
+    Type: String
+  SubnetPrivateB:
+    Description: Private subnet 2 of 2 that RDS is deployed to
+    Type: String
+Resources:
+  SaaSLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: saas-factory-srvls-wrkshp-layer
+      CompatibleRuntimes: [java8]
+      Content:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: ServerlessSaaS-lambda-layer.zip
+  ProductServiceExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-prodsvc-lambda-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-prodsvc-lambda-policy-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  #- logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:DescribeParameters
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'
+  ProductServiceGetByIdLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-products-get-by-id-${AWS::Region}
+      RetentionInDays: 30
+  ProductServiceGetById:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-products-get-by-id-${AWS::Region}
+      Role: !GetAtt ProductServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      VpcConfig: # Has to be a VPC Lambda because we're talking to RDS
+        SecurityGroupIds:
+          - !Ref RDSSecurityGroup
+        SubnetIds:
+          - !Ref SubnetPrivateA
+          - !Ref SubnetPrivateB
+      Handler: com.amazon.aws.partners.saasfactory.ProductService::getProduct
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: ProductService-lambda.zip
+      Layers:
+        - !Ref SaaSLambdaLayer
+  ProductServiceGetAllLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-products-get-all-${AWS::Region}
+      RetentionInDays: 30
+  ProductServiceGetAll:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-products-get-all-${AWS::Region}
+      Role: !GetAtt ProductServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      VpcConfig: # Has to be a VPC Lambda because we're talking to RDS
+        SecurityGroupIds:
+          - !Ref RDSSecurityGroup
+        SubnetIds:
+          - !Ref SubnetPrivateA
+          - !Ref SubnetPrivateB
+      Handler: com.amazon.aws.partners.saasfactory.ProductService::getProducts
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: ProductService-lambda.zip
+      Layers:
+        - !Ref SaaSLambdaLayer
+  ProductServiceUpdateLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-products-update-${AWS::Region}
+      RetentionInDays: 30
+  ProductServiceUpdate:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-products-update-${AWS::Region}
+      Role: !GetAtt ProductServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      VpcConfig: # Has to be a VPC Lambda because we're talking to RDS
+        SecurityGroupIds:
+          - !Ref RDSSecurityGroup
+        SubnetIds:
+          - !Ref SubnetPrivateA
+          - !Ref SubnetPrivateB
+      Handler: com.amazon.aws.partners.saasfactory.ProductService::updateProduct
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: ProductService-lambda.zip
+      Layers:
+        - !Ref SaaSLambdaLayer
+  ProductServiceInsertLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-products-insert-${AWS::Region}
+      RetentionInDays: 30
+  ProductServiceInsert:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-products-insert-${AWS::Region}
+      Role: !GetAtt ProductServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      VpcConfig: # Has to be a VPC Lambda because we're talking to RDS
+        SecurityGroupIds:
+          - !Ref RDSSecurityGroup
+        SubnetIds:
+          - !Ref SubnetPrivateA
+          - !Ref SubnetPrivateB
+      Handler: com.amazon.aws.partners.saasfactory.ProductService::insertProduct
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: ProductService-lambda.zip
+      Layers:
+        - !Ref SaaSLambdaLayer
+  ProductServiceDeleteLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-products-delete-${AWS::Region}
+      RetentionInDays: 30
+  ProductServiceDelete:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-products-delete-${AWS::Region}
+      Role: !GetAtt ProductServiceExecutionRole.Arn
+      Runtime: java8
+      Timeout: 30
+      MemorySize: 256
+      VpcConfig: # Has to be a VPC Lambda because we're talking to RDS
+        SecurityGroupIds:
+          - !Ref RDSSecurityGroup
+        SubnetIds:
+          - !Ref SubnetPrivateA
+          - !Ref SubnetPrivateB
+      Handler: com.amazon.aws.partners.saasfactory.ProductService::deleteProduct
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: ProductService-lambda.zip
+      Layers:
+        - !Ref SaaSLambdaLayer
+  ApiGatewayLoggingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-apigw-log-lab4-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+  ApiGatewayLab4Api:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: saas-factory-srvls-wrkshp-lab4
+      EndpointConfiguration:
+        Types: [REGIONAL]
+  ApiGatewayLoggingAccount:
+    Type: AWS::ApiGateway::Account
+    DependsOn:
+      - ApiGatewayLab4Api
+      - ApiGatewayLoggingRole
+    Properties:
+      CloudWatchRoleArn: !GetAtt ApiGatewayLoggingRole.Arn
+  ProductServiceProductsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab4Api
+      ParentId: !GetAtt ApiGatewayLab4Api.RootResourceId
+      PathPart: products
+  ProductServiceByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab4Api
+      ParentId: !Ref ProductServiceProductsResource
+      PathPart: '{id}'
+  ProductServiceGetAllMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab4Api
+      ResourceId: !Ref ProductServiceProductsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductServiceGetAll.Arn}/invocations
+  ProductServiceGetAllLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ProductServiceGetAll.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab4Api}/*/GET/products
+  ProductServiceGetByIdMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab4Api
+      ResourceId: !Ref ProductServiceByIdResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductServiceGetById.Arn}/invocations
+  ProductServiceGetByIdLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ProductServiceGetById.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab4Api}/*/GET/products/{id}
+  ProductServiceUpdateMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab4Api
+      ResourceId: !Ref ProductServiceByIdResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductServiceUpdate.Arn}/invocations
+  ProductServiceUpdateLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ProductServiceUpdate.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab4Api}/*/PUT/products/{id}
+  ProductServiceInsertMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab4Api
+      ResourceId: !Ref ProductServiceProductsResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductServiceInsert.Arn}/invocations
+  ProductServiceInsertLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ProductServiceInsert.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab4Api}/*/POST/products
+  ProductServiceDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab4Api
+      ResourceId: !Ref ProductServiceByIdResource
+      HttpMethod: DELETE
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductServiceDelete.Arn}/invocations
+  ProductServiceDeleteLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ProductServiceDelete.Arn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab4Api}/*/DELETE/products/{id}
+
+...

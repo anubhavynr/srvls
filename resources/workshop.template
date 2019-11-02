@@ -1,0 +1,127 @@
+---
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS SaaS Factory Serverless SaaS Workshop
+Parameters:
+  WorkshopS3Bucket:
+    Description: S3 bucket where you uploaded the Lambda code packages for CloudFormation
+    Type: String
+  EventEngineRoleName:
+    Description: IAM role name of the Event Engine player role
+    Type: String
+    Default: TeamRole
+  DBName:
+    Description: RDS Database Name
+    Type: String
+    MinLength: 3
+    MaxLength: 31
+    AllowedPattern: ^[a-zA-Z]+[a-zA-Z0-9_\$]*$
+    ConstraintDescription: Database name must be between 3 and 31 characters in length
+    Default: saas_factory_srvls_wrkshp
+  DBMasterUsername:
+    Description: RDS Master Username
+    Type: String
+    Default: master
+  DBMasterPassword:
+    Description: RDS Master User Password
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    AllowedPattern: ^[a-zA-Z0-9/@"' ]{8,}$
+    ConstraintDescription: RDS passwords must be at least 8 characters in length
+    Default: ServerlessSaaSWorkshop
+  DBAppUsername:
+    Description: RDS Application Username
+    Type: String
+    Default: application
+  DBAppPassword:
+    Description: RDS Application User Password
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    AllowedPattern: ^[a-zA-Z0-9/@"' ]{8,}$
+    ConstraintDescription: RDS passwords must be at least 8 characters in length
+    Default: '6sNVV/Fcx@4c'
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-checkrole-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-checkrole-policy-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/*
+  LambdaCheckRoleLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-checkrole-${AWS::Region}
+      RetentionInDays: 30
+  LambdaCheckRole:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-checkrole-${AWS::Region}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+      MemorySize: 256
+      Handler: com.amazon.aws.partners.saasfactory.CheckRole
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: CheckRole.jar
+  InvokeLambdaCheckRole:
+    Type: Custom::CustomResource
+    Properties:
+      ServiceToken: !GetAtt LambdaCheckRole.Arn
+      RoleName: !Ref EventEngineRoleName
+  lab1:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: InvokeLambdaCheckRole
+    Properties:
+      TemplateURL: !Sub https://s3.amazonaws.com/${WorkshopS3Bucket}/lab1.template
+      Parameters:
+        EventEngineRole: !GetAtt InvokeLambdaCheckRole.Role
+        EventEngineRoleName: !Ref EventEngineRoleName
+        WorkshopS3Bucket: !Ref WorkshopS3Bucket
+        DBName: !Ref DBName
+        DBMasterUsername: !Ref DBMasterUsername
+        DBMasterPassword: !Ref DBMasterPassword
+        DBAppUsername: !Ref DBAppUsername
+        DBAppPassword: !Ref DBAppPassword
+Outputs:
+  SaaSFactoryServerlessSaaSWorkshopStack:
+    Description: SaaS Factory Serverless SaaS Workshop CloudFormation stack
+    Value: !Ref AWS::StackName
+...
