@@ -20,6 +20,11 @@ Parameters:
     Description: Tenant Unique Identifier
     Type: String
     MaxLength: 38
+  TenantRouteALBPriority:
+    Description: The priority to set this tenant's routing listener rule to
+    Type: Number
+    MinValue: 1
+    MaxValue: 50000
   KeyPair:
     Description: EC2 key pair for application servers
     Type: AWS::EC2::KeyPair::KeyName
@@ -36,6 +41,9 @@ Parameters:
   AppServerSecurityGroup:
     Description: The security group to apply to the application servers
     Type: AWS::EC2::SecurityGroup::Id
+  ALBListener:
+    Description: The ARN of the application load balancer listener to add the tenant routing rules to
+    Type: String
   CodePipelineBucket:
     Description: S3 bucket for CodePipeline to retrieve build artifacts from
     Type: String
@@ -201,4 +209,18 @@ Resources:
       ApplicationName: !Ref CodeDeployApplication
       DeploymentGroup: !Ref DeploymentGroup
       AutoScalingGroup: !Ref AppServerAutoScalingGroup
+  TenantRoutingListenerRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+      Conditions:
+        - Field: http-header
+          HttpHeaderConfig:
+            HttpHeaderName: X-Tenant-ID
+            Values:
+              - !Ref TenantId
+      ListenerArn: !Ref ALBListener
+      Priority: !Ref TenantRouteALBPriority
 ...

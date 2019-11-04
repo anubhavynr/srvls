@@ -91,6 +91,32 @@ public class TenantServiceDAL {
         try {
             Map<String, AttributeValue> item = toAttributeValueMap(tenant);
             PutItemResponse response = ddb.putItem(request -> request.tableName(TENANT_TABLE).item(item));
+
+            // Bit of a hack here to keep our record keeping of RDS clusters up-to-date
+            if (tenant.getDatabase() != null && !tenant.getDatabase().isEmpty()) {
+                ScanResponse scan = ddb.scan(request -> request
+                        .tableName("saas-factory-srvls-wrkshp-rds-clusters")
+                        .filterExpression("Endpoint = :host")
+                        .expressionAttributeValues(Stream
+                                .of(new AbstractMap.SimpleEntry<String, AttributeValue>(":host", AttributeValue.builder().s(tenant.getDatabase()).build()))
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                        )
+                );
+                if (!scan.items().isEmpty()) {
+                    Map<String, AttributeValue> rdsHousekeepingItem = scan.items().get(0);
+                    Map<String, AttributeValue> updateKey = new HashMap<>();
+                    updateKey.put("DBClusterIdentifier", AttributeValue.builder().s(rdsHousekeepingItem.get("DBClusterIdentifier").s()).build());
+                    ddb.updateItem(request -> request
+                            .tableName("saas-factory-srvls-wrkshp-rds-clusters")
+                            .key(updateKey)
+                            .updateExpression("SET TenantId = :tenantId")
+                            .expressionAttributeValues(Stream
+                                    .of(new AbstractMap.SimpleEntry<String, AttributeValue>(":tenantId", AttributeValue.builder().s(tenant.getId().toString()).build()))
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                            )
+                    );
+                }
+            }
         } catch (DynamoDbException e) {
             LOGGER.error("TenantServiceDAL::insertTenant " + getFullStackTrace(e));
             throw new RuntimeException(e);
@@ -204,6 +230,9 @@ public class TenantServiceDAL {
         if (tenant.getUserPool() != null && !tenant.getUserPool().isEmpty()) {
             item.put("userPool", AttributeValue.builder().s(tenant.getUserPool()).build());
         }
+        if (tenant.getDatabase() != null && !tenant.getDatabase().isEmpty()) {
+            item.put("database", AttributeValue.builder().s(tenant.getDatabase()).build());
+        }
         return item;
     }
 
@@ -225,6 +254,9 @@ public class TenantServiceDAL {
             }
             if (item.containsKey("userPool")) {
                 tenant.setUserPool(item.get("userPool").s());
+            }
+            if (item.containsKey("database")) {
+                tenant.setDatabase(item.get("database").s());
             }
         }
         return tenant;

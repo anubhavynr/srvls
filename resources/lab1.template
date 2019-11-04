@@ -284,6 +284,7 @@ Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
+      Name: !Sub saas-svs-wrkshp-lab1-${AWS::Region}
       Scheme: internet-facing
       LoadBalancerAttributes:
         - Key: idle_timeout.timeout_seconds
@@ -336,7 +337,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: saas-factory-srvls-wrkshp-app-sg
-      GroupDescription: Monolith App Server Security Group
+      GroupDescription: App Server Security Group
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -1333,13 +1334,23 @@ Outputs:
   VpcId:
     Description: Workshop VPC
     Value: !Ref VPC
+  WorkshopBucket:
+    Description: Workshop S3 bucket
+    Value: !Ref WorkshopS3Bucket
   PrivateSubnets:
     Description: Workshop private subnet ids
     Value:
       Fn::Join: [',', [!Ref SubnetPrivateA, !Ref SubnetPrivateB]]
+  PublicSubnets:
+    Description: Workshop public subnet ids
+    Value:
+      Fn::Join: [',', [!Ref SubnetPublicA, !Ref SubnetPublicB]]
   AppServerSecurityGroup:
     Description: Application server security group
     Value: !Ref AppServerSecurityGroup
+  LoadBalancerSecurityGroup:
+    Description: Load balancer security group
+    Value: !Ref ALBSecurityGroup
   LoadBalancerEndpoint:
     Description: Load balancer URL
     Value: !GetAtt LoadBalancer.DNSName

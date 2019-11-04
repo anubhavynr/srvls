@@ -803,6 +803,18 @@ Resources:
       RestApiId: !Ref ApiGatewayLab3Api
       ParentId: !Ref TenantServiceTenantsResource
       PathPart: '{id}'
+  TenantServicePoolResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab3Api
+      ParentId: !Ref TenantServiceTenantsResource
+      PathPart: pool
+  TenantServiceNextDatabaseResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab3Api
+      ParentId: !Ref TenantServicePoolResource
+      PathPart: database
   TenantServiceTenantsResourceCORS:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -873,7 +885,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceGetAll.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceGetAllArn}/invocations
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -890,7 +902,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceGetAll.Arn
+      FunctionName: !GetAtt TenantServiceGetAllArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/GET/tenants
   TenantServiceGetByIdMethod:
     Type: AWS::ApiGateway::Method
@@ -903,7 +915,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceGetById.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceGetByIdArn}/invocations
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -921,7 +933,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceGetById.Arn
+      FunctionName: !GetAtt TenantServiceGetByIdArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/GET/tenants/{id}
   TenantServiceUpdateMethod:
     Type: AWS::ApiGateway::Method
@@ -934,7 +946,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceUpdate.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceUpdateArn}/invocations
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -952,7 +964,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceUpdate.Arn
+      FunctionName: !GetAtt TenantServiceUpdateArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/PUT/tenants/{id}
   TenantServiceInsertMethod:
     Type: AWS::ApiGateway::Method
@@ -964,7 +976,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceInsert.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceInsertArn}/invocations
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -981,7 +993,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceInsert.Arn
+      FunctionName: !GetAtt TenantServiceInsertArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/POST/tenants
   TenantServiceDeleteMethod:
     Type: AWS::ApiGateway::Method
@@ -994,7 +1006,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceDelete.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceDeleteArn}/invocations
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1012,8 +1024,37 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceDelete.Arn
+      FunctionName: !GetAtt TenantServiceDeleteArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/DELETE/tenants/{id}
+  TenantServiceNextDatabaseMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab3Api
+      ResourceId: !Ref TenantServiceNextDatabaseResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TenantServiceNextDbArn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  TenantServiceNextDatabaseLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt TenantServiceNextDbArn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/GET/tenants/pool/database
   RegistrationServiceRegisterResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -1060,7 +1101,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RegistrationServiceRegister.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RegistrationServiceRegisterArn}/invocations
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -1077,9 +1118,8 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt RegistrationServiceRegister.Arn
+      FunctionName: !GetAtt RegistrationServiceRegisterArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/POST/registration
-
   ApiGatewayLab3ApiDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
@@ -1111,6 +1151,7 @@ Resources:
       - TenantServiceUpdateMethod
       - TenantServiceInsertMethod
       - TenantServiceDeleteMethod
+      - TenantServiceNextDatabaseMethod
       - RegistrationServiceRegisterResourceCORS
       - RegistrationServiceRegisterMethod
     Properties:

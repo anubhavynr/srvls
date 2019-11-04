@@ -24,10 +24,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkServiceException;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
+import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.services.cloudformation.CloudFormationAsyncClient;
 import software.amazon.awssdk.services.cloudformation.model.CreateStackResponse;
 import software.amazon.awssdk.services.cloudformation.model.Parameter;
+import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeRulesResponse;
 import software.amazon.awssdk.services.ssm.SsmAsyncClient;
 import software.amazon.awssdk.services.ssm.model.GetParametersResponse;
 import software.amazon.awssdk.services.ssm.model.ParameterType;
@@ -50,6 +54,7 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
     private final static String ONBOARDING_TEMPLATE = "onboard-tenant.template";
     private SsmAsyncClient ssm;
     private CloudFormationAsyncClient cfn;
+    private ElasticLoadBalancingV2Client elbv2;
     private String apiGatewayEndpoint;
     private String workshopBucket;
     private String keyPairName;
@@ -60,11 +65,16 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
     private String codeDeployApplication;
     private String deploymentGroup;
     private String updateCodeDeployLambdaArn;
+    private String albListenerArn;
 
     public RegistrationService() {
 
         this.ssm = SsmAsyncClient.builder()
                 .httpClientBuilder(NettyNioAsyncHttpClient.builder())
+                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+                .build();
+        this.elbv2 = ElasticLoadBalancingV2Client.builder()
+                .httpClientBuilder(UrlConnectionHttpClient.builder())
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .build();
 
@@ -124,12 +134,33 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
             }
         });
 
+        // Can only query for a max of 10 parameters at a time...
+        CompletableFuture<GetParametersResponse> asyncResponse2 = this.ssm.getParameters(request -> request
+                .names("ALB_LISTENER")
+        );
+        asyncResponse2.whenComplete((parametersResponse, exception) -> {
+            if (parametersResponse != null) {
+                for (software.amazon.awssdk.services.ssm.model.Parameter parameter : parametersResponse.parameters()) {
+                    switch (parameter.name()) {
+                        case "ALB_LISTENER":
+                            this.albListenerArn = parameter.value();
+                            LOGGER.info("Setting env alb listener = " + this.albListenerArn);
+                            break;
+                    }
+                }
+            } else {
+                LOGGER.error(exception.getMessage());
+                throw new RuntimeException(exception);
+            }
+        });
+
         this.cfn = CloudFormationAsyncClient.builder()
                 .httpClientBuilder(NettyNioAsyncHttpClient.builder())
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .build();
 
         asyncResponse.join();
+        asyncResponse2.join();
     }
 
     @Override
@@ -159,15 +190,18 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
         if (registration != null) {
             try {
                 // Not thread safe - do not copy this
+
                 // First, get an available RDS cluster
                 String availableDatabaseResponse = nextAvailableDatabase();
                 Map<String, String> availableDatabase = MAPPER.readValue(availableDatabaseResponse, Map.class);
                 if (availableDatabase == null || availableDatabase.isEmpty()) {
                     throw new RuntimeException("Cannot register new tenant. Hot pool of RDS clusters has been depleted.");
                 }
+                String tenantDatabase = availableDatabase.get("Endpoint");
+                LOGGER.info("RegistrationService::register next available database = " + tenantDatabase);
 
                 // Second, create the new tenant
-                tenant = createTenant(registration.getCompany(), registration.getPlan(), availableDatabase.get("Endpoint"));
+                tenant = createTenant(registration.getCompany(), registration.getPlan(), tenantDatabase);
                 LOGGER.info("RegistrationService::register created tenant " + tenant.getId().toString());
 
                 // Third, save this tenant's environment variables to parameter store
@@ -275,6 +309,21 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
 
     protected void createStack(Tenant tenant) {
         long startTimeMillis = System.currentTimeMillis();
+
+        LOGGER.info("RegistrationService::createStack getting routing rule priority");
+        int priority = 0;
+        try {
+            DescribeRulesResponse elbResponse = elbv2.describeRules(request -> request
+                    .listenerArn(albListenerArn)
+            );
+            priority = elbResponse.rules().size() + 1;
+        } catch (SdkServiceException e) {
+            LOGGER.error(getFullStackTrace(e));
+            throw new RuntimeException(e);
+        }
+        LOGGER.info("RegistrationService::createStack routing rule priority = " + priority);
+
+        final Integer tenantAlbRulePriority = priority;
         String stackName = "Tenant-" + tenant.getId().toString().substring(0, 8);
         LOGGER.info("RegistrationService::createStack " + stackName);
         CompletableFuture<CreateStackResponse> asyncResponse = cfn.createStack(request -> request
@@ -284,6 +333,7 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
                 .templateURL("https://" + workshopBucket + ".s3-" + System.getenv("AWS_REGION") + ".amazonaws.com/" + ONBOARDING_TEMPLATE)
                 .parameters(
                         Parameter.builder().parameterKey("TenantId").parameterValue(tenant.getId().toString()).build(),
+                        Parameter.builder().parameterKey("TenantRouteALBPriority").parameterValue(tenantAlbRulePriority.toString()).build(),
                         Parameter.builder().parameterKey("KeyPair").parameterValue(keyPairName).build(),
                         Parameter.builder().parameterKey("VPC").parameterValue(vpcId).build(),
                         Parameter.builder().parameterKey("PrivateSubnets").parameterValue(privateSubnetIds).build(),
@@ -291,7 +341,8 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
                         Parameter.builder().parameterKey("CodePipelineBucket").parameterValue(codePipelineBucket).build(),
                         Parameter.builder().parameterKey("CodeDeployApplication").parameterValue(codeDeployApplication).build(),
                         Parameter.builder().parameterKey("DeploymentGroup").parameterValue(deploymentGroup).build(),
-                        Parameter.builder().parameterKey("LambdaUpdateDeploymentGroupArn").parameterValue(updateCodeDeployLambdaArn).build()
+                        Parameter.builder().parameterKey("LambdaUpdateDeploymentGroupArn").parameterValue(updateCodeDeployLambdaArn).build(),
+                        Parameter.builder().parameterKey("ALBListener").parameterValue(albListenerArn).build()
                 )
         );
         asyncResponse.whenComplete((response, exception) -> {

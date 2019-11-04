@@ -16,19 +16,44 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: AWS SaaS Factory Serverless SaaS Workshop - Lab 2
 Parameters:
-  LoadBalancerDNS:
-    Description: Application Load Balancer DNS name for API Gateway to proxy
+  LoadBalancerSecurityGroup:
+    Description: Security group for the load balancer to pass HTTP port 80 to the application servers
     Type: String
+  LoadBalancerSubnets:
+    Description: Public subnets for the load balancer to distribute target groups across
+    Type: List<AWS::EC2::Subnet::Id>
   CodeCommitRepoName:
-    Description: CodeCommit repository name for CodePipeline
+    Description: CodeCommit repository to use in the Lab 2 CodePipeline source phase
     Type: String
   CodeCommitRepoURL:
-    Description: CodeCommit repository clone URL for CodePipeline
+    Description: CodeCommit repository clone URL to use in the Lab 2 CodeBuild project
     Type: String
   WorkshopS3Bucket:
     Description: S3 bucket where you uploaded the Lambda code packages
     Type: String
 Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub saas-svs-wrkshp-lab2-${AWS::Region}
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: 30
+      Subnets: !Ref LoadBalancerSubnets    
+      SecurityGroups: [!Ref LoadBalancerSecurityGroup]
+  LoadBalancerDefaultListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 401
+            MessageBody: Unauthenticated request
+            ContentType: text/plain
+      Port: 80
+      Protocol: HTTP
   LambdaExecutionRoleLab2:
     Type: AWS::IAM::Role
     DependsOn:
@@ -560,6 +585,8 @@ Resources:
                   - elasticloadbalancing:DescribeTargetGroups
                   - elasticloadbalancing:CreateTargetGroup
                   - elasticloadbalancing:ModifyTargetGroupAttributes
+                  - elasticloadbalancing:DescribeRules
+                  - elasticloadbalancing:CreatRule
                 Resource: '*'
               - Effect: Allow
                 Action:
@@ -967,7 +994,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Sub http://${LoadBalancerDNS}/api/products
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/products
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -990,7 +1017,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/products/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1014,7 +1041,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
-        Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/products/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1037,7 +1064,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
-        Uri: !Sub http://${LoadBalancerDNS}/api/products
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/products
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -1060,7 +1087,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
-        Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/products/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1083,7 +1110,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Sub http://${LoadBalancerDNS}/api/categories
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/categories
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -1106,7 +1133,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/categories/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1130,7 +1157,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
-        Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/categories/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1153,7 +1180,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
-        Uri: !Sub http://${LoadBalancerDNS}/api/categories
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/categories
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -1176,7 +1203,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
-        Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/categories/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1199,7 +1226,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Sub http://${LoadBalancerDNS}/api/orders
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/orders
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -1222,7 +1249,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
-        Uri: !Sub http://${LoadBalancerDNS}/api/orders/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/orders/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1246,7 +1273,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: PUT
-        Uri: !Sub http://${LoadBalancerDNS}/api/orders/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/orders/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1269,7 +1296,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
-        Uri: !Sub http://${LoadBalancerDNS}/api/orders
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/orders
         PassthroughBehavior: WHEN_NO_MATCH
         IntegrationResponses:
           - StatusCode: 200
@@ -1292,7 +1319,7 @@ Resources:
       Integration:
         Type: HTTP
         IntegrationHttpMethod: DELETE
-        Uri: !Sub http://${LoadBalancerDNS}/api/orders/{id}
+        Uri: !Sub http://${LoadBalancer.DNSName}/api/orders/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
         IntegrationResponses:
@@ -1705,7 +1732,13 @@ Resources:
     Properties:
       Name: CODE_DEPLOY_LAMBDA
       Type: String
-      Value: !GetAtt LambdaUpdateDeploymentGroup.Arn 
+      Value: !GetAtt LambdaUpdateDeploymentGroup.Arn
+  SSMParamLoadBalancerListener:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: ALB_LISTENER
+      Type: String
+      Value: !Ref LoadBalancerDefaultListener
 Outputs:
   ApiGatewayEndpointLab2:
     Description: API Gateway Invoke URL

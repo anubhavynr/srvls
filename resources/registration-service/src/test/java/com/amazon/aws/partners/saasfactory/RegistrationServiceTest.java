@@ -2,6 +2,8 @@ package com.amazon.aws.partners.saasfactory;
 
 import org.junit.Test;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 public class RegistrationServiceTest {
