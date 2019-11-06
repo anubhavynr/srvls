@@ -18,6 +18,8 @@ function SignUpModal(props) {
         registerUser,
     } = props;
 
+    const [validated, setValidated] = useState(false);
+
     const useInput = initialValue => {
         const [value, setValue] = useState(initialValue);
 
@@ -28,6 +30,9 @@ function SignUpModal(props) {
             bind: {
                 value,
                 onChange: event => {
+                    const target = event.target;
+                    target.isInvalid = true;
+
                     setValue(event.target.value)
                 }
             },
@@ -37,19 +42,29 @@ function SignUpModal(props) {
     const { value: firstName, bind: bindFirstName } = useInput('');
     const { value: lastName, bind: bindLastName } = useInput('');
     const { value: email, bind: bindEmail } = useInput('');
+    const { value: password, bind: bindPassword } = useInput('');
     const { value: company, bind: bindCompany } = useInput('');
     const { value: plan, bind: bindPlan } = useInput('');
 
-    const submitRegisterUser = () => {
+    const submitRegisterUser = event => {
+        const form = event.currentTarget;
         const user = {
             firstName,
             lastName,
             email,
+            password,
             company,
             plan,
         };
 
-        registerUser(user);
+        if(form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            registerUser(user);
+        }
+
+        setValidated(true);
     };
 
     return (
@@ -59,29 +74,36 @@ function SignUpModal(props) {
                 onHide={closeModal}
                 centered
             >
+            <Form id="signUpForm" noValidate validated={validated} onSubmit={submitRegisterUser}>
                 <Modal.Header closeButton>
                     <Modal.Title>{title}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
                         <Form.Group controlId="signUpformFirstName">
                             <Form.Label>First Name</Form.Label>
-                            <Form.Control type="text" placeholder="FirstName" {...bindFirstName} />
+                            <Form.Control type="text" placeholder="FirstName" required {...bindFirstName} />
                         </Form.Group>
                         <Form.Group controlId="signUpformLastName">
                             <Form.Label>Last Name</Form.Label>
-                            <Form.Control type="text" placeholder="LastName" {...bindLastName} />
+                            <Form.Control type="text" placeholder="LastName" required {...bindLastName} />
                         </Form.Group>
                         <Form.Group controlId="signUpformEmail">
                             <Form.Label>Email Address</Form.Label>
-                            <Form.Control type="email" placeholder="EmailAddress" {...bindEmail} />
+                            <Form.Control type="email" placeholder="EmailAddress" required {...bindEmail} />
                             <Form.Text className="text-muted">
                                 {privacyMessage} <FontAwesomeIcon icon={faAward} />
                             </Form.Text>
                         </Form.Group>
+                        <Form.Group controlId="signUpformPassword">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control type="password" placeholder="Password" required pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])\S{8,}" {...bindPassword} />
+                            <Form.Control.Feedback type="invalid">
+                                Your password must be at least 8 characters long and contain one uppercase letter, one lowercase letter, and a number.
+                            </Form.Control.Feedback>
+                        </Form.Group>
                         <Form.Group controlId="signUpformCompany">
                             <Form.Label>Company</Form.Label>
-                            <Form.Control type="text" placeholder="CompanyName" {...bindCompany} />
+                            <Form.Control type="text" placeholder="CompanyName" required {...bindCompany} />
                         </Form.Group>
                         <Form.Group controlId="signUpformPlan">
                             <Form.Label>Plan</Form.Label>
@@ -91,16 +113,16 @@ function SignUpModal(props) {
                                 <option key={3} value={3}>Advanced Tier</option>
                             </Form.Control>
                         </Form.Group>
-                    </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={closeModal}>
                         Close
                     </Button>
-                    <Button variant="success" onClick={submitRegisterUser}>
+                    <Button type="submit" variant="success">
                         {buttonText}
                     </Button>
                 </Modal.Footer>
+            </Form>
             </Modal>
         </>
     );
