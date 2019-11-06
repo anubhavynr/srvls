@@ -22,16 +22,20 @@ export const receiveUserAuthentication = user => {
     };
 };
 
-export const authenticateUser = () => {
+export const authenticateUser = (userChallenge) => {
     return function(dispatch) {
-        const user = {
-            firstName: 'User',
-            lastName: 'Mustermann',
-            email: 'max@mustermann.com',
-            isAuthenticated: true,
+        let user;
+
+        if(userChallenge.userName === config.user.userName && userChallenge.password === config.user.password) {
+            user = {
+                firstName: 'User',
+                lastName: 'Mustermann',
+                email: 'max@mustermann.com',
+                isAuthenticated: true,
+            }
+
+            sessionStorage.setItem('isAuthenticated', 'true');
         }
-            
-        sessionStorage.setItem('isAuthenticated', 'true');
 
         dispatch(receiveUserAuthentication(user));
         dispatch(closeModal());

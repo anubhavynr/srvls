@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { closeModal } from '../actions';
 import Modal from 'react-bootstrap/Modal';
@@ -17,6 +17,34 @@ function SignInModal(props) {
         authenticateUser,
     } = props;
 
+    const useInput = initialValue => {
+        const [value, setValue] = useState(initialValue);
+
+        return {
+            value,
+            setValue,
+            reset: () => setValue(''),
+            bind: {
+                value,
+                onChange: event => {
+                    setValue(event.target.value)
+                }
+            },
+        };
+    };
+
+    const { value: email, bind: bindEmail } = useInput('');
+    const { value: password, bind: bindPassword } = useInput('');
+
+    function singInUser() {
+        const userChallenge = {
+            userName: email,
+            password: password,
+        }
+
+        authenticateUser(userChallenge);
+    }
+
     return (
         <>
             <Modal
@@ -31,11 +59,11 @@ function SignInModal(props) {
                     <Form>
                         <Form.Group controlId="signInformEmail">
                             <Form.Label>Email address</Form.Label>
-                            <Form.Control type="email" placeholder="Enter email" />
+                            <Form.Control type="email" placeholder="Enter email" {...bindEmail} />
                         </Form.Group>
                         <Form.Group controlId="signInformPassword">
                             <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" placeholder="Password" />
+                            <Form.Control type="password" placeholder="Password" {...bindPassword} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -43,7 +71,7 @@ function SignInModal(props) {
                     <Button variant="secondary" onClick={closeModal} >
                         Close
                     </Button>
-                    <Button variant="success" onClick={authenticateUser} >
+                    <Button variant="success" onClick={singInUser} >
                         {buttonText}
                     </Button>
                 </Modal.Footer>
