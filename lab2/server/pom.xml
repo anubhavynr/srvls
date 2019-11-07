@@ -90,6 +90,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     </dependencies>
 
     <build>
+        <defaultGoal>clean package</defaultGoal>
         <finalName>application</finalName>
         <plugins>
             <plugin>
