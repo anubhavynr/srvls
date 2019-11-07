@@ -165,25 +165,41 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
         return response;
     }
 
-    public APIGatewayProxyResponseEvent updateTenantDatabase(Map<String, Object> event, Context context) {
+    public APIGatewayProxyResponseEvent updateDatabase(Map<String, Object> event, Context context) {
         long startTimeMillis = System.currentTimeMillis();
         APIGatewayProxyResponseEvent response = null;
-        LOGGER.info("TenantService::updateTenantDatabase");
+        LOGGER.info("TenantService::updateDatabase");
         Map<String, String> params = (Map) event.get("pathParameters");
         String tenantId = params.get("id");
-
+        LOGGER.info("TenantService::updateDatabase " + tenantId);
+        Tenant tenant = fromJson((String) event.get("body"));
+        if (tenant == null) {
+            response = new APIGatewayProxyResponseEvent()
+                    .withStatusCode(400);
+        } else {
+            if (tenant.getId() == null || !tenant.getId().toString().equals(tenantId)
+                    || tenant.getDatabase() == null || tenant.getDatabase().isEmpty()) {
+                response = new APIGatewayProxyResponseEvent()
+                        .withStatusCode(400);
+            } else {
+                tenant = dal.updateDatabase(tenant);
+                response = new APIGatewayProxyResponseEvent()
+                        .withBody(toJson(tenant))
+                        .withStatusCode(200);
+            }
+        }
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
-        LOGGER.info("TenantService::updateTenantDatabase exec " + totalTimeMillis);
+        LOGGER.info("TenantService::updateDatabase exec " + totalTimeMillis);
         return response;
     }
 
-    public APIGatewayProxyResponseEvent updateTenantUserPool(Map<String, Object> event, Context context) {
+    public APIGatewayProxyResponseEvent updateUserPool(Map<String, Object> event, Context context) {
         long startTimeMillis = System.currentTimeMillis();
         APIGatewayProxyResponseEvent response = null;
-        LOGGER.info("TenantService::updateTenantUserPool");
+        LOGGER.info("TenantService::updateUserPool");
         Map<String, String> params = (Map) event.get("pathParameters");
         String tenantId = params.get("id");
-        LOGGER.info("TenantService::updateTenantUserPool " + tenantId);
+        LOGGER.info("TenantService::updateUserPool " + tenantId);
         Tenant tenant = fromJson((String) event.get("body"));
         if (tenant == null) {
             response = new APIGatewayProxyResponseEvent()
@@ -194,14 +210,14 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
                 response = new APIGatewayProxyResponseEvent()
                         .withStatusCode(400);
             } else {
-                tenant = dal.updateTenantUserPool(tenant);
+                tenant = dal.updateUserPool(tenant);
                 response = new APIGatewayProxyResponseEvent()
                         .withBody(toJson(tenant))
                         .withStatusCode(200);
             }
         }
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
-        LOGGER.info("TenantService::updateTenantUserPool exec " + totalTimeMillis);
+        LOGGER.info("TenantService::updateUserPool exec " + totalTimeMillis);
         return response;
     }
 

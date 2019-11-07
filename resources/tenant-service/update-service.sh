@@ -10,6 +10,7 @@ FUNCTIONS=("saas-factory-srvls-wrkshp-tenants-get-all-${REGION}"
 	"saas-factory-srvls-wrkshp-tenants-update-${REGION}"
 	"saas-factory-srvls-wrkshp-tenants-delete-${REGION}"
 	"saas-factory-srvls-wrkshp-tenants-next-db-${REGION}"
+	"saas-factory-srvls-wrkshp-tenants-update-userpool-${REGION}"
 )
 
 for FUNCTION in ${FUNCTIONS[@]}; do

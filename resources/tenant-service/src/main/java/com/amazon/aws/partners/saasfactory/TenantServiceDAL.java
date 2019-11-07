@@ -143,9 +143,36 @@ public class TenantServiceDAL {
         return tenant;
     }
 
-    public Tenant updateTenantUserPool(Tenant tenant) {
+    public Tenant updateDatabase(Tenant tenant) {
         long startTimeMillis = System.currentTimeMillis();
-        LOGGER.info("TenantServiceDAL::updateTenantUserPool");
+        LOGGER.info("TenantServiceDAL::updateDatabase");
+        Tenant updated = tenant;
+        try {
+            Map<String, AttributeValue> key = new HashMap<>();
+            key.put("id", AttributeValue.builder().s(tenant.getId().toString()).build());
+            UpdateItemResponse response = ddb.updateItem(request -> request
+                    .tableName(TENANT_TABLE)
+                    .key(key)
+                    .updateExpression("SET database = :db")
+                    .expressionAttributeValues(Stream
+                            .of(new AbstractMap.SimpleEntry<String, AttributeValue>(":db", AttributeValue.builder().s(tenant.getDatabase()).build()))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                    )
+                    .returnValues(ReturnValue.ALL_NEW)
+            );
+            updated = fromAttributeValueMap(response.attributes());
+        } catch (DynamoDbException e) {
+            LOGGER.error("TenantServiceDAL::updateDatabase " + getFullStackTrace(e));
+            throw new RuntimeException(e);
+        }
+        long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
+        LOGGER.info("TenantServiceDAL::updateDatabase exec " + totalTimeMillis);
+        return updated;
+    }
+
+    public Tenant updateUserPool(Tenant tenant) {
+        long startTimeMillis = System.currentTimeMillis();
+        LOGGER.info("TenantServiceDAL::updateUserPool");
         Tenant updated = tenant;
         try {
             Map<String, AttributeValue> key = new HashMap<>();
@@ -162,11 +189,11 @@ public class TenantServiceDAL {
             );
             updated = fromAttributeValueMap(response.attributes());
         } catch (DynamoDbException e) {
-            LOGGER.error("TenantServiceDAL::updateTenantUserPool " + getFullStackTrace(e));
+            LOGGER.error("TenantServiceDAL::updateUserPool " + getFullStackTrace(e));
             throw new RuntimeException(e);
         }
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
-        LOGGER.info("TenantServiceDAL::updateTenantUserPool exec " + totalTimeMillis);
+        LOGGER.info("TenantServiceDAL::updateUserPool exec " + totalTimeMillis);
         return updated;
     }
 
