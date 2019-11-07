@@ -7,17 +7,19 @@ public class Registration {
     private String email;
     private String company;
     private String plan;
+    private String password;
 
     public Registration() {
-        this(null, null, null, null, null);
+        this(null, null, null, null, null, null);
     }
 
-    public Registration(String firstName, String lastName, String email, String company, String plan) {
+    public Registration(String firstName, String lastName, String email, String company, String plan, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.company = company;
         this.plan = plan;
+        this.password = password;
     }
 
     public String getFirstName() {
@@ -58,5 +60,13 @@ public class Registration {
 
     public void setPlan(String plan) {
         this.plan = plan;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
