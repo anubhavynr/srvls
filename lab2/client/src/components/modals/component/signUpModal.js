@@ -30,9 +30,6 @@ function SignUpModal(props) {
             bind: {
                 value,
                 onChange: event => {
-                    const target = event.target;
-                    target.isInvalid = true;
-
                     setValue(event.target.value)
                 }
             },
