@@ -1189,7 +1189,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
@@ -1215,7 +1214,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1244,7 +1242,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: PUT
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1273,7 +1270,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: POST
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
@@ -1299,7 +1295,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: DELETE
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1328,7 +1323,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
@@ -1354,7 +1348,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1383,7 +1376,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: PUT
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1412,7 +1404,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: POST
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
@@ -1438,7 +1429,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: DELETE
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1467,7 +1457,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
@@ -1492,7 +1481,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1521,7 +1509,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: PUT
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -1550,7 +1537,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: POST
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
@@ -1576,7 +1562,6 @@ Resources:
       AuthorizationType: CUSTOM
       AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: DELETE
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
