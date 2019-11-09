@@ -27,7 +27,10 @@ echo "CodeCommit repository name = $CODE_COMMIT_REPO"
 CODE_COMMIT_CLONE_URL=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "CodeCommitCloneURL") | .OutputValue')
 echo "CodeCommit clone URL = $CODE_COMMIT_CLONE_URL"
 
-TEMPLATE_URL="https://${WORKSHOP_BUCKET}.s3-${MY_AWS_REGION}.amazonaws.com/lab2.template"
+LAMBDA_ARN=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "AddDatabaseUserLambda") | .OutputValue')
+echo "Add database user Lambda = $LAMBDA_ARN"
+
+TEMPLATE_URL="https://${WORKSHOP_BUCKET}.s3.amazonaws.com/lab2.template"
 echo "CloudFormation template URL = $TEMPLATE_URL"
 
 echo
@@ -36,4 +39,5 @@ ParameterKey=LoadBalancerSecurityGroup,ParameterValue="${LOAD_BALANCER_SG}" \
 ParameterKey=LoadBalancerSubnets,ParameterValue="${PUBLIC_SUBNETS}" \
 ParameterKey=CodeCommitRepoName,ParameterValue="${CODE_COMMIT_REPO}" \
 ParameterKey=CodeCommitRepoURL,ParameterValue="${CODE_COMMIT_CLONE_URL}" \
+ParameterKey=LambdaAddDatabaseUserArn,ParameterValue="${LAMBDA_ARN}" \
 ParameterKey=WorkshopS3Bucket,ParameterValue="${WORKSHOP_BUCKET}"
