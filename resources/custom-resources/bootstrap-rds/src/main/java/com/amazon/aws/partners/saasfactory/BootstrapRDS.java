@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.PutItemResponse;
 import software.amazon.awssdk.services.ssm.SsmClient;
 import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
+import software.amazon.awssdk.services.ssm.model.GetParametersResponse;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -39,11 +40,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class BootstrapRDS implements RequestHandler<Map<String, Object>, Object> {
 
@@ -123,6 +122,19 @@ public class BootstrapRDS implements RequestHandler<Map<String, Object>, Object>
                         }
                         sql.executeBatch();
                         connection.commit();
+
+                        // Add some mock data to the tables for the lab 1 "monolith" user
+                        if ("MONOLITH".equalsIgnoreCase(tenantId)) {
+                            InputStream dataSql = Thread.currentThread().getContextClassLoader().getResourceAsStream("data.sql");
+                            Scanner userSqlScanner = new Scanner(dataSql, "UTF-8");
+                            userSqlScanner.useDelimiter(";");
+                            while (userSqlScanner.hasNext()) {
+                                String inserts = userSqlScanner.next();
+                                sql.addBatch(inserts);
+                            }
+                            sql.executeBatch();
+                            connection.commit();
+                        }
 
                         // Use the RDS master user to create a new read/write non-root
                         // user for our app to access the database as.
@@ -244,6 +256,87 @@ public class BootstrapRDS implements RequestHandler<Map<String, Object>, Object>
             final PrintWriter pw = new PrintWriter(sw, true);
             e.printStackTrace(pw);
             context.getLogger().log(sw.getBuffer().toString() + "\n");
+        }
+
+        return null;
+    }
+
+    public Object addApplicationUser(Map<String, Object> input, Context context) {
+        LambdaLogger logger = context.getLogger();
+        final String requestType = (String) input.get("RequestType");
+        Map<String, Object> resourceProperties = (Map<String, Object>) input.get("ResourceProperties");
+
+        final String tenantId = (String) resourceProperties.get("TenantId");
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+
+        ObjectNode responseData = JsonNodeFactory.instance.objectNode();
+        try {
+            if (requestType == null) {
+                throw new RuntimeException();
+            }
+
+            Runnable r = () -> {
+                if ("Create".equalsIgnoreCase(requestType)) {
+                    final String dbMasterUsername = "master";
+                    final String dbMasterPassParam = "saas-factory-srvls-wrkshp-owner-pw";
+                    if (tenantId != null && !tenantId.isEmpty()) {
+                        final String dbHostParam = tenantId + "_DB_HOST";
+                        final String dbUserParam = tenantId + "_DB_USER";
+                        final String dbPassParam = tenantId + "_DB_PASS";
+                        final String dbNameParam = tenantId + "_DB_NAME";
+                        GetParametersResponse ssmResponse = ssm.getParameters(request -> request
+                                .names(dbMasterPassParam, dbHostParam, dbUserParam, dbPassParam, dbNameParam)
+                                .withDecryption(Boolean.TRUE)
+                        );
+
+                        Map<String, String> params = ssmResponse.parameters()
+                                .stream()
+                                .map(p -> new AbstractMap.SimpleEntry<String, String>(p.name(), p.value()))
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                        Properties masterConnectionProperties = new Properties();
+                        masterConnectionProperties.put("user", dbMasterUsername);
+                        masterConnectionProperties.put("password", params.get(dbMasterPassParam));
+
+                        String jdbcUrl = "jdbc:postgresql://" + params.get(dbHostParam) + ":5432/" + params.get(dbNameParam);
+                        try (Connection connection = DriverManager.getConnection(jdbcUrl, masterConnectionProperties);
+                             Statement sql = connection.createStatement()) {
+                            connection.setAutoCommit(false);
+                            InputStream userSql = Thread.currentThread().getContextClassLoader().getResourceAsStream("user.sql");
+                            Scanner userSqlScanner = new Scanner(userSql, "UTF-8");
+                            userSqlScanner.useDelimiter(";");
+                            while (userSqlScanner.hasNext()) {
+                                // Simple variable replacement in the SQL
+                                String ddl = userSqlScanner.next()
+                                        .replace("{{DB_APP_USER}}", params.get(dbUserParam))
+                                        .replace("{{DB_APP_PASS}}", params.get(dbPassParam));
+                                sql.addBatch(ddl);
+                            }
+                            sql.executeBatch();
+                            connection.commit();
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                        sendResponse(input, context, "SUCCESS", responseData);
+                    }
+                }
+            };
+            Future<?> f = service.submit(r);
+            f.get(context.getRemainingTimeInMillis() - 1000, TimeUnit.MILLISECONDS);
+        } catch (final TimeoutException | InterruptedException | ExecutionException e) {
+            // Timed out or unexpected exception
+            logger.log("FAILED unexpected error or request timed out " + e.getMessage() + "\n");
+            // Print the full stack trace
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw, true);
+            e.printStackTrace(pw);
+            logger.log(sw.getBuffer().toString() + "\n");
+
+            responseData.put("Reason", "Request timed out");
+            sendResponse(input, context, "FAILED", responseData);
+        } finally {
+            service.shutdown();
         }
 
         return null;

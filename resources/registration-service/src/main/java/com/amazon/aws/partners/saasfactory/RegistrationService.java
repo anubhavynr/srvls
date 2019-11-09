@@ -70,6 +70,7 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
     private String deploymentGroup;
     private String updateCodeDeployLambdaArn;
     private String albListenerArn;
+    private String addDatabaseUserArn;
 
     public RegistrationService() {
 
@@ -136,7 +137,7 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
 
         // Can only query for a max of 10 parameters at a time...
         CompletableFuture<GetParametersResponse> asyncResponse2 = this.ssm.getParameters(request -> request
-                .names("ALB_LISTENER")
+                .names("ALB_LISTENER", "RDS_ADD_USER_LAMBDA")
         );
         asyncResponse2.whenComplete((parametersResponse, exception) -> {
             if (parametersResponse != null) {
@@ -145,6 +146,10 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
                         case "ALB_LISTENER":
                             this.albListenerArn = parameter.value();
                             LOGGER.info("Setting env alb listener = " + this.albListenerArn);
+                            break;
+                        case "RDS_ADD_USER_LAMBDA":
+                            this.addDatabaseUserArn = parameter.value();
+                            LOGGER.info("Setting env add db user = " + this.addDatabaseUserArn);
                             break;
                     }
                 }
@@ -491,7 +496,8 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
                 .stackName(stackName)
                 .onFailure("DO_NOTHING")
                 .capabilitiesWithStrings("CAPABILITY_NAMED_IAM")
-                .templateURL("https://" + workshopBucket + ".s3-" + System.getenv("AWS_REGION") + ".amazonaws.com/" + ONBOARDING_TEMPLATE)
+                //.templateURL("https://" + workshopBucket + ".s3-" + System.getenv("AWS_REGION") + ".amazonaws.com/" + ONBOARDING_TEMPLATE)
+                .templateURL("https://" + workshopBucket + ".s3.amazonaws.com/" + ONBOARDING_TEMPLATE)
                 .parameters(
                         Parameter.builder().parameterKey("TenantId").parameterValue(tenant.getId().toString()).build(),
                         Parameter.builder().parameterKey("TenantRouteALBPriority").parameterValue(tenantAlbRulePriority.toString()).build(),
@@ -503,7 +509,8 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
                         Parameter.builder().parameterKey("CodeDeployApplication").parameterValue(codeDeployApplication).build(),
                         Parameter.builder().parameterKey("DeploymentGroup").parameterValue(deploymentGroup).build(),
                         Parameter.builder().parameterKey("LambdaUpdateDeploymentGroupArn").parameterValue(updateCodeDeployLambdaArn).build(),
-                        Parameter.builder().parameterKey("ALBListener").parameterValue(albListenerArn).build()
+                        Parameter.builder().parameterKey("ALBListener").parameterValue(albListenerArn).build(),
+                        Parameter.builder().parameterKey("LambdaAddDatabaseUserArn").parameterValue(addDatabaseUserArn).build()
                 )
         );
         asyncResponse.whenComplete((response, exception) -> {

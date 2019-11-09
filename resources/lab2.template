@@ -28,6 +28,9 @@ Parameters:
   CodeCommitRepoURL:
     Description: CodeCommit repository clone URL to use in the Lab 2 CodeBuild project
     Type: String
+  LambdaAddDatabaseUserArn:
+    Description: ARN of Lambda function to add the application user to this tenant's RDS cluster
+    Type: String
   WorkshopS3Bucket:
     Description: S3 bucket where you uploaded the Lambda code packages
     Type: String
@@ -495,6 +498,10 @@ Resources:
                   - logs:DescribeLogStreams
                 Resource:
                   - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - cognito-idp:ListUserPools
+                Resource: '*'
   LambdaCustomAuthorizer:
     Type: AWS::Lambda::Function
     Properties:
@@ -579,7 +586,7 @@ Resources:
                 Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*
                 Condition:
                   ForAllValues:StringEquals:
-                    cloudformation:TemplateUrl: [!Sub 'https://${WorkshopS3Bucket}.s3-${AWS::Region}.amazonaws.com/onboard-tenant.template']
+                    cloudformation:TemplateUrl: [!Sub 'https://${WorkshopS3Bucket}.s3.amazonaws.com/onboard-tenant.template']
               - Effect: Allow
                 Action:
                   - ssm:PutParameter
@@ -662,7 +669,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
-                Resource: !GetAtt LambdaUpdateDeploymentGroup.Arn
+                Resource:
+                  - !GetAtt LambdaUpdateDeploymentGroup.Arn
+                  - !Ref LambdaAddDatabaseUserArn
               - Effect: Allow
                 Action:
                   - cognito-idp:CreateUserPool

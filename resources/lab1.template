@@ -1197,6 +1197,61 @@ Resources:
       Code:
         S3Bucket: !Ref WorkshopS3Bucket
         S3Key: BootstrapRDS.jar
+  LambdaAddDatabaseUserLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-rds-add-db-user-${AWS::Region}
+      RetentionInDays: 30
+  LambdaAddDatabaseUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub saas-factory-srvls-wrkshp-rds-add-db-user-role-${AWS::Region}
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub saas-factory-srvls-wrkshp-rds-add-db-user-policy-${AWS::Region}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource:
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:*
+  LambdaAddDatabaseUser:
+    Type: AWS::Lambda::Function
+    DependsOn: JumpBoxSecurityGroup
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-rds-add-db-user-${AWS::Region}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+      MemorySize: 256
+      VpcConfig: # Has to be a VPC Lambda because we're talking to RDS
+        SecurityGroupIds:
+          - !Ref JumpBoxSecurityGroup
+        SubnetIds:
+          - !Ref SubnetPrivateA
+          - !Ref SubnetPrivateB
+      Handler: com.amazon.aws.partners.saasfactory.BootstrapRDS::addApplicationUser
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: BootstrapRDS.jar
   InvokeLambdaBootstrapDatabaseLab1:
     Type: Custom::CustomResource
     DependsOn:
@@ -1327,6 +1382,13 @@ Resources:
       Type: String
       Value:
         Fn::Join: [',', [!Ref SubnetPrivateA, !Ref SubnetPrivateB]]
+  SSMParamAddDatabaseUserLambda:
+    Type: AWS::SSM::Parameter
+    DependsOn: LambdaAddDatabaseUser
+    Properties:
+      Name: RDS_ADD_USER_LAMBDA
+      Type: String
+      Value: !GetAtt LambdaAddDatabaseUser.Arn
 Outputs:
   EC2KeyPair:
     Description: EC2 key pair for application servers
@@ -1384,4 +1446,7 @@ Outputs:
   CloudFrontDistributionDNS:
     Description: Website URL
     Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+  AddDatabaseUserLambda:
+    Description: Lambda execution role to add an application user to an RDS cluster
+      Value: !GetAtt LambdaAddDatabaseUser.Arn
 ...
