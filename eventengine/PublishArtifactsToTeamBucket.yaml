@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Create a Lambda function to Push the artifacts from event engine bucket to a new bucket in team account  
+Resources:
+  PushArtificatsToTeamBucket:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: PushArtificatsToTeamBucket-Lambda.lambda_handler
+      Runtime: python3.7
+      CodeUri: 's3://ee-assets-prod-us-east-1/modules/f10ef3b4f001409c893ee7f9decab4c8/v1/PushArtificatsToTeamBucket-Lambda.zip'
+      Description: Lambda function to Push the artifacts from event engine bucket to a new bucket in team account0 
+      MemorySize: 128
+      Timeout: 600
+      Policies: 
+        - AmazonS3FullAccess
+  InvokeLambda:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt PushArtificatsToTeamBucket.Arn
+      source_bucket: 'ee-assets-prod-us-east-1'
+      source_prefix: 'modules/f10ef3b4f001409c893ee7f9decab4c8/v1/'
+      Policies: 
+        - AmazonS3FullAccess
+
+
