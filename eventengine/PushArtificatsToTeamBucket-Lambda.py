@@ -1,4 +1,4 @@
-"""
+'''
  * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -13,7 +13,7 @@
  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- """
+'''
 
 #This lambda function is used by Event Engine to push artifacts to S3 buckets inside Individual Teams 
 import json
@@ -26,48 +26,47 @@ print('Loading function')
 s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
-    print("Received event: " + json.dumps(event, indent=2))
+    print('Received event: ' + json.dumps(event, indent=2))
 
-    # Get the parameters from the event
+    # Get the parameters from the event    
+    source_bucket = event['ResourceProperties']['SourceBucket'] #This is the bucket for Event Engine
+    source_prefix = event['ResourceProperties']['SourcePrefix'] #This is the key "modules/MODULE_ID/v1/"
+    target_bucket = event['ResourceProperties']['WorkshopS3Bucket'] #Workshop Bucket in the Team account
     
-    source_bucket = event["ResourceProperties"]['source_bucket'] #This is the bucket for Event Engine
-    source_prefix = event["ResourceProperties"]['source_prefix'] #This is the key "modules/MODULE_ID/v1/"
-    
-    #create unique target bucket
-    account_id = boto3.client('sts').get_caller_identity().get('Account')
-    target_bucket = 'saas-factory-serverless-saas-' + account_id #Bucket created in the Team account
-    s3.create_bucket(Bucket=target_bucket)
-
     kwargs = {'Bucket': source_bucket}
     kwargs['Prefix'] = source_prefix
     try:
         resp = s3.list_objects_v2(**kwargs)
         contents = resp['Contents']
+    except:
+        print(e)
+        error = 'Error getting objects from source bucket'
+        send_response(event, context, 'FAILURE', {'Message': error})
+
+    try:
         for obj in contents:
             key = obj['Key']
             copy_source = {'Bucket': source_bucket, 'Key': key}
             response = s3.copy_object(Bucket=target_bucket, Key=key.split('/')[-1], CopySource=copy_source)
             print(response)
 
-        send_response(event, context, "SUCCESS",
-                          {"Message": "Success!"})
+        send_response(event, context, 'SUCCESS', {'Message': 'Success!'})
     except Exception as e:
         print(e)
-        print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, source_bucket))
-        raise e
-        send_response(event, context, "FAILURE",
-                          {"Message": "Failure!"})
+        error = 'Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, source_bucket)
+        print(error)
+        send_response(event, context, 'FAILURE', {'Message': error})
 
 def send_response(event, context, response_status, response_data):
-    '''Send a resource manipulation status response to CloudFormation'''
+    #Send a resource manipulation status response to CloudFormation
     response_body = json.dumps({
-        "Status": response_status,
-        "Reason": "See the details in CloudWatch Log Stream: " + context.log_stream_name,
-        "PhysicalResourceId": context.log_stream_name,
-        "StackId": event['StackId'],
-        "RequestId": event['RequestId'],
-        "LogicalResourceId": event['LogicalResourceId'],
-        "Data": response_data
+        'Status': response_status,
+        'Reason': 'See the details in CloudWatch Log Stream: ' + context.log_stream_name,
+        'PhysicalResourceId': context.log_stream_name,
+        'StackId': event['StackId'],
+        'RequestId': event['RequestId'],
+        'LogicalResourceId': event['LogicalResourceId'],
+        'Data': response_data
     })
 
     opener = build_opener(HTTPHandler)
