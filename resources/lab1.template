@@ -1448,5 +1448,5 @@ Outputs:
     Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
   AddDatabaseUserLambda:
     Description: Lambda execution role to add an application user to an RDS cluster
-      Value: !GetAtt LambdaAddDatabaseUser.Arn
+    Value: !GetAtt LambdaAddDatabaseUser.Arn
 ...
