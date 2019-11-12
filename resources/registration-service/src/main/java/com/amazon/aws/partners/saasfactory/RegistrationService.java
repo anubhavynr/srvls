@@ -55,6 +55,9 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
     private final static Logger LOGGER = LoggerFactory.getLogger(RegistrationService.class);
     private final static ObjectMapper MAPPER = new ObjectMapper();
     private final static String ONBOARDING_TEMPLATE = "onboard-tenant.template";
+    private final static Map<String, String> CORS = Stream
+            .of(new AbstractMap.SimpleEntry<String, String>("Access-Control-Allow-Origin", "*"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     private SsmAsyncClient ssm;
     private CloudFormationAsyncClient cfn;
     private ElasticLoadBalancingV2Client elbv2;
@@ -199,6 +202,7 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
         //logRequestEvent(event);
         LOGGER.info("RegistrationService::register");
         APIGatewayProxyResponseEvent response = null;
+        Map<String, String> error = new HashMap<>();
 
         Registration registration = registrationFromJson((String) event.get("body"));
         Tenant tenant = null;
@@ -240,15 +244,19 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
 
                 response = new APIGatewayProxyResponseEvent()
                         .withStatusCode(200)
-                        .withBody(MAPPER.writeValueAsString(result));
+                        .withBody(MAPPER.writeValueAsString(result))
+                        .withHeaders(CORS);
             } catch (Exception e) {
+                error.put("message", e.getMessage());
                 response = new APIGatewayProxyResponseEvent()
                         .withStatusCode(400)
-                        .withBody(e.getMessage());
+                        .withBody(toJson(error));
             }
         } else {
+            error.put("message", "request body invalid");
             response = new APIGatewayProxyResponseEvent()
-                    .withStatusCode(400);
+                    .withStatusCode(400)
+                    .withBody(toJson(error));
         }
 
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;

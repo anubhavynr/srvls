@@ -28,10 +28,10 @@ import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +41,9 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
     private final static ObjectMapper MAPPER = new ObjectMapper();
+    private final static Map<String, String> CORS = Stream
+            .of(new AbstractMap.SimpleEntry<String, String>("Access-Control-Allow-Origin", "*"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private CognitoIdentityProviderClient cognito;
 
@@ -53,7 +56,9 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(Map<String, Object> event, Context context) {
+        logRequestEvent(event);
         APIGatewayProxyResponseEvent response = null;
+        Map<String, String> error = new HashMap<>();
         try {
             Map<String, String> signin = MAPPER.readValue((String) event.get("body"), Map.class);
             String username = signin.get("username");
@@ -73,8 +78,9 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
             );
             String challenge = authResponse.challengeNameAsString();
             if (challenge != null && !challenge.isEmpty()) {
+                error.put("message", challenge);
                 response = new APIGatewayProxyResponseEvent()
-                        .withBody(toJson(challenge))
+                        .withBody(toJson(error))
                         .withStatusCode(401);
             } else {
                 AuthenticationResultType auth = authResponse.authenticationResult();
@@ -85,14 +91,17 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
                         .refreshToken(auth.refreshToken())
                         .tokenType(auth.tokenType())
                         .build();
+
                 response = new APIGatewayProxyResponseEvent()
                         .withBody(toJson(result))
+                        .withHeaders(CORS)
                         .withStatusCode(200);
             }
-        } catch (IOException ioe) {
-            LOGGER.error(getFullStackTrace(ioe));
+        } catch (Exception e) {
+            LOGGER.error(getFullStackTrace(e));
+            error.put("message", e.getMessage());
             response = new APIGatewayProxyResponseEvent()
-                    .withBody(toJson(ioe.getMessage()))
+                    .withBody(toJson(error))
                     .withStatusCode(400);
         }
         return response;
