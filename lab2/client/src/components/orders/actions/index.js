@@ -1,3 +1,19 @@
+/**
+ * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+ * software and associated documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights to use, copy, modify,
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 import Axios from 'axios';
 import config from '../../../shared/config';
 import {
@@ -7,6 +23,9 @@ import {
     RECEIVE_DELETE_ORDER,
 } from '../actionTypes';
 import { closeModal } from '../../modals/actions';
+
+Axios.defaults.baseURL = config.api.base_url;
+Axios.defaults.headers.common['Authorization'] = `Bearer ${sessionStorage.getItem('idToken')}`;
 
 export const addOrderFinished = (order) => {
     return {
@@ -38,7 +57,7 @@ export const receiveAllOrders = orders => {
 
 export const fetchOrders = () => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/orders`;
+        const url = '/orders';
     
         Axios.get(url)
             .then(response => {
@@ -49,7 +68,7 @@ export const fetchOrders = () => {
 
 export const addOrder = (order) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/orders`;
+        const url = '/orders';
 
         Axios.post(url, order)
             .then(response => {
@@ -63,7 +82,7 @@ export const addOrder = (order) => {
 
 export const editOrder = (order) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/orders/${order.id}`;
+        const url = `/orders/${order.id}`;
 
         Axios.put(url, order)
             .then(response => {
@@ -77,7 +96,7 @@ export const editOrder = (order) => {
 
 export const deleteOrder = (order) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/orders/${order.id}`;
+        const url = `/orders/${order.id}`;
 
         Axios.delete(url, { data: order })
             .then(response => {

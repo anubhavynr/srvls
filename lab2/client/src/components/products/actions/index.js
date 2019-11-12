@@ -1,3 +1,19 @@
+/**
+ * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+ * software and associated documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights to use, copy, modify,
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 import Axios from 'axios';
 import config from '../../../shared/config';
 import {
@@ -9,6 +25,9 @@ import {
     RECEIVE_DELETE_PRODUCT,
  } from '../actionTypes';
 import { closeModal } from '../../modals/actions';
+
+Axios.defaults.baseURL = config.api.base_url;
+Axios.defaults.headers.common['Authorization'] = `Bearer ${sessionStorage.getItem('idToken')}`;
 
 export const requestAllProducts = () => {
     return {
@@ -53,8 +72,8 @@ export const deleteProductFinished = (product) => {
 
 export const fetchProducts = () => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/products`;
-    
+        const url = '/products';
+
         Axios.get(url)
             .then(response => {
                 dispatch(receiveAllProducts(response.data))
@@ -64,7 +83,7 @@ export const fetchProducts = () => {
 
 export const fetchProductCategories = () => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/categories`;
+        const url = '/categories';
 
         Axios.get(url)
         .then(response => {
@@ -75,7 +94,7 @@ export const fetchProductCategories = () => {
 
 export const addProduct = (product) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/products`;
+        const url = '/products';
 
         Axios.post(url, product)
             .then(response => {
@@ -89,7 +108,7 @@ export const addProduct = (product) => {
 
 export const editProduct = (product) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/products/${product.id}`;
+        const url = `/products/${product.id}`;
 
         Axios.put(url, product)
             .then(() => {
@@ -103,7 +122,7 @@ export const editProduct = (product) => {
 
 export const deleteProduct = (product) => {
     return function(dispatch) {
-        const url = `${config.api.base_url}/products/${product.id}`;
+        const url = `/products/${product.id}`;
 
         Axios.delete(url, { data: product })
             .then(() => {
