@@ -27,9 +27,6 @@ import {
 Axios.defaults.baseURL = config.api.base_url;
 
 const registerUserFinished = user => {
-
-console.log('finished registration: ', user);
-
     return {
         type: RECEIVE_REGISTER_USER,
         user,

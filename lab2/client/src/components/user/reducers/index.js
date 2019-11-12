@@ -41,8 +41,6 @@ export const user = (state = initialState, action) => {
         case REQUEST_REGISTER_USER:
             return null;
         case RECEIVE_REGISTER_USER:
-
-console.log('registered user is finished: ', action.user);
             return {
                 
             }
