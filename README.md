@@ -1,1 +1,3 @@
-# srvls
+#Monolith to serverless SaaS: A hands-on service decomposition#
+
+The move to a serverless model is especially appealing to SaaS providers. For many, this journey begins with transforming their legacy, single-tenant monolithic architecture into a multi-tenant serverless solution. In this workshop, we dive into the heart of this challenge, walking through the incremental steps required to map your monolithic application to a series of AWS Lambda-based microservices. We then use Lambda layers to add tenant-aware logging, metrics, and data access to your Lambda functions. Throughout, we expose the fundamental moving parts of this transformation, highlighting common considerations that can affect your serverless SaaS migration strategy.
