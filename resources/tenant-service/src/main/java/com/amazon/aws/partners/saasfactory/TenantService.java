@@ -27,13 +27,19 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TenantService implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TenantService.class);
     private final static ObjectMapper MAPPER = new ObjectMapper();
+    private final static Map<String, String> CORS = Stream
+            .of(new AbstractMap.SimpleEntry<String, String>("Access-Control-Allow-Origin", "*"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     private final TenantServiceDAL dal = new TenantServiceDAL();
 
     @Override
@@ -48,6 +54,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
         List<Tenant> tenants = dal.getTenants();
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withStatusCode(200)
+                .withHeaders(CORS)
                 .withBody(toJson(tenants));
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
         LOGGER.info("TenantService::getTenants exec " + totalTimeMillis);
@@ -63,6 +70,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
         Tenant tenant = dal.getTenant(tenantId);
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withStatusCode(200)
+                .withHeaders(CORS)
                 .withBody(toJson(tenant));
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
         LOGGER.info("TenantService::getTenant exec " + totalTimeMillis);
@@ -83,6 +91,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
             tenant = dal.insertTenant(tenant);
             response = new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
+                    .withHeaders(CORS)
                     .withBody(toJson(tenant));
         }
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
@@ -110,6 +119,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
                 tenant = dal.updateTenant(tenant);
                 response = new APIGatewayProxyResponseEvent()
                         .withStatusCode(200)
+                        .withHeaders(CORS)
                         .withBody(toJson(tenant));
             }
         }
@@ -137,6 +147,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
             } else {
                 dal.deleteTenant(tenantId);
                 response = new APIGatewayProxyResponseEvent()
+                        .withHeaders(CORS)
                         .withStatusCode(200);
             }
         }
@@ -159,6 +170,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
         Map<String, String> rds = dal.nextAvailableDatabase();
         response = new APIGatewayProxyResponseEvent()
                 .withBody(toJson(rds))
+                .withHeaders(CORS)
                 .withStatusCode(200);
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
         LOGGER.info("TenantService::nextAvailableDatabase exec " + totalTimeMillis);
@@ -185,6 +197,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
                 tenant = dal.updateDatabase(tenant);
                 response = new APIGatewayProxyResponseEvent()
                         .withBody(toJson(tenant))
+                        .withHeaders(CORS)
                         .withStatusCode(200);
             }
         }
@@ -213,6 +226,7 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
                 tenant = dal.updateUserPool(tenant);
                 response = new APIGatewayProxyResponseEvent()
                         .withBody(toJson(tenant))
+                        .withHeaders(CORS)
                         .withStatusCode(200);
             }
         }

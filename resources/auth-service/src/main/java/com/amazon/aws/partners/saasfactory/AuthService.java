@@ -28,7 +28,6 @@ import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.AbstractMap;
@@ -42,6 +41,9 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
     private final static ObjectMapper MAPPER = new ObjectMapper();
+    private final static Map<String, String> CORS = Stream
+            .of(new AbstractMap.SimpleEntry<String, String>("Access-Control-Allow-Origin", "*"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     private CognitoIdentityProviderClient cognito;
 
@@ -56,9 +58,6 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
     public APIGatewayProxyResponseEvent handleRequest(Map<String, Object> event, Context context) {
         logRequestEvent(event);
         APIGatewayProxyResponseEvent response = null;
-        Map<String, String> cors = Stream
-                .of(new AbstractMap.SimpleEntry<String, String>("Access-Control-Allow-Origin", "*"))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Map<String, String> error = new HashMap<>();
         try {
             Map<String, String> signin = MAPPER.readValue((String) event.get("body"), Map.class);
@@ -82,7 +81,6 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
                 error.put("message", challenge);
                 response = new APIGatewayProxyResponseEvent()
                         .withBody(toJson(error))
-                        .withHeaders(cors)
                         .withStatusCode(401);
             } else {
                 AuthenticationResultType auth = authResponse.authenticationResult();
@@ -96,7 +94,7 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
 
                 response = new APIGatewayProxyResponseEvent()
                         .withBody(toJson(result))
-                        .withHeaders(cors)
+                        .withHeaders(CORS)
                         .withStatusCode(200);
             }
         } catch (Exception e) {
@@ -104,7 +102,6 @@ public class AuthService implements RequestHandler<Map<String, Object>, APIGatew
             error.put("message", e.getMessage());
             response = new APIGatewayProxyResponseEvent()
                     .withBody(toJson(error))
-                    .withHeaders(cors)
                     .withStatusCode(400);
         }
         return response;
