@@ -205,6 +205,7 @@ public class TenantServiceDAL {
         long startTimeMillis = System.currentTimeMillis();
         LOGGER.info("TenantServiceDAL::deleteTenant");
         try {
+            //TODO remove TenantId from saas-factory-srvls-wrkshp-rds-clusters
             Map<String, AttributeValue> key = new HashMap<>();
             key.put("id", AttributeValue.builder().s(tenantId).build());
             DeleteItemResponse response = ddb.deleteItem(request -> request.tableName(TENANT_TABLE).key(key));
