@@ -80,6 +80,11 @@ Resources:
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
               - Effect: Allow
                 Action:
+                  - dynamodb:ListTables
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - dynamodb:CreateTable
                   - dynamodb:GetItem
                   - dynamodb:PutItem
                   - dynamodb:DeleteItem
