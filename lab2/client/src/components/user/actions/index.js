@@ -33,7 +33,7 @@ const registerUserFinished = user => {
     };
 };
 
-export const receiveUserAuthentication = user => {
+const receiveUserAuthentication = user => {
     return {
         type: RECEIVE_AUTHENTICATE_USER,
         user,
@@ -62,11 +62,18 @@ export const authenticateUser = (userChallenge) => {
 };
 
 export const registerUser = (user) => {
+
+console.log('user: ', user);
+
+
     return function(dispatch) {
         const url = '/registration';
 
         Axios.post(url, user)
             .then(response => {
+
+console.log('response: ', response);
+
                 dispatch(registerUserFinished(response.data));
             }, error => console.error(error))
             .then(() => {

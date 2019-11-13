@@ -70,14 +70,14 @@ function SignUpModal(props) {
             plan,
         };
 
+        event.preventDefault();
+
         if(form.checkValidity() === false) {
-            event.preventDefault();
             event.stopPropagation();
         } else {
+            setValidated(true);
             registerUser(user);
         }
-
-        setValidated(true);
     };
 
     return (
