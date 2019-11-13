@@ -29,7 +29,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OrderService implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
 
@@ -39,6 +43,9 @@ public class OrderService implements RequestHandler<Map<String, Object>, APIGate
             .findAndRegisterModules()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    private final static Map<String, String> CORS = Stream
+            .of(new AbstractMap.SimpleEntry<String, String>("Access-Control-Allow-Origin", "*"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     public APIGatewayProxyResponseEvent handleRequest(Map<String, Object> event, Context context) {
         return getOrders(event, context);
@@ -46,9 +53,11 @@ public class OrderService implements RequestHandler<Map<String, Object>, APIGate
 
     public APIGatewayProxyResponseEvent getOrders(Map<String, Object> event, Context context) {
         LOGGER.info("OrderService::getOrders");
+        List<Order> orders = DAL.getOrders(event);
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withStatusCode(200)
-                .withBody("");
+                .withHeaders(CORS)
+                .withBody(toJson(orders));
         return response;
     }
 
@@ -60,15 +69,33 @@ public class OrderService implements RequestHandler<Map<String, Object>, APIGate
         Order order = DAL.getOrder(event, orderId);
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withStatusCode(200)
+                .withHeaders(CORS)
                 .withBody(toJson(order));
         return response;
     }
 
     public APIGatewayProxyResponseEvent updateOrder(Map<String, Object> event, Context context) {
         LOGGER.info("OrderService::updateOrder");
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
-                .withStatusCode(200)
-                .withBody("");
+        APIGatewayProxyResponseEvent response = null;
+        Map<String, String> params = (Map) event.get("pathParameters");
+        String orderId = params.get("id");
+        LOGGER.info("OrderService::updateOrder " + orderId);
+        Order order = fromJson((String) event.get("body"));
+        if (order == null) {
+            response = new APIGatewayProxyResponseEvent()
+                    .withStatusCode(400);
+        } else {
+            if (order.getId() == null || !order.getId().toString().equals(orderId)) {
+                response = new APIGatewayProxyResponseEvent()
+                        .withStatusCode(400);
+            } else {
+                order = DAL.updateOrder(event, order);
+                response = new APIGatewayProxyResponseEvent()
+                        .withStatusCode(200)
+                        .withHeaders(CORS)
+                        .withBody(toJson(order));
+            }
+        }
         return response;
     }
 
@@ -84,6 +111,7 @@ public class OrderService implements RequestHandler<Map<String, Object>, APIGate
             order = DAL.insertOrder(event, order);
             response = new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
+                    .withHeaders(CORS)
                     .withBody(toJson(order));
         }
         return response;
@@ -91,9 +119,25 @@ public class OrderService implements RequestHandler<Map<String, Object>, APIGate
 
     public APIGatewayProxyResponseEvent deleteOrder(Map<String, Object> event, Context context) {
         LOGGER.info("OrderService::deleteOrder");
-        APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
-                .withStatusCode(200)
-                .withBody("");
+        APIGatewayProxyResponseEvent response = null;
+        Map<String, String> params = (Map) event.get("pathParameters");
+        String orderId = params.get("id");
+        LOGGER.info("OrderService::deleteOrder " + orderId);
+        Order order = fromJson((String) event.get("body"));
+        if (order == null) {
+            response = new APIGatewayProxyResponseEvent()
+                    .withStatusCode(400);
+        } else {
+            if (order.getId() == null || !order.getId().toString().equals(orderId)) {
+                response = new APIGatewayProxyResponseEvent()
+                        .withStatusCode(400);
+            } else {
+                DAL.deleteOrder(event, orderId);
+                response = new APIGatewayProxyResponseEvent()
+                        .withHeaders(CORS)
+                        .withStatusCode(200);
+            }
+        }
         return response;
     }
 

@@ -206,7 +206,7 @@ public class RegistrationService implements RequestHandler<Map<String, Object>, 
 
         Registration registration = registrationFromJson((String) event.get("body"));
         Tenant tenant = null;
-        if (registration != null) {
+        if (registration != null && !registration.isEmpty()) {
             try {
                 // Not thread safe - do not copy this
 

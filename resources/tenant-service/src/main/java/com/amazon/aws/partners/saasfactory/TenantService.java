@@ -146,6 +146,9 @@ public class TenantService implements RequestHandler<Map<String, Object>, APIGat
                         .withStatusCode(400);
             } else {
                 dal.deleteTenant(tenantId);
+                //TODO remove Cognito UserPool
+                //TODO remove tenant's parameters from SSM
+                //TODO delete onboarding CFN stack
                 response = new APIGatewayProxyResponseEvent()
                         .withHeaders(CORS)
                         .withStatusCode(200);

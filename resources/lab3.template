@@ -40,6 +40,15 @@ Parameters:
   RegistrationServiceRegisterArn:
     Description: RegistrationService register function ARN
     Type: String
+  AuthServiceSignInArn:
+    Description: AuthService sign in function ARN
+    Type: String
+  LambdaCustomAuthorizerArn:
+    Description: API Gateway Lambda authorizer function ARN
+    Type: String
+  ApiGatewayLambdaAuthorizerRoleArn:
+    Description: IAM execution role for the API Gateway Lambda authorizer
+    Type: String
   WorkshopS3Bucket:
     Description: S3 bucket where you uploaded the Lambda function and layers code packages
     Type: String
@@ -78,6 +87,10 @@ Resources:
                   - dynamodb:Query
                   - dynamodb:UpdateItem
                 Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/*
+              - Effect: Allow
+                Action:
+                  - cognito-idp:ListUserPools
+                Resource: '*'
   OrderServiceGetByIdLogs:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -192,6 +205,16 @@ Resources:
       - ApiGatewayLoggingRole
     Properties:
       CloudWatchRoleArn: !GetAtt ApiGatewayLoggingRole.Arn
+  ApiGatewayLambdaAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      RestApiId: !Ref ApiGatewayLab3Api
+      Type: TOKEN
+      Name: !Sub saas-factory-srvls-wrkshp-apigw-lambda-authorizer-lab3-${AWS::Region}
+      AuthorizerCredentials: !Ref ApiGatewayLambdaAuthorizerRoleArn
+      IdentitySource: method.request.header.Authorization
+      IdentityValidationExpression: ^[Bb]earer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$
+      AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaCustomAuthorizerArn}/invocations
   ProductServiceProductsResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -353,13 +376,15 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceProductsResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Sub http://${LoadBalancerDNS}/api/products
         PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -375,8 +400,9 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceProductByIdResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -384,6 +410,7 @@ Resources:
         Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -399,8 +426,9 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceProductByIdResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: PUT
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -408,6 +436,7 @@ Resources:
         Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -423,13 +452,15 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceProductsResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: POST
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
         Uri: !Sub http://${LoadBalancerDNS}/api/products
         PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -445,8 +476,9 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceProductByIdResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: DELETE
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -454,6 +486,7 @@ Resources:
         Uri: !Sub http://${LoadBalancerDNS}/api/products/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -469,13 +502,15 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceCategoriesResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: GET
         Uri: !Sub http://${LoadBalancerDNS}/api/categories
         PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -491,8 +526,9 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceCategoryByIdResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: GET
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -500,6 +536,7 @@ Resources:
         Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -515,8 +552,9 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceCategoryByIdResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: PUT
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -524,6 +562,7 @@ Resources:
         Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -539,13 +578,15 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceCategoriesResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: POST
-      AuthorizationType: NONE
       Integration:
         Type: HTTP
         IntegrationHttpMethod: POST
         Uri: !Sub http://${LoadBalancerDNS}/api/categories
         PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -561,8 +602,9 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
       ResourceId: !Ref ProductServiceCategoryByIdResource
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref ApiGatewayLambdaAuthorizer
       HttpMethod: DELETE
-      AuthorizationType: NONE
       RequestParameters: {method.request.path.id: true}
       Integration:
         Type: HTTP
@@ -570,6 +612,7 @@ Resources:
         Uri: !Sub http://${LoadBalancerDNS}/api/categories/{id}
         PassthroughBehavior: WHEN_NO_MATCH
         RequestParameters: {integration.request.path.id: 'method.request.path.id'}
+        RequestParameters: {integration.request.header.X-Tenant-ID: 'context.authorizer.TenantId'}
         IntegrationResponses:
           - StatusCode: 200
             ResponseTemplates: {application/json: ''}
@@ -902,7 +945,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceGetAllArn
+      FunctionName: !Ref TenantServiceGetAllArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/GET/tenants
   TenantServiceGetByIdMethod:
     Type: AWS::ApiGateway::Method
@@ -933,7 +976,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceGetByIdArn
+      FunctionName: !Ref TenantServiceGetByIdArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/GET/tenants/{id}
   TenantServiceUpdateMethod:
     Type: AWS::ApiGateway::Method
@@ -964,7 +1007,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceUpdateArn
+      FunctionName: !Ref TenantServiceUpdateArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/PUT/tenants/{id}
   TenantServiceInsertMethod:
     Type: AWS::ApiGateway::Method
@@ -993,7 +1036,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceInsertArn
+      FunctionName: !Ref TenantServiceInsertArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/POST/tenants
   TenantServiceDeleteMethod:
     Type: AWS::ApiGateway::Method
@@ -1024,7 +1067,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceDeleteArn
+      FunctionName: !Ref TenantServiceDeleteArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/DELETE/tenants/{id}
   TenantServiceNextDatabaseMethod:
     Type: AWS::ApiGateway::Method
@@ -1053,7 +1096,7 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt TenantServiceNextDbArn
+      FunctionName: !Ref TenantServiceNextDbArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/GET/tenants/pool/database
   RegistrationServiceRegisterResource:
     Type: AWS::ApiGateway::Resource
@@ -1118,8 +1161,73 @@ Resources:
     Properties:
       Principal: apigateway.amazonaws.com
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt RegistrationServiceRegisterArn
+      FunctionName: !Ref RegistrationServiceRegisterArn
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/POST/registration
+  AuthServiceSignInResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayLab3Api
+      ParentId: !GetAtt ApiGatewayLab3Api.RootResourceId
+      PathPart: auth
+  AuthServiceSignInResourceCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab3Api
+      ResourceId: !Ref AuthServiceSignInResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Max-Age: "'3600'"
+              method.response.header.X-Requested-With: "'*'"
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Max-Age: false
+            method.response.header.X-Requested-With: false
+  AuthServiceSignInMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayLab3Api
+      ResourceId: !Ref AuthServiceSignInResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthServiceSignInArn}/invocations
+        PassthroughBehavior: WHEN_NO_MATCH
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates: {application/json: ''}
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels: {application/json: Empty}
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: false
+  AuthServiceSignInLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Principal: apigateway.amazonaws.com
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AuthServiceSignInArn
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayLab3Api}/*/POST/auth
   ApiGatewayLab3ApiDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
@@ -1154,6 +1262,8 @@ Resources:
       - TenantServiceNextDatabaseMethod
       - RegistrationServiceRegisterResourceCORS
       - RegistrationServiceRegisterMethod
+      - AuthServiceSignInResourceCORS
+      - AuthServiceSignInMethod
     Properties:
       RestApiId: !Ref ApiGatewayLab3Api
   ApiGatewayLab3ApiStage:
