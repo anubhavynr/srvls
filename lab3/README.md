@@ -187,4 +187,4 @@ This lab represented a key next step in our migration process. We now started th
 
 You have now completed Lab3. 
 
-[Continue to Lab 4](../Lab4/README.md)
+[Continue to Lab 4](../lab4/README.md)

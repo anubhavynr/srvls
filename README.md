@@ -12,21 +12,21 @@ In this Lab, we’ll start with a traditional monolithic architecture for a work
 <br></br>
 ## Lab1 – Deploying, Exploring, and Exercising the Single-Tenant Monolith
 
-[![Lab1](Images/lab1.png)](./Lab1/README.md "Lab 1")
+[![Lab1](Images/lab1.png)](./lab1/README.md "Lab 1")
 <br></br>
 ## Lab2 – Onboarding, Identity, and a Modern Client 
 
-[![Lab2](Images/lab2.png)](./Lab2/README.md "Lab 2")
+[![Lab2](Images/lab2.png)](./lab2/README.md "Lab 2")
 <br></br>
 ## Lab3 – Carving Out Our First Multi-Tenant Serverless Microservice
 
-[![Lab3](Images/lab3.png)](./Lab3/README.md "Lab 3")
+[![Lab3](Images/lab3.png)](./lab3/README.md "Lab 3")
 <br></br>
 ## Lab4 – Extracting the Remaining Service—Goodbye Monolith!
 
-[![Lab4](Images/lab4.png)](./Lab4/README.md "Lab 4")
+[![Lab4](Images/lab4.png)](./lab4/README.md "Lab 4")
 
 
-[Proceed to Lab 1 when ready to begin.](./Lab1/README.md)
+[Proceed to Lab 1 when ready to begin.](./lab1/README.md)
 
 # License

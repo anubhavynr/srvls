@@ -210,4 +210,4 @@ While it may not feel as though we’ve done much to enable migration to our ser
 
 You have now completed Lab2. 
 
-[Continue to Lab 3](../Lab3/README.md)
+[Continue to Lab 3](../lab3/README.md)

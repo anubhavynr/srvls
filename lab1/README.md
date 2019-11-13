@@ -211,4 +211,4 @@ The goal of Lab 1 was to expose you to the fundamentals of the existing monolith
 
 You have now completed Lab1. 
 
-[Continue to Lab 2](../Lab2/README.md)
+[Continue to Lab 2](../lab2/README.md)
