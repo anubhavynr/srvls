@@ -135,7 +135,7 @@ public class TenantServiceDAL {
             Map<String, AttributeValue> item = toAttributeValueMap(tenant);
             PutItemResponse response = ddb.putItem(request -> request.tableName(TENANT_TABLE).item(item));
         } catch (DynamoDbException e) {
-            LOGGER.error("TenantServiceDAL::insertTenant " + getFullStackTrace(e));
+            LOGGER.error("TenantServiceDAL::updateTenant " + getFullStackTrace(e));
             throw new RuntimeException(e);
         }
         long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
