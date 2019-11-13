@@ -75,11 +75,11 @@ function SignInModal(props) {
                     <Form>
                         <Form.Group controlId="signInformEmail">
                             <Form.Label>Email address</Form.Label>
-                            <Form.Control type="email" placeholder="Enter email" {...bindEmail} />
+                            <Form.Control type="email" required placeholder="Enter email" {...bindEmail} />
                         </Form.Group>
                         <Form.Group controlId="signInformPassword">
                             <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" placeholder="Password" {...bindPassword} />
+                            <Form.Control type="password" required placeholder="Password" {...bindPassword} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>

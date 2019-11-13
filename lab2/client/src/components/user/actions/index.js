@@ -50,30 +50,26 @@ export const authenticateUser = (userChallenge) => {
                     sessionStorage.setItem('isAuthenticated', 'true');
                     sessionStorage.setItem('idToken', response.data.idToken);
 
-                    dispatch(receiveUserAuthentication(response.data));
+                    const user = response.data;
+                    user.isAuthenticated = true;
+
+                    dispatch(receiveUserAuthentication(user));
                 } else {
                     throw new Error("User authentication failed.");
                 }
             }, error => console.error(error))
             .then(() => {
-                 dispatch(closeModal());
+                dispatch(closeModal());
             }, error => console.error(error));
     }
 };
 
 export const registerUser = (user) => {
-
-console.log('user: ', user);
-
-
     return function(dispatch) {
         const url = '/registration';
 
         Axios.post(url, user)
             .then(response => {
-
-console.log('response: ', response);
-
                 dispatch(registerUserFinished(response.data));
             }, error => console.error(error))
             .then(() => {
