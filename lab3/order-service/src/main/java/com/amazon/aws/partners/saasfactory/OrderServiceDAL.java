@@ -25,9 +25,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class OrderServiceDAL {
 
@@ -41,6 +39,21 @@ public class OrderServiceDAL {
                 .build();
     }
 
+    public List<Order> getOrders(Map<String, Object> event) {
+        LOGGER.info("OrderServiceDAL::getOrders");
+        List<Order> orders = new ArrayList<>();
+        try {
+            ScanResponse response = ddb.scan(request -> request.tableName(tableName(event)));
+            response.items().forEach(item ->
+                    orders.add(DynamoDbHelper.orderFromAttributeValueMap(item))
+            );
+        } catch (DynamoDbException e) {
+            LOGGER.error("TenantServiceDAL::getTenants " + getFullStackTrace(e));
+            throw new RuntimeException(e);
+        }
+        return orders;
+    }
+
     public Order getOrder(Map<String, Object> event, UUID orderId) {
         return getOrder(event, orderId.toString());
     }
@@ -48,18 +61,32 @@ public class OrderServiceDAL {
     public Order getOrder(Map<String, Object> event, String orderId) {
         LOGGER.info("OrderServiceDAL::getOrder " + orderId);
 
-        Map<String, AttributeValue> order = null;
+        Order order = null;
         try {
             Map<String, AttributeValue> key = new HashMap<>();
             key.put("id", AttributeValue.builder().s(orderId).build());
             GetItemResponse response = ddb.getItem(request -> request.tableName(tableName(event)).key(key));
-            order = response.item();
+            Map<String, AttributeValue> item = response.item();
+            order = DynamoDbHelper.orderFromAttributeValueMap(item);
         } catch (DynamoDbException e) {
             LOGGER.error("OrderServiceDAL::getOrder " + getFullStackTrace(e));
             throw new RuntimeException(e);
         }
+        return order;
+    }
 
-        return DynamoDbHelper.orderFromAttributeValueMap(order);
+    // Choosing to do a replacement update as you might do in a RDBMS by
+    // setting columns = NULL when they do not exist in the updated value
+    public Order updateOrder(Map<String, Object> event, Order order) {
+        LOGGER.info("OrderServiceDAL::updateOrder");
+        try {
+            Map<String, AttributeValue> item = DynamoDbHelper.toAttributeValueMap(order);
+            PutItemResponse response = ddb.putItem(request -> request.tableName(tableName(event)).item(item));
+        } catch (DynamoDbException e) {
+            LOGGER.error("OrderServiceDAL::updateOrder " + getFullStackTrace(e));
+            throw new RuntimeException(e);
+        }
+        return order;
     }
 
     public Order insertOrder(Map<String, Object> event, Order order) {
@@ -76,6 +103,23 @@ public class OrderServiceDAL {
         }
 
         return order;
+    }
+
+    public void deleteOrder(Map<String, Object> event, UUID orderId) {
+        deleteOrder(event, orderId.toString());
+    }
+
+    public void deleteOrder(Map<String, Object> event, String orderId) {
+        LOGGER.info("OrderServiceDAL::deleteOrder");
+        try {
+            Map<String, AttributeValue> key = new HashMap<>();
+            key.put("id", AttributeValue.builder().s(orderId).build());
+            DeleteItemResponse response = ddb.deleteItem(request -> request.tableName(tableName(event)).key(key));
+        } catch (DynamoDbException e) {
+            LOGGER.error("deleteOrder::deleteOrder " + getFullStackTrace(e));
+            throw new RuntimeException(e);
+        }
+        return;
     }
 
     private static String tableName(Map<String, Object> event) {

@@ -926,7 +926,7 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       Type: TOKEN
-      Name: !Sub saas-factory-srvls-wrkshp-apigw-lambda-authorizer-${AWS::Region}
+      Name: !Sub saas-factory-srvls-wrkshp-apigw-lambda-authorizer-lab2-${AWS::Region}
       AuthorizerCredentials: !GetAtt ApiGatewayLambdaAuthorizerRole.Arn
       IdentitySource: method.request.header.Authorization
       IdentityValidationExpression: ^[Bb]earer [A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$
@@ -1191,7 +1191,6 @@ Resources:
             method.response.header.X-Requested-With: false
   ProductServiceGetAllMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceProductsResource
@@ -1216,7 +1215,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceGetByIdMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceProductByIdResource
@@ -1244,7 +1242,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceUpdateMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceProductByIdResource
@@ -1272,7 +1269,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceInsertMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceProductsResource
@@ -1297,7 +1293,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceDeleteMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceProductByIdResource
@@ -1325,7 +1320,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceGetAllCategoriesMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceCategoriesResource
@@ -1350,7 +1344,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceGetCategoryByIdMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceCategoryByIdResource
@@ -1378,7 +1371,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceUpdateCategoryMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceCategoryByIdResource
@@ -1406,7 +1398,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceInsertCategoryMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceCategoriesResource
@@ -1431,7 +1422,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   ProductServiceDeleteCategoryMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref ProductServiceCategoryByIdResource
@@ -1459,7 +1449,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   OrderServiceGetAllOrdersMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref OrderServiceOrdersResource
@@ -1511,7 +1500,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   OrderServiceUpdateOrderMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref OrderServiceOrderByIdResource
@@ -1539,7 +1527,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   OrderServiceInsertOrderMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref OrderServiceOrdersResource
@@ -1564,7 +1551,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: false
   OrderServiceDeleteOrderMethod:
     Type: AWS::ApiGateway::Method
-    DependsOn: ApiGatewayLambdaAuthorizer
     Properties:
       RestApiId: !Ref ApiGatewayLab2Api
       ResourceId: !Ref OrderServiceOrderByIdResource
@@ -2070,4 +2056,37 @@ Outputs:
   CodeDeployDeploymentGroupLab2:
     Description: CodeDeploy Deployment Group for Lab 2
     Value: !Ref CodeDeployDeploymentGroupLab2
+  LoadBalancerEndpointLab2:
+    Description: Load balancer URL
+    Value: !GetAtt LoadBalancer.DNSName
+  TenantServiceGetAllArn:
+    Description: TenantService getByAll function ARN
+    Value: !GetAtt TenantServiceGetAll.Arn
+  TenantServiceGetByIdArn:
+    Description: TenantService getById function ARN
+    Value: !GetAtt TenantServiceGetById.Arn
+  TenantServiceUpdateArn:
+    Description: TenantService update function ARN
+    Value: !GetAtt TenantServiceUpdate.Arn
+  TenantServiceInsertArn:
+    Description: TenantService insert function ARN
+    Value: !GetAtt TenantServiceInsert.Arn
+  TenantServiceDeleteArn:
+    Description: TenantService delete function ARN
+    Value: !GetAtt TenantServiceDelete.Arn
+  TenantServiceNextDbArn:
+    Description: TenantService nextDb function ARN
+    Value: !GetAtt TenantServiceNextDb.Arn
+  RegistrationServiceRegisterArn:
+    Description: RegistrationService register function ARN
+    Value: !GetAtt RegistrationServiceRegister.Arn
+  AuthServiceSignInArn:
+    Description: AuthService sign in function ARN
+    Value: !GetAtt AuthServiceSignIn.Arn
+  LambdaCustomAuthorizerArn:
+    Description: API Gateway Lambda authorizer function ARN
+    Value: !GetAtt LambdaCustomAuthorizer.Arn
+  ApiGatewayLambdaAuthorizerRoleArn:
+    Description: IAM execution role for the API Gateway Lambda authorizer
+    Value: !GetAtt ApiGatewayLambdaAuthorizerRole.Arn
 ...

@@ -24,26 +24,28 @@ echo "Setting environment variables"
 MY_AWS_REGION=$(aws configure list | grep region | awk '{print $2}')
 echo "AWS Region = $MY_AWS_REGION"
 
-WORKSHOP_STACK=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "SaaSFactoryServerlessSaaSWorkshopStack") | .OutputValue')
+STACK_OUTPUTS=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[]')
+
+WORKSHOP_STACK=$(echo $STACK_OUTPUTS | jq -r 'select(.OutputKey == "SaaSFactoryServerlessSaaSWorkshopStack") | .OutputValue')
 echo "Workshop stack = $WORKSHOP_STACK"
 
-WORKSHOP_BUCKET=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "WorkshopBucket") | .OutputValue')
+WORKSHOP_BUCKET=$(echo $STACK_OUTPUTS | jq -r 'select(.OutputKey == "WorkshopBucket") | .OutputValue')
 echo "Workshop bucket = $WORKSHOP_BUCKET"
 
-LOAD_BALANCER_SG=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "LoadBalancerSecurityGroup") | .OutputValue')
+LOAD_BALANCER_SG=$(echo $STACK_OUTPUTS | jq -r 'select(.OutputKey == "LoadBalancerSecurityGroup") | .OutputValue')
 echo "Application load balancer security group = $LOAD_BALANCER_SG"
 
-PUBLIC_SUBNETS=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "PublicSubnets") | .OutputValue')
+PUBLIC_SUBNETS=$(echo $STACK_OUTPUTS | jq -r 'select(.OutputKey == "PublicSubnets") | .OutputValue')
 PUBLIC_SUBNETS=$(sed -e 's|,|\\,|' <<< $PUBLIC_SUBNETS)
 echo "Public subnets = $PUBLIC_SUBNETS"
 
-CODE_COMMIT_REPO=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "CodeCommitRepoName") | .OutputValue')
+CODE_COMMIT_REPO=$(echo $STACK_OUTPUTS | jq -r 'select(.OutputKey == "CodeCommitRepoName") | .OutputValue')
 echo "CodeCommit repository name = $CODE_COMMIT_REPO"
 
-CODE_COMMIT_CLONE_URL=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "CodeCommitCloneURL") | .OutputValue')
+CODE_COMMIT_CLONE_URL=$(echo $STACK_OUTPUTS | jq -r 'select(.OutputKey == "CodeCommitCloneURL") | .OutputValue')
 echo "CodeCommit clone URL = $CODE_COMMIT_CLONE_URL"
 
-LAMBDA_ARN=$(aws cloudformation describe-stacks | jq -r '.Stacks[] | select(.Outputs != null) | .Outputs[] | select(.OutputKey == "AddDatabaseUserLambda") | .OutputValue')
+LAMBDA_ARN=$(echo $STACK_OUTPUTS | jq -r 'select(.OutputKey == "AddDatabaseUserLambda") | .OutputValue')
 echo "Add database user Lambda = $LAMBDA_ARN"
 
 TEMPLATE_URL="https://${WORKSHOP_BUCKET}.s3.amazonaws.com/lab2.template"
