@@ -38,6 +38,12 @@ public class Registration {
         this.password = password;
     }
 
+    public boolean isEmpty() {
+        return (firstName == null || firstName.isEmpty()) && (lastName == null || lastName.isEmpty()) &&
+                (email == null || email.isEmpty()) && (company == null || company.isEmpty()) &&
+                (plan == null || plan.isEmpty()) && (password == null || password.isEmpty());
+    }
+
     public String getFirstName() {
         return firstName;
     }

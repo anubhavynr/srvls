@@ -31,4 +31,11 @@ public class RegistrationServiceTest {
 //        }
 //    }
 
+    @Test
+    public void testRegistrationIsEmpty() {
+        Registration r = new Registration();
+        assertTrue(r.isEmpty());
+        r.setCompany("Company");
+        assertFalse(r.isEmpty());
+    }
 }
