@@ -13,25 +13,33 @@
 -- OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 -- SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-INSERT INTO category (category) VALUES ('Basketball'), ('Football'), ('Baseball'), ('Soccer');
-INSERT INTO product (sku, product, price) VALUES ('ABC', 'ABC Product', 35.00), ('DEF', 'DEF Product', 100.00), ('123', '123 Product', 17.99), ('456', '456 Product', 2897.67);
-INSERT INTO product_categories (product_id, category_id) VALUES (1, 3), (2, 1), (3, 4), (4, 2);
+INSERT INTO product (sku, product, price) VALUES ('054138', 'SaaS Architectures in JavaScript', 49.99), ('345629', 'Go SaaS', 37.99), ('582460', 'Modern C# Multi-Tenancy', 59.99), ('680425', 'iOS SaaS Identity', 79.99);
+INSERT INTO product_categories (product_id, category_id)
+SELECT product_id, category_id FROM product CROSS JOIN category WHERE sku = '054138' AND category = 'JavaScript'
+UNION
+SELECT product_id, category_id FROM product CROSS JOIN category WHERE sku = '345629' AND category = 'Golang'
+UNION
+SELECT product_id, category_id FROM product CROSS JOIN category WHERE sku = '582460' AND category = 'C#'
+UNION
+SELECT product_id, category_id FROM product CROSS JOIN category WHERE sku = '680425' AND category = 'Swift'
+;
 
-INSERT INTO purchaser (first_name, last_name) VALUES ('Santa', 'Claus'), ('Easter', 'Bunny'), ('Tooth', 'Fairy');
+INSERT INTO purchaser (first_name, last_name) VALUES ('Melissa', 'Jones'), ('Robin', 'Wrangler'), ('Thomas', 'Smith');
+
 INSERT INTO order_fulfillment (purchaser_id, order_date, ship_to_line1, ship_to_city, ship_to_state, ship_to_postal_code, bill_to_line1, bill_to_city, bill_to_state, bill_to_postal_code)
 VALUES
-(1, CURRENT_DATE - INTERVAL '30 day', 'Kris Kringle Road', 'North Pole City', 'North Pole', '12345', 'Kris Kringle Road', 'North Pole City', 'North Pole', '12345'),
-(2, CURRENT_DATE - INTERVAL '10 day', 'Egg Painting Lane', 'Easter Island City', 'Easter Island', '12345', 'Egg Painting Lane', 'Easter Island City', 'Easter Island', '12345'),
-(3, CURRENT_DATE - INTERVAL '1 day', 'Tooth Change Exchange Circle', 'Fairy City', 'Dreams', '12345', 'Tooth Change Exchange Circle', 'Fairy City', 'Dreams', '12345');
+(1, CURRENT_DATE - INTERVAL '30 day', '347 Main St', 'SaaS City', 'NV', '12345', '347 Main St', 'SaaS City', 'NV', '12345'),
+(2, CURRENT_DATE - INTERVAL '10 day', '63 Multi-Tenant Circle', 'Cloud City', 'NY', '12345', '63 Multi-Tenant Circle', 'Cloud City', 'NY', '12345'),
+(3, CURRENT_DATE - INTERVAL '1 day', '53 Cloud Route', 'Consumption Pricing Town', 'CA', '12345', '53 Cloud Route', 'Consumption Pricing Town', 'CA', '12345');
 
 INSERT INTO order_line_item (order_fulfillment_id, product_id, quantity, unit_purchase_price)
-SELECT 1, product_id, 2, price FROM product WHERE sku = 'ABC'
+SELECT 1, product_id, 2, price FROM product WHERE sku = '345629'
 UNION
-SELECT 1, product_id, 1, price FROM product WHERE sku = 'DEF'
+SELECT 1, product_id, 1, price FROM product WHERE sku = '582460'
 UNION
-SELECT 2, product_id, 1, price FROM product WHERE sku = '123'
+SELECT 2, product_id, 1, price FROM product WHERE sku = '054138'
 UNION
-SELECT 2, product_id, 1, price FROM product WHERE sku = '456'
+SELECT 2, product_id, 1, price FROM product WHERE sku = '680425'
 UNION
-SELECT 3, product_id, 10, price FROM product WHERE sku = '123'
+SELECT 3, product_id, 10, price FROM product WHERE sku = '582460'
 ;

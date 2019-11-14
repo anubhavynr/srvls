@@ -1087,7 +1087,7 @@ Resources:
       DBInstanceClass: db.r5.large
       Engine: aurora-postgresql
       DBInstanceIdentifier: saas-factory-srvls-wrkshp-lab4-instance1
-  RDSPooledCluster1Instance2:
+  RDSPooledClusterInstance2:
     Type: AWS::RDS::DBInstance
     Properties:
       DBClusterIdentifier: !Ref RDSPooledCluster
@@ -1306,6 +1306,57 @@ Resources:
       RDSClusterEndpoint: !GetAtt [RDSHotCluster2, Endpoint.Address]
       RDSDatabase: !Ref DBName
       TenantId: ''
+  LambdaBootstrapDatabasePooledLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/saas-factory-srvls-wrkshp-rds-pooled-${AWS::Region}
+      RetentionInDays: 30
+  LambdaBootstrapDatabasePooled:
+    Type: AWS::Lambda::Function
+    DependsOn: JumpBoxSecurityGroup
+    Properties:
+      FunctionName: !Sub saas-factory-srvls-wrkshp-rds-pooled-${AWS::Region}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: java8
+      Timeout: 60
+      MemorySize: 256
+      VpcConfig: # Has to be a VPC Lambda because we're talking to RDS
+        SecurityGroupIds:
+          - !Ref JumpBoxSecurityGroup
+        SubnetIds:
+          - !Ref SubnetPrivateA
+          - !Ref SubnetPrivateB
+      Handler: com.amazon.aws.partners.saasfactory.BootstrapRDS::bootstrapPool
+      Code:
+        S3Bucket: !Ref WorkshopS3Bucket
+        S3Key: BootstrapRDS.jar
+  InvokeLambdaBootstrapDatabasePooled:
+    Type: Custom::CustomResource
+    DependsOn:
+      - RDSPooledCluster
+      - RDSPooledClusterInstance1
+      - RDSPooledClusterInstance2
+      - JumpBoxSecurityGroup
+    Properties:
+      ServiceToken: !GetAtt LambdaBootstrapDatabasePooled.Arn
+      RDSMasterUsername: !Ref DBMasterUsername
+      RDSMasterPassword: saas-factory-srvls-wrkshp-owner-pw
+      RDSAppUsername: !Ref DBAppUsername
+      RDSAppPassword: saas-factory-srvls-wrkshp-app-pw
+      RDSCluster: !Ref RDSPooledCluster
+      RDSClusterEndpoint: !GetAtt [RDSPooledCluster, Endpoint.Address]
+      RDSDatabase: !Ref DBName
+      TenantId: ''
+  SSMParamDBHostLab4:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - RDSPooledCluster
+      - RDSPooledClusterInstance1
+      - RDSPooledClusterInstance2
+    Properties:
+      Name: DB_HOST_POOL
+      Type: String
+      Value: !GetAtt [RDSPooledCluster, Endpoint.Address]
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:

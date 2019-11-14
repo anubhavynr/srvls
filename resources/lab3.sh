@@ -68,6 +68,10 @@ echo "Custom Authorizer Role = $AUTHORIZER_ROLE"
 TEMPLATE_URL="https://${WORKSHOP_BUCKET}.s3.amazonaws.com/lab3.template"
 echo "CloudFormation template URL = $TEMPLATE_URL"
 
+cd /home/ec2-user/environment/saas-factory-serverless-workshop/lab3/order-service
+mvn
+aws s3 cp target/OrderService-lambda.zip s3://$WORKSHOP_BUCKET
+
 echo
 aws cloudformation create-stack --stack-name "${WORKSHOP_STACK}-lab3" --on-failure DO_NOTHING --capabilities CAPABILITY_NAMED_IAM --template-url "${TEMPLATE_URL}" --parameters \
 ParameterKey=LoadBalancerDNS,ParameterValue="${LOAD_BALANCER_DNS}" \
@@ -82,3 +86,5 @@ ParameterKey=AuthServiceSignInArn,ParameterValue="${AUTH_SVC_SIGN_IN}" \
 ParameterKey=LambdaCustomAuthorizerArn,ParameterValue="${CUSTOM_AUTHORIZER}" \
 ParameterKey=ApiGatewayLambdaAuthorizerRoleArn,ParameterValue="${AUTHORIZER_ROLE}" \
 ParameterKey=WorkshopS3Bucket,ParameterValue="${WORKSHOP_BUCKET}"
+
+cd /home/ec2-user/environment/saas-factory-serverless-workshop/resources

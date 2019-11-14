@@ -126,10 +126,10 @@ public class BootstrapRDS implements RequestHandler<Map<String, Object>, Object>
                         // Add some mock data to the tables for the lab 1 "monolith" user
                         if ("MONOLITH".equalsIgnoreCase(tenantId)) {
                             InputStream dataSql = Thread.currentThread().getContextClassLoader().getResourceAsStream("data.sql");
-                            Scanner userSqlScanner = new Scanner(dataSql, "UTF-8");
-                            userSqlScanner.useDelimiter(";");
-                            while (userSqlScanner.hasNext()) {
-                                String inserts = userSqlScanner.next();
+                            Scanner dataSqlScanner = new Scanner(dataSql, "UTF-8");
+                            dataSqlScanner.useDelimiter(";");
+                            while (dataSqlScanner.hasNext()) {
+                                String inserts = dataSqlScanner.next();
                                 sql.addBatch(inserts);
                             }
                             sql.executeBatch();
@@ -213,54 +213,6 @@ public class BootstrapRDS implements RequestHandler<Map<String, Object>, Object>
         return null;
     }
 
-    /**
-     * Send a response to CloudFormation regarding progress in creating resource.
-     *
-     * @param input
-     * @param context
-     * @param responseStatus
-     * @param responseData
-     * @return
-     */
-    public final Object sendResponse(final Map<String, Object> input, final Context context, final String responseStatus, ObjectNode responseData) {
-
-        String responseUrl = (String) input.get("ResponseURL");
-        context.getLogger().log("ResponseURL: " + responseUrl + "\n");
-
-        URL url;
-        try {
-            url = new URL(responseUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestMethod("PUT");
-
-            ObjectNode responseBody = JsonNodeFactory.instance.objectNode();
-            responseBody.put("Status", responseStatus);
-            responseBody.put("RequestId", (String) input.get("RequestId"));
-            responseBody.put("LogicalResourceId", (String) input.get("LogicalResourceId"));
-            responseBody.put("StackId", (String) input.get("StackId"));
-            responseBody.put("PhysicalResourceId", context.getLogStreamName());
-            if (!"FAILED".equals(responseStatus)) {
-                responseBody.set("Data", responseData);
-            } else {
-                responseBody.put("Reason", responseData.get("Reason").asText());
-            }
-            try (OutputStreamWriter response = new OutputStreamWriter(connection.getOutputStream())) {
-                response.write(responseBody.toString());
-            }
-            context.getLogger().log("Response Code: " + connection.getResponseCode() + "\n");
-            connection.disconnect();
-        } catch (IOException e) {
-            // Print the full stack trace
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw, true);
-            e.printStackTrace(pw);
-            context.getLogger().log(sw.getBuffer().toString() + "\n");
-        }
-
-        return null;
-    }
-
     public Object addApplicationUser(Map<String, Object> input, Context context) {
         LambdaLogger logger = context.getLogger();
         final String requestType = (String) input.get("RequestType");
@@ -337,6 +289,157 @@ public class BootstrapRDS implements RequestHandler<Map<String, Object>, Object>
             sendResponse(input, context, "FAILED", responseData);
         } finally {
             service.shutdown();
+        }
+
+        return null;
+    }
+
+    public Object bootstrapPool(Map<String, Object> input, Context context) {
+        LambdaLogger logger = context.getLogger();
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            logger.log(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(input));
+            logger.log("\n");
+        } catch (JsonProcessingException e) {
+            logger.log("Could not log input\n");
+        }
+
+        final String requestType = (String) input.get("RequestType");
+        Map<String, Object> resourceProperties = (Map<String, Object>) input.get("ResourceProperties");
+        final String dbMasterUser = (String) resourceProperties.get("RDSMasterUsername");
+        final String dbMasterPass = (String) resourceProperties.get("RDSMasterPassword");
+        final String dbAppUser = (String) resourceProperties.get("RDSAppUsername");
+        final String dbAppPass = (String) resourceProperties.get("RDSAppPassword");
+        final String dbHost = (String) resourceProperties.get("RDSClusterEndpoint");
+        final String dbDatabase = (String) resourceProperties.get("RDSDatabase");
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+
+        ObjectNode responseData = JsonNodeFactory.instance.objectNode();
+        try {
+            if (requestType == null) {
+                throw new RuntimeException();
+            }
+
+            Runnable r = () -> {
+                GetParameterResponse ssmResponse = ssm.getParameter(request -> request
+                        .name(dbMasterPass)
+                        .withDecryption(Boolean.TRUE)
+                );
+                String decryptedMasterPassword = ssmResponse.parameter().value();
+
+                GetParameterResponse response = ssm.getParameter(request -> request
+                        .name(dbAppPass)
+                        .withDecryption(Boolean.TRUE)
+                );
+                String decryptedAppPassword = response.parameter().value();
+
+                Properties masterConnectionProperties = new Properties();
+                masterConnectionProperties.put("user", dbMasterUser);
+                masterConnectionProperties.put("password", decryptedMasterPassword);
+
+                String jdbcUrl = "jdbc:postgresql://" + dbHost + ":5432/" + dbDatabase;
+
+                if ("Create".equalsIgnoreCase(requestType)) {
+                    logger.log("CREATE\n");
+
+                    try (Connection connection = DriverManager.getConnection(jdbcUrl, masterConnectionProperties);
+                         Statement sql = connection.createStatement()) {
+                        connection.setAutoCommit(false);
+                        InputStream bootstrapSql = Thread.currentThread().getContextClassLoader().getResourceAsStream("bootstrap_pool.sql");
+                        Scanner bootstrapSqlScanner = new Scanner(bootstrapSql, "UTF-8");
+                        bootstrapSqlScanner.useDelimiter(";");
+                        while (bootstrapSqlScanner.hasNext()) {
+                            // Simple variable replacement in the SQL
+                            String ddl = bootstrapSqlScanner.next()
+                                    .replace("{{DB_APP_USER}}", dbAppUser)
+                                    .replace("{{DB_APP_PASS}}", decryptedAppPassword);
+                            sql.addBatch(ddl);
+                        }
+                        sql.executeBatch();
+                        connection.commit();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    sendResponse(input, context, "SUCCESS", responseData);
+                } else if ("Update".equalsIgnoreCase(requestType)) {
+                    logger.log("UDPATE\n");
+                    // TODO: Is there really any logical update process here?
+                    sendResponse(input, context, "SUCCESS", responseData);
+                } else if ("Delete".equalsIgnoreCase(requestType)) {
+                    logger.log("DELETE\n");
+                    // TODO: Do we dare drop the database here?
+                    sendResponse(input, context, "SUCCESS", responseData);
+                } else {
+                    logger.log("FAILED unknown requestType " + requestType + "\n");
+                    responseData.put("Reason", "Unknown RequestType " + requestType);
+                    sendResponse(input, context, "FAILED", responseData);
+                }
+            };
+            Future<?> f = service.submit(r);
+            f.get(context.getRemainingTimeInMillis() - 1000, TimeUnit.MILLISECONDS);
+        } catch (final TimeoutException | InterruptedException | ExecutionException e) {
+            // Timed out or unexpected exception
+            logger.log("FAILED unexpected error or request timed out " + e.getMessage() + "\n");
+            // Print the full stack trace
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw, true);
+            e.printStackTrace(pw);
+            logger.log(sw.getBuffer().toString() + "\n");
+
+            responseData.put("Reason", "Request timed out");
+            sendResponse(input, context, "FAILED", responseData);
+        } finally {
+            service.shutdown();
+        }
+
+        return null;
+    }
+
+    /**
+     * Send a response to CloudFormation regarding progress in creating resource.
+     *
+     * @param input
+     * @param context
+     * @param responseStatus
+     * @param responseData
+     * @return
+     */
+    public final Object sendResponse(final Map<String, Object> input, final Context context, final String responseStatus, ObjectNode responseData) {
+
+        String responseUrl = (String) input.get("ResponseURL");
+        context.getLogger().log("ResponseURL: " + responseUrl + "\n");
+
+        URL url;
+        try {
+            url = new URL(responseUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setRequestMethod("PUT");
+
+            ObjectNode responseBody = JsonNodeFactory.instance.objectNode();
+            responseBody.put("Status", responseStatus);
+            responseBody.put("RequestId", (String) input.get("RequestId"));
+            responseBody.put("LogicalResourceId", (String) input.get("LogicalResourceId"));
+            responseBody.put("StackId", (String) input.get("StackId"));
+            responseBody.put("PhysicalResourceId", context.getLogStreamName());
+            if (!"FAILED".equals(responseStatus)) {
+                responseBody.set("Data", responseData);
+            } else {
+                responseBody.put("Reason", responseData.get("Reason").asText());
+            }
+            try (OutputStreamWriter response = new OutputStreamWriter(connection.getOutputStream())) {
+                response.write(responseBody.toString());
+            }
+            context.getLogger().log("Response Code: " + connection.getResponseCode() + "\n");
+            connection.disconnect();
+        } catch (IOException e) {
+            // Print the full stack trace
+            final StringWriter sw = new StringWriter();
+            final PrintWriter pw = new PrintWriter(sw, true);
+            e.printStackTrace(pw);
+            context.getLogger().log(sw.getBuffer().toString() + "\n");
         }
 
         return null;
