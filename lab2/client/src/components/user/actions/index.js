@@ -15,6 +15,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 import Axios from 'axios';
+import jwt from 'jsonwebtoken';
 import config from '../../../shared/config';
 import {
     RECEIVE_AUTHENTICATE_USER,
@@ -49,31 +50,30 @@ export const authenticateUser = (userChallenge) => {
                 if(response.data && response.data.idToken) {
                     sessionStorage.setItem('isAuthenticated', 'true');
                     sessionStorage.setItem('idToken', response.data.idToken);
+                    const decoded = jwt.decode(response.data.idToken);
+                    const user = {
+                        firstName: decoded.given_name,
+                        lastName: decoded.family_name,
+                        isAuthenticated: true,
+                    }
 
-                    dispatch(receiveUserAuthentication(response.data));
+                    dispatch(receiveUserAuthentication(user));
                 } else {
                     throw new Error("User authentication failed.");
                 }
             }, error => console.error(error))
             .then(() => {
-                 dispatch(closeModal());
+                dispatch(closeModal());
             }, error => console.error(error));
     }
 };
 
 export const registerUser = (user) => {
-
-console.log('user: ', user);
-
-
     return function(dispatch) {
         const url = '/registration';
 
         Axios.post(url, user)
             .then(response => {
-
-console.log('response: ', response);
-
                 dispatch(registerUserFinished(response.data));
             }, error => console.error(error))
             .then(() => {

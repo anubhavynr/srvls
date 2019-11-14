@@ -42,7 +42,8 @@ export const user = (state = initialState, action) => {
             return null;
         case RECEIVE_REGISTER_USER:
             return {
-                
+                ...state,
+                ...action.user,
             }
         default:
             return state;

@@ -94,7 +94,7 @@ function Orders(props) {
                                             orderDate,
                                             lineItems,
                                             total,
-                                            totalItems = lineItems.length,
+                                            totalItems = lineItems ? lineItems.length : 0,
                                             purchaser,
                                             purchaserId = purchaser.id,
                                             shipDate,

@@ -17,12 +17,10 @@
 
 WORKSHOP_BUCKET=$1
 
-if [ ! -d resources ]; then
+if [ $(basename $PWD) != "resources" ]; then
 	echo "Can't find resources directory"
 	exit 1
 fi
-
-cd resources
 
 for LAMBDA in $(ls -d */); do
 	if [ $LAMBDA != "custom-resources/" ]; then

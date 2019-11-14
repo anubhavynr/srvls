@@ -30,6 +30,7 @@ import java.util.*;
 public class OrderServiceDAL {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OrderServiceDAL.class);
+    private final Map<String, String> tenantTableCache = new HashMap<>();
     private DynamoDbClient ddb;
 
     public OrderServiceDAL() {
@@ -122,10 +123,31 @@ public class OrderServiceDAL {
         return;
     }
 
-    private static String tableName(Map<String, Object> event) {
-        String tenantId = TokenManager.getTenantId(event);
+    private String tableName(Map<String, Object> event) {
+        String tenantId = new TokenManager().getTenantId(event);
+
         String tableName = "order_fulfillment_" + tenantId;
-        return tableName;
+        if (!tenantTableCache.containsKey(tenantId) || !tenantTableCache.get(tenantId).equals(tableName)) {
+            boolean exits = false;
+            ListTablesResponse response = ddb.listTables();
+            for (String table : response.tableNames()) {
+                if (table.equals(tableName)) {
+                    exits = true;
+                    break;
+                }
+            }
+            if (!exits) {
+                CreateTableResponse createTable = ddb.createTable(request -> request
+                        .tableName(tableName)
+                        .attributeDefinitions(AttributeDefinition.builder().attributeName("id").attributeType(ScalarAttributeType.S).build())
+                        .keySchema(KeySchemaElement.builder().attributeName("id").keyType(KeyType.HASH).build())
+                        .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(5L).writeCapacityUnits(5L).build())
+                );
+            }
+            tenantTableCache.put(tenantId, tableName);
+        }
+
+        return tenantTableCache.get(tenantId);
     }
 
     private static String getFullStackTrace(Exception e) {

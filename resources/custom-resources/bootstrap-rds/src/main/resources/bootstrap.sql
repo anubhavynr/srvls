@@ -65,3 +65,7 @@ CREATE TABLE order_line_item (
 	quantity INT NOT NULL CHECK (quantity > 0),
 	unit_purchase_price DECIMAL(9, 2) NOT NULL
 );
+
+-- UI currently blows up if there are no categories, so add some static entries even if we're not
+-- entering fake product or order data
+INSERT INTO category (category) VALUES ('JavaScript'), ('Python'), ('Java'), ('C#'), ('PHP'), ('Swift'), ('Ruby'), ('Golang');

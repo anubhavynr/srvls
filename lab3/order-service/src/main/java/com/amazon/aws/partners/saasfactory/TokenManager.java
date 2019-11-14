@@ -44,8 +44,8 @@ public class TokenManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenManager.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final Map<String, List<Map<String, String>>> USER_POOLS_JWKS = new HashMap<>();
-    private static final String TENANT_CLAIM = "TenantId";
+    private static final String TENANT_CLAIM = "custom:tenant_id";
+    private final Map<String, List<Map<String, String>>> userPoolsJwks = new HashMap<>();
     private CognitoIdentityProviderClient cognito;
 
     public TokenManager() {
@@ -56,21 +56,27 @@ public class TokenManager {
         init();
     }
 
-    public static String getTenantId(Map<String, Object> event) {
+    public String getTenantId(Map<String, Object> event) {
         String bearerToken = ((Map<String, String>) event.get("headers")).get("Authorization");
         String jwtToken = bearerToken.substring(bearerToken.indexOf(" ") + 1);
         Claims verifiedClaims = Jwts.parser()
                 .setSigningKeyResolver(keyResolver())
                 .parseClaimsJws(jwtToken)
                 .getBody();
+
         String tenantId = verifiedClaims.get(TENANT_CLAIM, String.class);
+
+        if (tenantId == null) {
+            throw new RuntimeException("No tenant id in token");
+        }
+
         return tenantId;
     }
 
-    static SigningKeyResolver keyResolver() {
-        LOGGER.info("TokenManager::keyResolver building key resolver for " + USER_POOLS_JWKS.keySet().size() + " user pools");
+    public SigningKeyResolver keyResolver() {
+        LOGGER.info("TokenManager::keyResolver building key resolver for " + userPoolsJwks.keySet().size() + " user pools");
         List<List<Map<String, String>>> cognitoKeys = new ArrayList<>();
-        USER_POOLS_JWKS.entrySet()
+        userPoolsJwks.entrySet()
                 .stream()
                 .map(e -> e.getValue())
                 .forEachOrdered(cognitoKeys::add);
@@ -83,7 +89,7 @@ public class TokenManager {
         if (userPools != null) {
             for (UserPoolDescriptionType userPool : userPools) {
                 String userPoolId = userPool.id();
-                if (!USER_POOLS_JWKS.containsKey(userPoolId)) {
+                if (!userPoolsJwks.containsKey(userPoolId)) {
                     addUserPoolJwks(userPoolId);
                 }
             }
@@ -104,7 +110,7 @@ public class TokenManager {
             cognitoIdp.disconnect();
 
             Map<String, List<Map<String, String>>> cognitoWellKnownJwks = MAPPER.readValue(jwks, Map.class);
-            USER_POOLS_JWKS.put(userPoolId, cognitoWellKnownJwks.get("keys"));
+            userPoolsJwks.put(userPoolId, cognitoWellKnownJwks.get("keys"));
         } catch (Exception e) {
             LOGGER.error(getFullStackTrace(e));
             throw new RuntimeException(e);

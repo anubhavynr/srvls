@@ -2075,8 +2075,8 @@ Outputs:
     Description: TenantService delete function ARN
     Value: !GetAtt TenantServiceDelete.Arn
   TenantServiceNextDbArn:
-    Description: TenantService nextDb function ARN
-    Value: !GetAtt TenantServiceNextDb.Arn
+    Description: TenantService nextDatabase function ARN
+    Value: !GetAtt TenantServiceNextDatabase.Arn
   RegistrationServiceRegisterArn:
     Description: RegistrationService register function ARN
     Value: !GetAtt RegistrationServiceRegister.Arn
