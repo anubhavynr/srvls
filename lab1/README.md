@@ -1,17 +1,13 @@
 # Lab 1 – Deploying, Exploring, and Exercising the Single-Tenant Monolith
 Our transformation process must begin with our baseline monolithic application. We need a reference starting that employs the common monolithic patterns that will represent our starting point for migrating to microservices and multi-tenant SaaS. For our solution, we’ve picked a fairly common Java-based technology stack that should be similar to many of the monolithic solutions that have been commonly employed by different organizations. While we’ve selected Java here, there’s little about this stack that is unique to Java. A .NET monolith, for example, would likely have a footprint very similar to what we have created here.
 
-The architecture employed for our monolith will rely on a traditional EC2-based model where the web and application tiers of our architecture are hosted on a collection of load-balanced, scalable instances. While the these are logically separated within the code, they are deployed collectively as one unit. Any change to the web experience or the business logic would require a complete redeployment of this code. This is a classic monolithic challenge (in some cases the web tier may be separate out to allow separate scale and deployment of these two tiers. The data for each customer is stored in a monolithic database that houses all of a customer’s data. The conceptual footprint of this environment is shown in the image below:
+The architecture employed for our monolith will rely on a traditional EC2-based model where the web and application tiers of our architecture are hosted on a collection of load-balanced, scalable instances. While these are logically separated within the code, they are deployed collectively as one unit. Any change to the web experience or the business logic would require a complete redeployment of this code. This is a classic monolithic challenge (in some cases the web tier may be separate out to allow separate scale and deployment of these two tiers. The data for each customer is stored in a monolithic database that houses all of a customer’s data. The conceptual footprint of this environment is shown in the image below:
 
 <p align="center"><img src="../Images/Lab1/LogicalArchitecture.png" alt="Architecture Overview"/></p>
 
 You’ll notice here that we’ve shown two copies of this environment. The idea here is to convey the idea that every customer of this monolithic system will be deployed with a completely standalone infrastructure. This is a common strategy for most single-tenant independent software vendors (ISVs) who essentially treat each customer as have their own unique installation. This usually means separate support, potentially different versions for each customer, different management and operations teams, and so on. 
 
 We’ll start the lab with all the moving parts of this monolith provisioned. We’ll look briefly at some of the key elements of the deployed environment just to give you a glimpse of the architecture and elements of the underlying application components. We’ll then exercise the application just to demonstrate the working application and establish a foundation for the experience we’ll be moving to serverless microservices.
-
-Once we’ve explored the basics of the monolith, we’ll start with the first phase of our transformation. The approach here will be to move our web application from a server rendered HTML to a modern REACT application hosted on S3. It’s important to note that you may not always start your transformation with the client application. Some organizations will prefer to start from the bottom up, leaving the client application to the final step. However, for this lab, it made more sense to move to a modern application first and then shape our services around the interactions that are being driven by the interactions between the client and the server.
-
-The migrated UI will push our client experience out to and S3 bucket and introduce the Amazon API Gateway to process and route requests to our server-side services (new and old). After we’ve moved the application out to the S3, we’ll exercise this new experience briefly to highlight the architectural elements of this new model.
 
 ## What You’ll Be Building
 
@@ -39,34 +35,34 @@ The Cloud9 IDE has all the traditional elements you would expect to find in a mo
 <b>Step 3</b> – Now that Cloud9 is open, we need to execute the script that will get our monolith application code, deploy the first copy of the application, and populate the local repository that we will be using as we apply changes during this workshop. This script is at a specified URL and can be executed with a CURL command. To execute this command, navigate to the terminal window at the bottom of the Cloud9 page and enter the following command:
 
 ```
-curl -s https://raw.githubusercontent.com/brtrvn/srvls/master/bootstrap.sh | bash
+curl -s https://raw.githubusercontent.com/brtrvn/srvls/master/resources/bootstrap.sh | bash
 ```
 
 When this script is done executing, you’ll have all the pieces we need in place to begin exercising our application.
 
-<b>Step 4</b> – Running this script actually created and launched a deployment via CodePipeline. To see the status of this pipeline, navigate to the CodePipeline service within the AWS console. When you access this page, you’ll see the <b>saas-factory-svls-wrkshp-app-deploy</b> pipeline listed amongst the pipelines in your account. The screen should appear as follows:
+<b>Step 4</b> – Running this script actually created and launched a deployment via CodePipeline. To see the status of this pipeline, navigate to the CodePipeline service within the AWS console. When you access this page, you’ll see the <b>saas-factory-srvls-wrkshp-pipeline-lab1-[ID]</b> pipeline listed amongst the pipelines in your account. The screen should appear as follows:
 
 <p align="center"><img src="../Images/Lab1/Codepipeline.png" alt="Code Pipeline"/></p>
 
 Once this pipeline succeeds it will have deployed our monolith application to the infrastructure that was provisioned at the outset of this workshop. If you select the pipeline from the list, you’ll be able to view the execution status of the pipeline. 
 
 
-<b>Step 5</b> – While our code is being deployed, let’s take a look at some of the infrastructure that will be hosting our application. The architecture that has been pre-provisioned for our monolith is intentionally meant to resemble something that could be on AWS now or on-prem. In this particular monolith solution, we have one cluster that is running all the moving parts of our system. We have deployed this on an EC2 cluster in a multi-AZ configuration with auto-scaling groups. To see the current instances, navigate to the EC2 service within the AWS console. Now, select <b>Auto Scaling Groups</b> from the navigation pane on the left (you may need to scroll to locate the menu item). This will display a list of provisioned auto-scaling groups including our <b>“Monolith-Serverless-[Region]-Workshop”</b> auto-scaling group. Select the checkbox that corresponds to this auto-scaling group to focus on this group. Now, at the bottom of the page, select the <b>“Instances”</b> to view the EC2 instances in the auto-scaling group. The screen should appear as follows:
+<b>Step 5</b> – While our code is being deployed, let’s take a look at some of the infrastructure that will be hosting our application. The architecture that has been pre-provisioned for our monolith is intentionally meant to resemble something that could be on AWS now or on-prem. In this particular monolith solution, we have one cluster that is running all the moving parts of our system. We have deployed this on an EC2 cluster in a multi-AZ configuration with auto-scaling groups. To see the current instances, navigate to the EC2 service within the AWS console. Now, select <b>Auto Scaling Groups</b> from the navigation pane on the left (you may need to scroll to locate the menu item). This will display a list of provisioned auto-scaling groups including our <b>“Serverless-SaaS-Workshop-1-lab1”</b> auto-scaling group. Select the checkbox that corresponds to this auto-scaling group to focus on this group. Now, at the bottom of the page, select the <b>“Instances”</b> to view the EC2 instances in the auto-scaling group. The screen should appear as follows:
 
 <p align="center"><img src="../Images/Lab1/AutoScalingGroup.png" alt="Code Pipeline"/></p>
 
 
 This view indicates that we have 2 running instances in our auto-scaling group. In a production environment, we’d likely provision a larger minimum footprint. These instances sit behind an Application Load Balancer (ALB) that directs traffic to each of the instances shown here.
 
-<b>Step 6</b> – The infrastructure provisioned also includes an Aurora RDS instance. Navigate to RDS in the console and select “databases” from the navigation pane on the left-hand side of the console. Here, you’ll see the <b>LAB1</b> instance that has been provisioned. The screen will appear as follows:
+<b>Step 6</b> – The infrastructure provisioned also includes an Aurora RDS instance. Navigate to RDS in the console and select <b>“Databases”</b> from the navigation pane on the left-hand side of the console. Here, you’ll see the <b>LAB1</b> instance that has been provisioned. The screen will appear as follows:
 
 <p align="center"><img src="../Images/Lab1/RDS.png" alt="LAB1 RDS"/></p>
 
 This database is deployed with separate reader and writer instances. As our monolith database, it will hold all of the data for our entire single-tenant environment. The code in our application services have access to any of the data in database, enabling them to couple to any and all of the constructs in this database. 
 
-<b>Step 7</b> – Let’s now turn our attention to the running application. To access the application, we’ll first need to confirm that the deployment process has completed. Once again, navigate to the CodePipeline in the AWS console. Check the status of the <b>“saas-factory-srvls-wrkshp-app-deploy”</b> and confirm that the pipeline successfully completed the deployment process. 
+<b>Step 7</b> – Let’s now turn our attention to the running application. To access the application, we’ll first need to confirm that the deployment process has completed. Once again, navigate to the CodePipeline in the AWS console. Check the status of the <b>“saas-factory-srvls-wrkshp-pipeline-lab1-[ID]”</b> and confirm that the pipeline successfully completed the deployment process. 
 
-<b>Step 8</b> – Finally, let’s locate the URL that will be used to access our application. This URL is associated with the ALB that was generated when the environment was created. To access the URL, first navigate to the EC2 service in the AWS console. Then, select <b>“Load Balancers”</b> from the navigation pane on the left-hand side of the page. This will display a list of load balancers. Select the <b>“Monol-LoadB-[ID]”</b> from the list and your screen should appear as follows:
+<b>Step 8</b> – Finally, let’s locate the URL that will be used to access our application. This URL is associated with the ALB that was generated when the environment was created. To access the URL, first navigate to the EC2 service in the AWS console. Then, select <b>“Load Balancers”</b> from the navigation pane on the left-hand side of the page. This will display a list of load balancers. Select the <b>“saas-svs-wrkshp-lab1-[REGION]”</b> from the list and your screen should appear as follows:
 
 <p align="center"><img src="../Images/Lab1/LoadBalancer.png" alt="Load Balancer"/></p>
 
@@ -104,7 +100,7 @@ Fill in the data for a sample product and select “Add Product” to save this 
 
 To explore the code, you must first re-open the Cloud9 service in the AWS console. Once you open the Cloud9, select the “Serverless SaaS Workshop IDE” that listed as one of the environments. Open this environment by selected the “Open IDE” button.
 
-Now, expand the list of folders in the left-hand pane drilling into the “Lab 1” folder. In that folder under “server” you’ll find the “src” folder that holds the source code for our monolith. The main folders of our application are show in the following image:
+Now, expand the list of folders in the left-hand pane drilling into the “lab 1” folder. In that folder under “server” you’ll find the “src” folder that holds the source code for our monolith. The main folders of our application are show in the following image:
 
 <p align="center"><img src="../Images/Lab1/CodeTree.png" alt="CodeTree"/></p>
 
@@ -148,7 +144,7 @@ Identify a product you want to delete and select the red delete (“Del”) icon
 
 <p align="center"><img src="../Images/Lab1/Products2.png" alt="Products"/></p>
 
-<b>Step 15</b> – Let’s troubleshoot our problem by digging into the “Controller” portion of our MVC model to see why our delete request isn’t working. Navigate to the Cloud9 service and open the IDE for this workshop. With the source tree that appears on the left, navigate to the “Lab 1/server/src” folder. Within the nested folders (these correspond to Java’s package naming organization of code), select the “Controllers” folder. This will give you a list of the controllers that are implemented for our monolith. Select the <b>“ProductsController.java”</b> file to open the editor for this file. 
+<b>Step 15</b> – Let’s troubleshoot our problem by digging into the “Controller” portion of our MVC model to see why our delete request isn’t working. Navigate to the Cloud9 service and open the IDE for this workshop. With the source tree that appears on the left, navigate to the “lab 1/server/src” folder. Within the nested folders (these correspond to Java’s package naming organization of code), select the “controller” folder. This will give you a list of the controllers that are implemented for our monolith. Select the <b>“ProductsController.java”</b> file to open the editor for this file. 
 
 Within this file, we’ll navigate to the <b>updateProduct()</b> and <b>deleteProduct()</b> methods of our Java class. These two methods represent the entry point of our HTTP calls that will be processed by the various methods in this class. You’ll notice that, within the body of these methods, we are calling the actual product service that is the actual implementation of our service functionality. Let’s take a closer look at these two specific methods to see if we can figure out what’s broken with the delete product functionality that we observed in the application. The two methods are as follows:
 
@@ -172,7 +168,7 @@ public String deleteProduct(@ModelAttribute Product product) throws Exception {
 }
 ```
 
-At first glance, there doesn’t appear to be anything wrong without <b>deleteProduct()</b> method. However, if you compare it to the <b>updateProduct()</b> method above it, you’ll notice that an <b>@PostMapping</b> annotation is associated with our <b>updateProduct()</b> method. This annotation is missing from our deleteProduct() method. Without this annotation, there’s our HTTP calls will have no routing to the delete method.
+At first glance, there doesn’t appear to be anything wrong without <b>deleteProduct()</b> method. However, if you compare it to the <b>updateProduct()</b> method above it, you’ll notice that an <b>@PostMapping</b> annotation is associated with our <b>updateProduct()</b> method. This annotation is missing from our <b>deleteProduct()</b> method. Without this annotation, there’s our HTTP calls will have no routing to the delete method.
 
 To resolve this, we’ll need to simply add the missing annotation to our <b>deleteProduct()</b> method. Do this by adding the annotation as shown below:
 

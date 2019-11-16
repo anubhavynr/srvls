@@ -26,36 +26,50 @@ Upon completion of these steps, you should be on your way to your full serverles
 
 The following is a breakdown of the step-by-step process for getting creating our new multi-tenant Order service in a serverless model.
 
-<b>Step 1</b> – Let’s start by finding the code that will start with for our Order service. Open the Cloud9 IDE in the AWS console and select the <b>“Serverless SaaS Workshop IDE”</b>. With the IDE, we can now examine the code that currently exists for our Order service. To get there, open the <b>“Lab 3“</b> folder in the left-hand pane of the page. Under the <b>“server/order-service/src“</b> you will find the various Java files that makeup our Order service. 
+<b>Step 1</b> – Let’s start by finding the code that will start with for our Order service. Open the Cloud9 IDE in the AWS console and select the <b>“Serverless SaaS Workshop IDE”</b>. With the IDE, we can now examine the code that currently exists for our Order service. To get there, open the <b>“Lab 3“</b> folder in the left-hand pane of the page. Under the <b>“server/order-service/src/main/java“</b> you will find the various Java files that makeup our Order service. 
 Let’s deploy this new microservice and see it in action. We’ve introduced a script that will be responsible for uploading and publishing changes to your microservices (or, in this case, publishing it for the first time). Run the following commands in the terminal windows of your Cloud9 IDE to launch this script:
 ```
-cd /serverless/Lab 3
+cd /home/ec2-user/environment/saas-factory-serverless-workshop/resources
 bash lab3.sh
 ```
 
-<b>Step 2</b> – Now we can go verify that our service has been deployed. Open the Lambda service within the AWS console. You’ll be presented with a list of all of your functions. Enter <b>“saas-factory-srvls-wrkshp-orders“</b> into the filter box above the list of functions to narrow this list to those that we’ve deployed. Here you’ll notice that there are separate functions for each of the operations of our Order service. Each one corresponds to a REST operation (GET, PUT, DELETE, etc.). This confirms that our service has been deployed.
+This will trigger a cloud formation stack creation. Before proceeding make sure that lab3 stack has been created successfully as follows:
 
-<b>Step 3</b> – The functions are in place. Now we need to verify that the API Gateway has mapped entry to these functions to route traffic to this serverless microservice (instead of the monolith we were using before). Navigate to the API Gateway service in the AWS console. In the left-hand pane you will now see a new API that was provisioned during the deployment of our Order service. Select the <b>“Serverless SaaS Lambda API“</b> from this list. This should display a list of resources that are configured for this API that appears as follows:
+<p align="center"><kbd><img src="../Images/Lab3/Cloudformation.png" alt="Cloud Formation"/></kbd></p>
+
+<b>Step 2</b> - We will now go ahead update our website to use the new endpoints created as part of above cloudformation. Please go ahead and do that by running following commands:
+```
+cd /home/ec2-user/environment/saas-factory-serverless-workshop/resources
+bash website-lab2.sh
+```
+
+<b>Step 3</b>This will trigger the cloudfront cache invalidation. Go to CloudFront service and click on the ID with name <b>"serverless-saas-stack-lab1-[ID]"</b>. Click on Invalidations tab and wait for the status of invalidaion to be complete.
+
+<p align="center"><kbd><img src="../Images/Lab3/Cloudfront.png" alt="Cloud Front"/></kbd></p>
+
+<b>Step 4</b> – Now we can go verify that our service has been deployed. Open the Lambda service within the AWS console. You’ll be presented with a list of all of your functions. Enter <b>“saas-factory-srvls-wrkshp-orders“</b> into the filter box above the list of functions to narrow this list to those that we’ve deployed. Here you’ll notice that there are separate functions for each of the operations of our Order service. Each one corresponds to a REST operation (GET, PUT, DELETE, etc.). This confirms that our service has been deployed.
+
+<b>Step 5</b> – The functions are in place. Now we need to verify that the API Gateway has mapped entry to these functions to route traffic to this serverless microservice (instead of the monolith we were using before). Navigate to the API Gateway service in the AWS console. In the left-hand pane you will now see a new API that was provisioned during the deployment of our Order service. Select the <b>“saas-factory-srvls-wrkshp-lab3“</b> from this list. This should display a list of resources that are configured for this API that appears as follows:
 
 <p align="center"><img src="../Images/Lab3/APIGatewayOrderService.png" alt="Order Service"/></p>
 
-Here you’ll see the basic CRUD operations that are enabled as resources in our API Gateway. There are GET and POST resources which don’ require parameters. There is also a /{id} route that adds an identifier to the resource to enable GET, DELETE, and PUT operations on individual orders.
+Here you’ll see the basic CRUD operations that are enabled as resources in our API Gateway. There are GET and POST resources which don’t require parameters. There is also a /{id} route that adds an identifier to the resource to enable GET, DELETE, and PUT operations on individual orders.
 
-<b>Step 4</b> – The functions are in place. Now we need to verify that the API Gateway has mapped entry to these functions to route traffic to this serverless microservice (instead of the monolith we were using before). Select the <b>GET</b> method under the <b>/orders</b> resource to access the configuration for the GET orders operation. This will display a view similar to the following:
+<b>Step 6</b> – The functions are in place. Now we need to verify that the API Gateway has mapped entry to these functions to route traffic to this serverless microservice (instead of the monolith we were using before). Select the <b>GET</b> method under the <b>/orders</b> resource to access the configuration for the GET orders operation. This will display a view similar to the following:
 
 <p align="center"><img src="../Images/Lab3/OrderService.png" alt="Order Service"/></p>
 
-<b>Step 5</b> – Finally, we can verify that the GET for our orders resource is pointing at the correct Lambda function. Select the <b>“Integration Request“</b> title from the top of the box at the right. This will display a view similar to the following:
+<b>Step 7</b> – Finally, we can verify that the GET for our orders resource is pointing at the correct Lambda function. Select the <b>“Integration Request“</b> title from the top of the box at the right. This will display a view similar to the following:
 
 <p align="center"><img src="../Images/Lab3/OrderServiceIntegrationRequest.png" alt="Order Service Integration Request"/></p>
 
 The key piece of information here is the Lambda Function. The value for this attribute should map directly to our getOrders() Lambda function that we deployed earlier. The function will be named <b>“saas-factory-srvls-wrkshp-orders-get-all-[REGION]“</b>.
 
-<b>Step 6</b> – We’ve confirmed that our API Gateway and Lambda functions appear to have landed and been configured correctly. Now let’s go perform an operation in the application to verify that these new functions are working. Now, we intentionally didn’t carry forward any data from our monolith database so we’re starting with an empty database. Open the application using the URL you’ve previously saved for your modern application and sign-in with one of the tenants you’re previously created. Now, navigate to the <b>“Orders“</b> menu item at the top to application and select <b>“Add Order“</b> from the page that is displayed. Fill out the form that is displayed with some mock order information and save the order by selecting the <b>“Add Order“</b> button.
+<b>Step 8</b> – We’ve confirmed that our API Gateway and Lambda functions appear to have landed and been configured correctly. Now let’s go perform an operation in the application to verify that these new functions are working. Now, we intentionally didn’t carry forward any data from our monolith database so we’re starting with an empty database. Open the application using the URL you’ve previously saved for your modern application and sign-in with one of the tenants you’re previously created. Now, navigate to the <b>“Orders“</b> menu item at the top to application and select <b>“Add Order“</b> from the page that is displayed. Fill out the form that is displayed with some mock order information and save the order by selecting the <b>“Add Order“</b> button.
 
 You’ll notice that—even though we added an order—no order was actually created. Let’s go take a look at our Order service to see what went wrong.
 
-<b>Step 7</b> – Let’s start by finding the code of our Order service. Open the Cloud9 IDE in the AWS console and select the <b>“Serverless SaaS Workshop IDE“</b>. With the IDE, we can now examine the code that currently exists for our Order service. To get there, open the <b>“Lab 3“</b> folder in the left-hand pane of the page. Under the <b>“server/order-service/src“</b> you will find the various Java files that makeup our Order service. Double-click on the <b>“OrderService.java“</b> file to view its contents and locate the <b>“insertOrder“</b> function within the Java class (on line XX). The function will appear as follows:
+<b>Step 9</b> – Let’s start by finding the code of our Order service. Open the Cloud9 IDE in the AWS console and select the <b>“Serverless SaaS Workshop IDE“</b>. With the IDE, we can now examine the code that currently exists for our Order service. To get there, open the <b>“Lab 3“</b> folder in the left-hand pane of the page. Under the <b>“server/order-service/src“</b> you will find the various Java files that makeup our Order service. Double-click on the <b>“OrderService.java“</b> file to view its contents and locate the <b>“insertOrder“</b> function within the Java class (on line XX). The function will appear as follows:
 
 ```java
 public APIGatewayProxyResponseEvent insertOrder(Map<String, Object> event, Context context) {
@@ -71,33 +85,33 @@ public APIGatewayProxyResponseEvent insertOrder(Map<String, Object> event, Conte
 
 In looking at this function more closely, you’ll discover that the function isn’t actually finished. It’s essentially recording a log and returning null. This is why our orders aren’t being written—the code was never finished. In fact, there’s a comment in the coding showing us where the code needs to be inserted.
 
-<b>Step 8</b> – To get our insertOrder() function working, we’ll need to add the code that inserts an order into the database. The following represents the code you’ll need to insert into our insertOrder() function:
+<b>Step 10</b> – To get our insertOrder() function working, we’ll need to add the code that inserts an order into the database. The following represents the code you’ll need to insert into our insertOrder() function:
 
 ```java
 Order order = fromJson((String) event.get("body"));
-    if (order == null) {
-        response = new APIGatewayProxyResponseEvent()
-                .withStatusCode(400);
-    } else {
-        order = DAL.insertOrder(event, order);
-        response = new APIGatewayProxyResponseEvent(
-                .withStatusCode(200)
-                .withBody(toJson(order));
-    }
+if (order == null) {
+    response = new APIGatewayProxyResponseEvent()
+            .withStatusCode(400);
+} else {
+    order = DAL.insertOrder(event, order);
+    response = new APIGatewayProxyResponseEvent(
+            .withStatusCode(200)
+            .withBody(toJson(order));
+}
 ```
 
 This code extracts the order data from our incoming request. If the order is empty, we return with a status code of 400. Otherwise, we call our data access layer (DAL) to insert the order into the database and return a status code of 200. Insert this code into your insertOrder() function where the current comment appears and remove the comment.
 
-<b>Step 9</b> – With our new code introduced, we now need to deploy this updated function to the Lambda service. Run the following commands to invoke this update:
+<b>Step 11</b> – With our new code introduced, we now need to deploy this updated function to the Lambda service. Run the following commands to invoke this update:
 
 ```
-cd /serverless/Lab 3
-[Insert script invocation here]
+cd ~/environment/saas-factory-serverless-workshop/lab3/order-service/
+bash update-service.sh 
 ```
 
-<b>Step 10</b> – The updated version of our insertOrder() function is now in place. Let’s go open the application again (using the URL you retrieved earlier), login using the tenant you had used earlier, and access the <b>“Orders“</b> item in the menu. Select the <b>“Add Order“</b> button from the page and enter an order into the form that is displayed. When you are done entering the order select the <b>“Add Order“</b> button from the form. You should now see that your order appears in the list of orders on the page, confirming that our fix appears to have worked.
+<b>Step 12</b> – The updated version of our insertOrder() function is now in place. Let’s go open the application again (using the URL you retrieved earlier), login using the tenant you had used earlier, and access the <b>“Orders“</b> item in the menu. Select the <b>“Add Order“</b> button from the page and enter an order into the form that is displayed. When you are done entering the order select the <b>“Add Order“</b> button from the form. You should now see that your order appears in the list of orders on the page, confirming that our fix appears to have worked.
 
-<b>Step 11</b> – As part of moving to this new microservice, we also had to remove our dependency on the database monolith where orders had previously been shared in one large database used by all services. Extracting this data from the monolith is essential to our microservices story. Each of our microservices must own the data that it manages to limit coupling and enable autonomy. When we move this data out of the monolith, it also gives us the opportunity to determine what service and multi-tenant storage strategy will best fit the multi-tenant requirements of our microservice. 
+<b>Step 13</b> – As part of moving to this new microservice, we also had to remove our dependency on the database monolith where orders had previously been shared in one large database used by all services. Extracting this data from the monolith is essential to our microservices story. Each of our microservices must own the data that it manages to limit coupling and enable autonomy. When we move this data out of the monolith, it also gives us the opportunity to determine what service and multi-tenant storage strategy will best fit the multi-tenant requirements of our microservice. 
 
 In this case, we’re looking at how we want to represent our order data that will be managed by our order management microservice. Should we silo the data for each tenant? Should it be pooled (share a common table/database)? What are its isolation requirements? These are all questions we need to answer. For this solution, we’ve decided to move the order data to DynamoDB and use a NoSQL representation. However, for isolation reasons, we’ve opted to put the data in separate tables for each tenant. Below is a conceptual model of the data representation for the order service:
 
@@ -109,76 +123,90 @@ To see this in action, let’s now go look at the data that was added via our ne
 
 Here you’ll see that there are two tables here, one for each tenant in our system. Your list of tables will vary based on the tenants you’ve introduced. 
 
-<b>Step 12</b> – Now we need to verify that the order we created landed in a DynamoDB table. Select the different table names here (since you don’t know which tenant is yours, you may need to drill into multiple tables to find the data you added). Once you select your table, you’ll get a view with a list of tabs with information about your table. Select the <b>“Items“</b> table to view the list of the items in that table. The view will be similar to the following:
+<b>Step 14</b> – Now we need to verify that the order we created landed in a DynamoDB table. Select the table named <b>"order_fulfillment_[ID]"</b>. Once you select your table, you’ll get a view with a list of tabs with information about your table. Select the <b>“Items“</b> tab to view the list of the items in that table. The view will be similar to the following:
 
 <p align="center"><img src="../Images/Lab3/ItemsTable.png" alt="Items Table"/></p>
 
 In this example, our table had one order item. You can drill into any item in this list to get more detail on that item.
 
-<b>Step 13</b> – This tenant-per-table partitioning model uses the context of the current tenant identifier (passed in the JWT token) to generate our table name. Let’s look at how this is resolved in the code of our application service. Open the Cloud9 IDE in the AWS console and select the <b>“Serverless SaaS Workshop IDE“</b>. With the IDE, we can now examine the code that currently exists for our Order service. To get there, open the <b>“Lab 3“</b> folder in the left-hand pane of the page. Under the <b>“server/order-service/src“</b> you will find the various Java files that makeup our Order service. Double-click on the <b>“OrderServiceDAL.java“</b> file and look at the insertOrder() function here. The code will appear as follows:
+<b>Step 15</b> – This tenant-per-table partitioning model uses the context of the current tenant identifier (passed in the JWT token) to generate our table name. Let’s look at how this is resolved in the code of our application service. Open the Cloud9 IDE in the AWS console and select the <b>“Serverless SaaS Workshop IDE“</b>. With the IDE, we can now examine the code that currently exists for our Order service. To get there, open the <b>“Lab 3“</b> folder in the left-hand pane of the page. Under the <b>“server/order-service/src“</b> you will find the various Java files that makeup our Order service. Double-click on the <b>“OrderServiceDAL.java“</b> file and look at the insertOrder() function here. The code will appear as follows:
 
 ```java
 public Order insertOrder(Map<String, Object> event, Order order) {
-    long startTimeMillis = System.currentTimeMillis();
     UUID orderId = UUID.randomUUID();
-    LoggingManager.log(event, "OrderServiceDAL::insertOrder " + orderId);
+    LOGGER.info("OrderServiceDAL::insertOrder " + orderId);
 
     order.setId(orderId);
-    try {
+    try{
         Map<String, AttributeValue> item = DynamoDbHelper.toAttributeValueMap(order);
-        PutItemResponse response = ddb.putItem(request ->
-                          request.tableName(getTableName(event)).item(item));
+        PutItemResponse response = ddb.putItem(request -> request.tableName(tableName(event)).item(item));
     } catch (DynamoDbException e) {
-        LoggingManager.log(event, "OrderServiceDAL::insertOrder " + getFullStackTrace(e));
+        LOGGER.error("OrderServiceDAL::insertOrder " + getFullStackTrace(e));
         throw new RuntimeException(e);
     }
-
-    long totalTimeMillis = System.currentTimeMillis() - startTimeMillis;
-    MetricsManager.recordMetric(event, "OrderServiceDAL", "insertOrder", totalTimeMillis);
 
     return order;
 }
 ```
 
-Within this function, you’ll see line XX that makes a ddb.putItem() call that is calling a helper class, DynamoDBHelper (ddb) to put an item to a table. As part of this call, the code call getTableName(), supplying the context of the request in the <b>“event“</b> parameter. The parameter contains our JWT token with our tenant context.
-They key here is the getTableName() call. Let’s look at this implementation of getTableName() in line XX to see how it generates a table name. The code is as follows:
-
-They key here is the getTableName() call. Let’s look at this implementation of getTableName() in line XX to see how it generates a table name. The code is as follows:
+Within this function, you’ll see line 100 that makes a ddb.putItem() call that is calling a helper class, DynamoDBHelper (ddb) to put an item to a table. As part of this call, the code call getTableName(), supplying the context of the request in the <b>“event“</b> parameter. The parameter contains our JWT token with our tenant context.
+They key here is the getTableName() call. Let’s look at this implementation of tableName() in line 126 to see how it generates a table name. The code is as follows:
 
 ```java
-private static String getTableName(Map<String, Object> event) {
-    String tenantId = TokenManager.getTenantId(event);
+private String tableName(Map<String, Object> event) {
+    String tenantId = new TokenManager().getTenantId(event);
+
     String tableName = "order_fulfillment_" + tenantId;
-    return tableName;
+    if (!tenantTableCache.containsKey(tenantId) || !tenantTableCache.get(tenantId).equals(tableName)) {
+        boolean exits = false;
+        ListTablesResponse response = ddb.listTables();
+        for (String table : response.tableNames()) {
+            if (table.equals(tableName)) {
+                exits = true;
+                break;
+            }
+        }
+        if (!exits) {
+            CreateTableResponse createTable = ddb.createTable(request -> request
+                    .tableName(tableName)
+                    .attributeDefinitions(AttributeDefinition.builder().attributeName("id").attributeType(ScalarAttributeType.S).build())
+                    .keySchema(KeySchemaElement.builder().attributeName("id").keyType(KeyType.HASH).build())
+                    .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(5L).writeCapacityUnits(5L).build())
+            );
+        }
+        tenantTableCache.put(tenantId, tableName);
+    }
+
+    return tenantTableCache.get(tenantId);
 }
 ```
 
 You’ll notice that this code first makes a call to the TokenManager to get our current tenant identifier from the supplied JWT token. It then creates and table name that is the concatenation of <b>“order_fulfillment_“</b> and the tenant id we retrieved. This ensures that each table name is unique for each tenant.
 
-<b>Step 14</b> – In order to simplify our ability (for this lab) to identify activity for tenant order tables, we’re going to add a bit of logging detail to our order service to include this information. Go to the insertOrder() function in our OrderServiceDAL.java file. Let’s make the following changes to the the function. First, add the two new line above the call to putItem(). This will fetch the table name in a separate step. Then, add the next line, which will log the table name. Finally, since we have already fetched the table name, we can change Line XX to what is shown below, replacing the getTableName() call with the tableName we already fetched.
+<b>Step 16</b> – In order to simplify our ability (for this lab) to identify activity for tenant order tables, we’re going to add a bit of logging detail to our order service to include this information. Go to the insertOrder() function in our OrderServiceDAL.java file. Let’s make the following changes to the the function. First, add the two new line above the call to putItem(). This will fetch the table name in a separate step. Then, add the next line, which will log the table name. Finally, since we have already fetched the table name, we can change Line XX to what is shown below, replacing the getTableName() call with the tableName we already fetched.
 
 ```java
 // add these two lines to fetch and log the table name
-String tableName = getTableName(event);
+String tableName = tableName(event);
 LoggingManager.log(event, "OrderServiceDAL::insertOrder TableName = " + tableName);
 
 // change this line to reference the tableName fetched above
 PutItemResponse response = ddb.putItem(request -> request.tableName(tableName).item(item));
 ```
 
-<b>Step 15</b> – With our new code introduced, we now need to deploy this updated code to the Lambda service. Run the following commands to invoke this update:
+<b>Step 17</b> – With our new code introduced, we now need to deploy this updated code to the Lambda service. Run the following commands to invoke this update:
 ```
-cd /serverless/Lab 3
-[Insert script invocation here]
+cd ~/environment/saas-factory-serverless-workshop/lab3/order-service/
+bash update-service.sh 
 ```
 
-<b>Step 16</b> – The last step in validating our change is to run the actual application and verify that our new logging call is recording the tenant table name. Open the application (using the URL used before), sign-in with your credentials, and access the Orders link at the top of the page. Select the <b>“Add Order“</b> button from the orders page and enter a new order into the form. Now select <b>“Add Order“</b> on the new order form to save the order.
+<b>Step 18</b> – The last step in validating our change is to run the actual application and verify that our new logging call is recording the tenant table name. Open the application (using the URL used before), sign-in with your credentials, and access the Orders link at the top of the page. Select the <b>“Add Order“</b> button from the orders page and enter a new order into the form. Now select <b>“Add Order“</b> on the new order form to save the order.
 
-<b>Step 17</b> – Finally, to see the impact of our change, we’ll need to view the log files for our function. Open the CloudWatch service in the AWS console and select <b>“Logs“</b> from the navigation pane on the left of the page. This will display a list of multiple log groups. To narrow the list, enter <b>“/aws/lambda/saas-factory-srvls-wrkshp-orders-insert“</b> into the filters box at the top of the function list. Now, select the function name shown in the list. This will display a list of log streams for the selected function that will be similar to the following:
+<b>Step 19</b> – Finally, to see the impact of our change, we’ll need to view the log files for our function. Open the CloudWatch service in the AWS console and select <b>“Logs“</b> from the navigation pane on the left of the page. This will display a list of multiple log groups. To narrow the list, enter <b>“/aws/lambda/saas-factory-srvls-wrkshp-orders-insert“</b> into the filters box at the top of the function list. Now, select the function name shown in the list. This will display a list of log streams for the selected function that will be similar to the following:
 
 <p align="center"><img src="../Images/Lab3/CloudWatchLogs.png" alt="CloudWatch Logs"/></p>
 
-<b>Step 18</b> – Click on the top log stream to access the log file contents. Once you’re in the log, you’ll need to search for your newly inserted log file. Ultimately, you will be able to locate the DynamoDB table name that was associated with the order creation that you performed.
+<b>Step 20</b> – Click on the top log stream to access the log file contents. Once you’re in the log, you’ll need to search for your newly inserted log file. Ultimately, you will be able to locate the DynamoDB table name that was associated with the order creation that you performed.
 
 ## Review
 This lab represented a key next step in our migration process. We now started the gradual move to decompose our monolith into microservices. The key element of this model is our ability to run these new microservices side-by-side with code that remains in our monolith. In this scenario, we separated out the Order service, moving it to a serverless microservice. We also moved the data it manages over to the new environment. Our API Gateway was then setup to direct traffic selective to the microservice or the monolith (depending on which functionality was being accessed). 
